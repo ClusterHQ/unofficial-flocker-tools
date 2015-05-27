@@ -30,7 +30,7 @@ if __name__ == "__main__":
     c.scp("cluster.crt", c.config["control_node"], "/etc/flocker/cluster.crt")
     print "* Uploaded cluster cert to control node."
     for ext in ("crt", "key"):
-        c.scp("%s.%s" % (c.config["control_node"], ext),
+        c.scp("control-%s.%s" % (c.config["control_node"], ext),
                 c.config["control_node"], "/etc/flocker/control-service.%s" % (ext,))
     print "* Uploaded control cert & key to control node."
 
