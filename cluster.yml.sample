@@ -1,7 +1,21 @@
+cluster_name: name 
 agent_nodes:
  - 1.2.3.4
  - 1.2.3.5
-control_node:
- - dns.name.for.control.node
+control_node: dns.name.for.control.node # or IP address (but you must always connect via TLS to the given name here)
 users:
  - user1
+os: XXX # ubuntu-14.04 or centos7
+agent_config:
+  version: 1
+  control-service:
+     hostname: XXX # control_node should get substituted in here
+     port: 4524
+  dataset:
+     backend: XXX
+     # other backend settings (these vary per backend, this is example of openstack):
+     username: XXX
+     api_key: XXX
+     region: XXX
+     auth_url: XXX
+     auth_plugin: XXX
