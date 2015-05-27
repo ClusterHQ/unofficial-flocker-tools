@@ -4,6 +4,7 @@
 # to the servers specified in a cluster.yml
 
 import sys
+import yaml
 
 # Usage: deploy.py cluster.yml
 from utils import Configurator
@@ -33,12 +34,19 @@ if __name__ == "__main__":
                 c.config["control_node"], "/etc/flocker/control-service.%s" % (ext,))
     print "* Uploaded control cert & key to control node."
 
+    # Dump agent_config into a file and scp it to /etc/flocker/agent.yml on the
+    # nodes.
+    f = open("agent.yml", "w")
+    agent_config = yaml.dump(c.config["agent_config"], f)
+    f.close()
+
     # Copy cluster cert, and agent cert and key to agent nodes.
     for node, uuid in node_mapping.iteritems():
-        c.scp("cluster.crt", c.config["control_node"], "/etc/flocker/cluster.crt")
+        c.scp("cluster.crt", node, "/etc/flocker/cluster.crt")
+        c.scp("agent.yml", node, "/etc/flocker/agent.yml")
         print "* Uploaded cluster cert to %s." % (node,)
         for ext in ("crt", "key"):
-            c.scp("%s.crt" % (uuid,), c.config["control_node"], "/etc/flocker/node.%s" % (ext,))
+            c.scp("%s.crt" % (uuid,), node, "/etc/flocker/node.%s" % (ext,))
         print "* Uploaded node cert and key to %s." % (node,)
 
     print "\nYou should now be able to communicate with the control service:\n"
