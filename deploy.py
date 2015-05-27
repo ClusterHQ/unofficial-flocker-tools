@@ -10,7 +10,7 @@ import yaml
 from utils import Configurator
 
 if __name__ == "__main__":
-    c = Configurator(configFile=sys.argv[0])
+    c = Configurator(configFile=sys.argv[1])
     c.run("flocker-ca initialize %s" % (c.config["cluster_name"],))
     print "Initialized cluster CA."
     c.run("flocker-ca create-control-certificate %s" % (c.config["control_node"],))
