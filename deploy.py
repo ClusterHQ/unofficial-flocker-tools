@@ -22,7 +22,7 @@ if __name__ == "__main__":
         node_mapping[node] = uuid
         print "Generated", uuid, "for", node
     for user in c.config["users"]:
-        c.run("flocker-ca create-api-certificate %s" % (c.config["user"],))
+        c.run("flocker-ca create-api-certificate %s" % (user,))
         print "Created user key for", user
     print "Uploading keys to respective nodes:"
 
