@@ -23,6 +23,6 @@ if __name__ == "__main__":
         print "\nThen create a container with the volume"
         print prefix + header + """ -XPOST -d '{"host": "'${NODE_UUID}'", "name": "mongodb", """,
         print """"image": "clusterhq/mongodb:latest", "ports": [{"internal": 27017, "external": 27017}], """,
-        print """"volumes": [{"dataset_id": "'${DATASET_ID}'", "mountpoint": "/data"}]}' """ + url + "/state/datasets | jq ."
+        print """"volumes": [{"dataset_id": "'${DATASET_ID}'", "mountpoint": "/data"}]}' """ + url + "/configuration/containers | jq ."
         print "\nThen wait for the container to show up..."
         print prefix + " " + url + "/state/containers | jq ."
