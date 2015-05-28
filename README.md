@@ -32,7 +32,7 @@ provision some machines, somehow.
 There are 3 example configuration files that correspond to the backend Flocker will use - base your cluster.yml on one of these files:
 
  * [AWS EBS](cluster.yml.ebs.sample)
- * [Opentstack Cinder](cluster.yml.openstack.sample)
+ * [Openstack Cinder](cluster.yml.openstack.sample)
  * [ZFS](cluster.yml.zfs.sample)
 
 for example:
