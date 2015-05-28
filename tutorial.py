@@ -13,7 +13,7 @@ if __name__ == "__main__":
         url = "https://%(control_node)s:4523/v1" % dict(control_node=c.config["control_node"],)
         header = ' --header "Content-type: application/json"'
         print "\nThis should create a volume on a node:"
-        print "NODE_IP=" + node_mapping.items()[0]
+        print "NODE_IP=" + node_mapping.keys()[0]
         print prefix + header + """ -XPOST -d '{"primary": "'${NODE_IP}'", "metadata": {"name": "mongodb_data"}}' """,
         print url + "/configuration/datasets| jq ."
         print "\nThen record the dataset_id (you'll need it later)..."
