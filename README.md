@@ -17,6 +17,14 @@ git clone https://github.com/lukemarsden/unofficial-flocker-tools
 cd unofficial-flocker-tools
 ```
 
+## get some nodes
+
+provision some machines, somehow.
+
+* Amazon EC2 if you want to use our EBS backend (note VMs must be in the same AZ)
+* OpenStack deployment (e.g. Rackspace, private cloud) if you want to use our OpenStack backend
+* ~~Any other infrastructure if you want to try out our alpha ZFS backend~~ (does not work yet)
+
 ## cluster.yml
 
 There are 3 example configuration files that correspond to the backend Flocker will use - base your cluster.yml on one of these files:
