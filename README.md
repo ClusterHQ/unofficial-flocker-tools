@@ -17,6 +17,7 @@ git clone https://github.com/lukemarsden/unofficial-flocker-tools
 cd unofficial-flocker-tools
 mv cluster.yml.sample cluster.yml
 vim cluster.yml # customize for your cluster
+./install.py cluster.yml
 ./deploy.py cluster.yml
 ```
 
