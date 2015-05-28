@@ -46,7 +46,7 @@ if __name__ == "__main__":
         c.scp("agent.yml", node, "/etc/flocker/agent.yml")
         print " * Uploaded cluster cert to %s." % (node,)
         for ext in ("crt", "key"):
-            c.scp("%s.crt" % (uuid,), node, "/etc/flocker/node.%s" % (ext,))
+            c.scp("%s.%s" % (uuid, ext), node, "/etc/flocker/node.%s" % (ext,))
         print " * Uploaded node cert and key to %s." % (node,)
 
     for node, uuid in node_mapping.iteritems():
