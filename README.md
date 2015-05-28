@@ -15,9 +15,22 @@ Prerequisites:
 ```
 git clone https://github.com/lukemarsden/unofficial-flocker-tools
 cd unofficial-flocker-tools
-mv cluster.yml.sample cluster.yml
+mv cluster.yml.ebs.sample cluster.yml
 vim cluster.yml # customize for your cluster
 ./install.py cluster.yml
 ./deploy.py cluster.yml
 ```
+
+## cluster.yml
+
+There are 3 example configuration files that correspond to the backend Flocker will use - base your cluster.yml on one of these files:
+
+ * [AWS EBS](cluster.yml.ebs.sample)
+ * [Opentstack Cinder](cluster.yml.openstack.sample)
+ * [AWS EBS](cluster.yml.zfs.sample)
+
+## notes
+
+ * You need to ensure that machines can be SSH'd into as root
+ * You need a private key to access the machines - you can configure this in the `private_key_path` of cluster.yml
 
