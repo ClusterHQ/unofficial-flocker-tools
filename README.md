@@ -2,13 +2,11 @@
 
 ## what is here
 
-*Automate key generation and push to nodes via SCP.*
-
-Assuming you have root SSH access to some machines you want to set up as a flocker cluster, this will automate the flocker key generation and pushing.
+This repo makes it easy to install flocker on some nodes and configure the requisite keys.
 
 Prerequisites:
 
-* flocker-cli for your system (from http://build.clusterhq.com/results/omnibus/storage-driver-configuration-FLOC-1925/ for now)
+* flocker-cli for your local system (from http://build.clusterhq.com/results/omnibus/storage-driver-configuration-FLOC-1925/ for now)
 * python 2.7
 * pyyaml module (`sudo pip install pyyaml`)
 
