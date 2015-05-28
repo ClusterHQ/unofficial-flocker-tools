@@ -39,6 +39,8 @@ if __name__ == "__main__":
     f = open("agent.yml", "w")
     agent_config = yaml.dump(c.config["agent_config"], f)
     f.close()
+
+    # Record the node mapping for later.
     f = open("node_mapping.yml", "w")
     agent_config = yaml.dump(node_mapping, f)
     f.close()
