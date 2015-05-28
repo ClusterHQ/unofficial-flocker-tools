@@ -1,6 +1,6 @@
 # unofficial-flocker-tools
 
-## installation
+## what is here
 
 *Automate key generation and push to nodes via SCP.*
 
@@ -12,23 +12,12 @@ Prerequisites:
 * python 2.7
 * pyyaml module (`sudo pip install pyyaml`)
 
+## get the repo
+
 ```
 git clone https://github.com/lukemarsden/unofficial-flocker-tools
 cd unofficial-flocker-tools
-mv cluster.yml.ebs.sample cluster.yml
-vim cluster.yml # customize for your cluster
 ```
-
-## ./install.py cluster.yml
-
-this will install the packages on your nodes
-## ./deploy.py cluster.yml
-
-this will configure certificates, push them to your nodes, and set up firewall rules for the control service
-
-## ./tutorial.py cluster.yml
-
-this will print out a tutorial customized to your deployment.
 
 ## cluster.yml
 
@@ -37,6 +26,25 @@ There are 3 example configuration files that correspond to the backend Flocker w
  * [AWS EBS](cluster.yml.ebs.sample)
  * [Opentstack Cinder](cluster.yml.openstack.sample)
  * [ZFS](cluster.yml.zfs.sample)
+
+for example:
+
+```
+mv cluster.yml.ebs.sample cluster.yml
+vim cluster.yml # customize for your cluster
+```
+
+## ./install.py cluster.yml
+
+this will install the packages on your nodes
+
+## ./deploy.py cluster.yml
+
+this will configure certificates, push them to your nodes, and set up firewall rules for the control service
+
+## ./tutorial.py cluster.yml
+
+this will print out a tutorial customized to your deployment.
 
 ## notes
 
