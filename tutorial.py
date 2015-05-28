@@ -26,3 +26,6 @@ if __name__ == "__main__":
         print """"volumes": [{"dataset_id": "'${DATASET_ID}'", "mountpoint": "/data/db"}]}' """ + url + "/configuration/containers | jq ."
         print "\nThen wait for the container to show up..."
         print prefix + " " + url + "/state/containers | jq ."
+        print "Now move the container to another machine, and the dataset will follow!"
+        print "NODE_UUID_2=" + node_mapping.values()[1]
+        print prefix + header + """ -XPOST -d '{"primary": "'${NODE_UUID_2}'"}' """ + url + "/configuration/containers/mongodb | jq ."
