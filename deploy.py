@@ -57,6 +57,8 @@ add-apt-repository -y ppa:james-page/docker
 add-apt-repository -y 'deb https://clusterhq-archive.s3.amazonaws.com/ubuntu-testing/14.04/$(ARCH) /'
 apt-get update
 apt-get -y --force-yes install clusterhq-flocker-node
+service flocker-container-agent restart
+service flocker-dataset-agent restart
 """)
         elif c.config["os"] == "centos":
             c.runSSH(node, """
@@ -76,7 +78,7 @@ stop on runlevel [016]
 EOF
 echo 'flocker-control-api       4523/tcp                        # Flocker Control API port' >> /etc/services
 echo 'flocker-control-agent     4524/tcp                        # Flocker Control Agent port' >> /etc/services
-service flocker-control start
+service flocker-control restart
 ufw allow flocker-control-api
 ufw allow flocker-control-agent
 """)
@@ -91,8 +93,6 @@ firewall-cmd --add-service flocker-control-agent
 """)
     print "Configured and started control service, opened firewall."
 
-    print "\nYou should now be able to communicate with the control service:\n"
     if c.config["users"]:
-        print "curl --cacert $PWD/cluster.crt --cert $PWD/%(user)s.crt --key $PWD/%(user)s.key \\" % dict(
-                user=c.config["users"][0])
-        print "https://%s:4523/v1/state/nodes | jq ." % (c.config["control_node"],)
+        print "\nYou should now be able to communicate with the control service, for example:\n"
+        print "curl -s --cacert $PWD/cluster.crt --cert $PWD/%(user)s.crt --key $PWD/%(user)s.key https://%(control_node)s:4523/v1/state/nodes | jq ." % dict(user=c.config["users"][0], control_node=c.config["control_node"],)
