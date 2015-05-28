@@ -1,6 +1,6 @@
 # unofficial-flocker-tools
 
-## deploy.py
+## installation
 
 *Automate key generation and push to nodes via SCP.*
 
@@ -17,8 +17,9 @@ git clone https://github.com/lukemarsden/unofficial-flocker-tools
 cd unofficial-flocker-tools
 mv cluster.yml.ebs.sample cluster.yml
 vim cluster.yml # customize for your cluster
-./install.py cluster.yml
-./deploy.py cluster.yml
+./install.py cluster.yml # this will install the packages on your nodes
+./deploy.py cluster.yml # this will configure certificates, push them to your nodes, and set up firewall rules for the control service
+./tutorial.py cluster.yml # this will print out a tutorial customized to your deployment.
 ```
 
 ## cluster.yml
