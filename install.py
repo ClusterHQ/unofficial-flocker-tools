@@ -1,16 +1,14 @@
 #!/usr/bin/env python
 
-# This script will use the correct repo to install .debs for clusterhq-flocker-node
+# This script will use the correct repo to install packages for clusterhq-flocker-node
 
 import sys
-import yaml
 
 # Usage: deploy.py cluster.yml
 from utils import Configurator
 
 if __name__ == "__main__":
     c = Configurator(configFile=sys.argv[1])
-    
     for node in c.config["agent_nodes"]:
         if c.config["os"] == "ubuntu":
             c.runSSH(node, """apt-get -y install apt-transport-https software-properties-common
