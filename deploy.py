@@ -39,6 +39,9 @@ if __name__ == "__main__":
     f = open("agent.yml", "w")
     agent_config = yaml.dump(c.config["agent_config"], f)
     f.close()
+    f = open("node_mapping.yml", "w")
+    agent_config = yaml.dump(node_mapping, f)
+    f.close()
 
     # Copy cluster cert, and agent cert and key to agent nodes.
     for node, uuid in node_mapping.iteritems():
@@ -97,17 +100,4 @@ firewall-cmd --add-service flocker-control-agent
         header = ' --header "Content-type: application/json"'
         print "This should give you a list of your nodes:"
         print prefix + " " + url + "/state/nodes | jq ."
-        print "\nThis should create a volume on a node:"
-        print "NODE_IP=" + node_mapping.items()[0]
-        print prefix + header + """ -XPOST -d '{"primary": "'${NODE_IP}'", "metadata": {"name": "mongodb_data"}}' """,
-        print url + "/configuration/datasets| jq ."
-        print "\nThen record the dataset_id (you'll need it later)..."
-        print "DATASET_ID=..."
-        print "\nWait for your dataset to show up..."
-        print prefix + " " + url + "/state/datasets | jq ."
-        print "\nThen create a container with the volume"
-        print prefix + header + """-XPOST -d '{"host": "'${NODE_IP}'", "name": "mongodb", """,
-        print """"image": "clusterhq/mongodb:latest", "ports": [{"internal": 27017, "external": 27017}], """,
-        print """"volumes": [{"dataset_id": "'${DATASET_ID}'", "mountpoint": "/data"}]}' """ + url + "/state/datasets | jq ."
-        print "\nThen wait for the container to show up..."
-        print prefix + " " + url + "/state/containers | jq ."
+        print "Try running tutorial.py cluster.yml for more..."
