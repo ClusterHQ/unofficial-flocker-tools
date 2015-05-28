@@ -2,11 +2,11 @@
 
 ## what is here
 
-This repo makes it easy to install flocker on some nodes and configure the requisite keys.
+this repo makes it easy to install flocker on some nodes and configure the requisite keys.
 
-See the [official docs](http://doc-dev.clusterhq.com/using/installing/index.html) for the full long-form installation instructions.
+see the [official docs](http://doc-dev.clusterhq.com/using/installing/index.html) for the full long-form installation instructions.
 
-Prerequisites:
+prerequisites:
 
 * flocker-cli for your local system (from http://build.clusterhq.com/results/omnibus/storage-driver-configuration-FLOC-1925/ for now)
 * python 2.7
@@ -21,7 +21,7 @@ cd unofficial-flocker-tools
 
 ## get some nodes
 
-provision some machines, somehow.
+provision some machines, somehow. use ubuntu 14.04 or centos 7.
 
 * Amazon EC2 if you want to use our EBS backend (note VMs must be in the same AZ)
 * OpenStack deployment (e.g. Rackspace, private cloud) if you want to use our OpenStack backend
@@ -29,7 +29,7 @@ provision some machines, somehow.
 
 ## cluster.yml
 
-There are 3 example configuration files that correspond to the backend Flocker will use - base your cluster.yml on one of these files:
+there are 3 example configuration files that correspond to the backend Flocker will use - base your cluster.yml on one of these files:
 
  * [AWS EBS](cluster.yml.ebs.sample)
  * [Openstack Cinder](cluster.yml.openstack.sample)
@@ -68,6 +68,5 @@ this will print out a tutorial customized to your deployment.
 
 ## notes
 
- * You need to ensure that machines can be SSH'd into as root
- * You need a private key to access the machines - you can configure this in the `private_key_path` of cluster.yml
-
+* you need to ensure that machines can be SSH'd into as root
+* you need a private key to access the machines - you can configure this in the `private_key_path` of cluster.yml
