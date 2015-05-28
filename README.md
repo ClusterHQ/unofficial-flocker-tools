@@ -27,7 +27,7 @@ There are 3 example configuration files that correspond to the backend Flocker w
 
  * [AWS EBS](cluster.yml.ebs.sample)
  * [Opentstack Cinder](cluster.yml.openstack.sample)
- * [AWS EBS](cluster.yml.zfs.sample)
+ * [ZFS](cluster.yml.zfs.sample)
 
 ## notes
 
