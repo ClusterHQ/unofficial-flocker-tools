@@ -1,0 +1,16 @@
+cluster_name: name 
+agent_nodes:
+ - 1.2.3.4
+ - 1.2.3.5
+control_node: dns.name.for.control.node # or IP address (but you must always connect via TLS to the given name here)
+users:
+ - user1
+os: XXX # ubuntu or centos
+private_key_path: XXX # the key used to SSH as root onto the nodes
+agent_config:
+  version: 1
+  control-service:
+     hostname: XXX # control_node should get substituted in here
+     port: 4524
+  dataset:
+     backend: "zfs"
