@@ -50,6 +50,9 @@ vim cluster.yml # customize for your cluster
 
 this will install the packages on your nodes
 
+at this point you will need to manually install the latest (highest numbered) packages from http://build.clusterhq.com/results/omnibus/storage-driver-configuration-FLOC-1925/ onto your nodes as well.
+
+
 ## deploy
 
 ```
