@@ -34,15 +34,27 @@ mv cluster.yml.ebs.sample cluster.yml
 vim cluster.yml # customize for your cluster
 ```
 
-## ./install.py cluster.yml
+## install
+
+```
+./install.py cluster.yml
+```
 
 this will install the packages on your nodes
 
-## ./deploy.py cluster.yml
+## deploy
+
+```
+./deploy.py cluster.yml
+```
 
 this will configure certificates, push them to your nodes, and set up firewall rules for the control service
 
-## ./tutorial.py cluster.yml
+## tutorial
+
+```
+./tutorial.py cluster.yml
+```
 
 this will print out a tutorial customized to your deployment.
 
