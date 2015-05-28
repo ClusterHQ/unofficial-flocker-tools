@@ -51,8 +51,7 @@ if __name__ == "__main__":
 
     for node, uuid in node_mapping.iteritems():
         if c.config["os"] == "ubuntu":
-            c.runSSH(node, """
-apt-get -y install apt-transport-https software-properties-common
+            c.runSSH(node, """apt-get -y install apt-transport-https software-properties-common
 add-apt-repository -y ppa:james-page/docker
 add-apt-repository -y 'deb https://clusterhq-archive.s3.amazonaws.com/ubuntu-testing/14.04/$(ARCH) /'
 apt-get update
@@ -61,8 +60,7 @@ service flocker-container-agent restart
 service flocker-dataset-agent restart
 """)
         elif c.config["os"] == "centos":
-            c.runSSH(node, """
-if selinuxenabled; then setenforce 0; fi
+            c.runSSH(node, """if selinuxenabled; then setenforce 0; fi
 test -e /etc/selinux/config && sed --in-place='.preflocker' 's/^SELINUX=.*$/SELINUX=disabled/g' /etc/selinux/config
 yum install -y https://s3.amazonaws.com/clusterhq-archive/centos/clusterhq-release$(rpm -E %dist).noarch.rpm
 yum install -y clusterhq-flocker-node
@@ -71,8 +69,7 @@ systemctl start docker.service
 """)
 
     if c.config["os"] == "ubuntu":
-        c.runSSH(c.config["control_node"], """
-cat <<EOF > /etc/init/flocker-control.override
+        c.runSSH(c.config["control_node"], """cat <<EOF > /etc/init/flocker-control.override
 start on runlevel [2345]
 stop on runlevel [016]
 EOF
@@ -83,8 +80,7 @@ ufw allow flocker-control-api
 ufw allow flocker-control-agent
 """)
     elif c.config["os"] == "centos":
-        c.runSSH(c.config["control_node"], """
-systemctl enable flocker-control
+        c.runSSH(c.config["control_node"], """systemctl enable flocker-control
 systemctl start flocker-control
 firewall-cmd --permanent --add-service flocker-control-api
 firewall-cmd --add-service flocker-control-api
