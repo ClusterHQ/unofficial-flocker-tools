@@ -49,6 +49,25 @@ if __name__ == "__main__":
             c.scp("%s.crt" % (uuid,), node, "/etc/flocker/node.%s" % (ext,))
         print " * Uploaded node cert and key to %s." % (node,)
 
+    for node, uuid in node_mapping.iteritems():
+        if c.config["os"] == "ubuntu":
+            c.runSSH(node, """
+apt-get -y install apt-transport-https software-properties-common
+add-apt-repository -y ppa:james-page/docker
+add-apt-repository -y 'deb https://clusterhq-archive.s3.amazonaws.com/ubuntu-testing/14.04/$(ARCH) /'
+apt-get update
+apt-get -y --force-yes install clusterhq-flocker-node
+""")
+        elif c.config["os"] == "centos":
+            c.runSSH(node, """
+if selinuxenabled; then setenforce 0; fi
+test -e /etc/selinux/config && sed --in-place='.preflocker' 's/^SELINUX=.*$/SELINUX=disabled/g' /etc/selinux/config
+yum install -y https://s3.amazonaws.com/clusterhq-archive/centos/clusterhq-release$(rpm -E %dist).noarch.rpm
+yum install -y clusterhq-flocker-node
+systemctl enable docker.service
+systemctl start docker.service
+""")
+
     if c.config["os"] == "ubuntu":
         c.runSSH(c.config["control_node"], """
 cat <<EOF > /etc/init/flocker-control.override
@@ -61,15 +80,16 @@ service flocker-control start
 ufw allow flocker-control-api
 ufw allow flocker-control-agent
 """)
-        print "Configured and started control service, opened firewall."
-
-    """
-    for node, uuid in node_mapping.iteritems():
-        if c.config["os"] == "ubuntu":
-            c.runSSH(node, "start ...")
-        elif c.config["os"] == "centos":
-            c.runSSH(node, "systemctl ...")
-    """
+    elif c.config["os"] == "centos":
+        c.runSSH(c.config["control_node"], """
+systemctl enable flocker-control
+systemctl start flocker-control
+firewall-cmd --permanent --add-service flocker-control-api
+firewall-cmd --add-service flocker-control-api
+firewall-cmd --permanent --add-service flocker-control-agent
+firewall-cmd --add-service flocker-control-agent
+""")
+    print "Configured and started control service, opened firewall."
 
     print "\nYou should now be able to communicate with the control service:\n"
     if c.config["users"]:

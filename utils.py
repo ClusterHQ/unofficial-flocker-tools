@@ -13,7 +13,7 @@ class Configurator(object):
     def runSSH(self, ip, command):
         command = 'ssh -i %s %s@%s %s' % (self.config["private_key_path"],
                 self.config["remote_server_username"],
-                ip, " ".join(map(quote, command)))
+                ip, " ".join(map(quote, ["sh", "-c", command])))
         return subprocess.check_output(command, shell=True)
 
     def runSSHRaw(self, ip, command):
