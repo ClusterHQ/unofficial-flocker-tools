@@ -14,7 +14,7 @@ if __name__ == "__main__":
         header = ' --header "Content-type: application/json"'
         print "\nThis should create a volume on a node:"
         print "NODE_UUID=" + node_mapping.values()[0]
-        print prefix + header + """ -XPOST -d '{"primary": "'${NODE_UUID}'", "metadata": {"name": "mongodb_data"}}' """,
+        print prefix + header + """ -XPOST -d '{"primary": "'${NODE_UUID}'", "maximum_size": 8589934592, "metadata": {"name": "mongodb_data"}}' """,
         print url + "/configuration/datasets| jq ."
         print "\nThen record the dataset_id (you'll need it later)..."
         print "DATASET_ID=..."
