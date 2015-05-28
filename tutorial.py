@@ -13,15 +13,15 @@ if __name__ == "__main__":
         url = "https://%(control_node)s:4523/v1" % dict(control_node=c.config["control_node"],)
         header = ' --header "Content-type: application/json"'
         print "\nThis should create a volume on a node:"
-        print "NODE_IP=" + node_mapping.keys()[0]
-        print prefix + header + """ -XPOST -d '{"primary": "'${NODE_IP}'", "metadata": {"name": "mongodb_data"}}' """,
+        print "NODE_UUID=" + node_mapping.values()[0]
+        print prefix + header + """ -XPOST -d '{"primary": "'${NODE_UUID}'", "metadata": {"name": "mongodb_data"}}' """,
         print url + "/configuration/datasets| jq ."
         print "\nThen record the dataset_id (you'll need it later)..."
         print "DATASET_ID=..."
         print "\nWait for your dataset to show up..."
         print prefix + " " + url + "/state/datasets | jq ."
         print "\nThen create a container with the volume"
-        print prefix + header + """-XPOST -d '{"host": "'${NODE_IP}'", "name": "mongodb", """,
+        print prefix + header + """-XPOST -d '{"host": "'${NODE_UUID}'", "name": "mongodb", """,
         print """"image": "clusterhq/mongodb:latest", "ports": [{"internal": 27017, "external": 27017}], """,
         print """"volumes": [{"dataset_id": "'${DATASET_ID}'", "mountpoint": "/data"}]}' """ + url + "/state/datasets | jq ."
         print "\nThen wait for the container to show up..."
