@@ -27,6 +27,7 @@ if __name__ == "__main__":
     print "Uploading keys to respective nodes:"
 
     # Copy cluster cert, and control cert and key to control node.
+    c.runSSHRaw(c.config["control_node"], "mkdir -p /etc/flocker")
     c.scp("cluster.crt", c.config["control_node"], "/etc/flocker/cluster.crt")
     print " * Uploaded cluster cert to control node."
     for ext in ("crt", "key"):
@@ -45,6 +46,7 @@ if __name__ == "__main__":
 
     # Copy cluster cert, and agent cert and key to agent nodes.
     for node, uuid in node_mapping.iteritems():
+        c.runSSHRaw(node, "mkdir -p /etc/flocker")
         c.scp("cluster.crt", node, "/etc/flocker/cluster.crt")
         c.scp("agent.yml", node, "/etc/flocker/agent.yml")
         print " * Uploaded cluster cert to %s." % (node,)

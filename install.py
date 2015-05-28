@@ -11,7 +11,7 @@ from utils import Configurator
 if __name__ == "__main__":
     c = Configurator(configFile=sys.argv[1])
     
-    for node, uuid in node_mapping.iteritems():
+    for node in c.config["agent_nodes"]:
         if c.config["os"] == "ubuntu":
             c.runSSH(node, """apt-get -y install apt-transport-https software-properties-common
 add-apt-repository -y ppa:james-page/docker
