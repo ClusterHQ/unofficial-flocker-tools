@@ -11,19 +11,19 @@ class Configurator(object):
         self.config["remote_server_username"] = self.config.get("remote_server_username", "root")
 
     def runSSH(self, ip, command):
-        command = 'ssh -i %s %s@%s %s' % (self.config["private_key_path"],
+        command = 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i %s %s@%s %s' % (self.config["private_key_path"],
                 self.config["remote_server_username"],
                 ip, " ".join(map(quote, ["sh", "-c", command])))
         return subprocess.check_output(command, shell=True)
 
     def runSSHRaw(self, ip, command):
-        command = 'ssh -i %s %s@%s %s' % (self.config["private_key_path"],
+        command = 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i %s %s@%s %s' % (self.config["private_key_path"],
                 self.config["remote_server_username"],
                 ip, command)
         return subprocess.check_output(command, shell=True)
 
     def runSSHPassthru(self, ip, command):
-        command = 'ssh -i %s %s@%s %s' % (self.config["private_key_path"],
+        command = 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i %s %s@%s %s' % (self.config["private_key_path"],
                 self.config["remote_server_username"],
                 ip, " ".join(map(quote, command)))
         return os.system(command)
@@ -64,7 +64,7 @@ class Configurator(object):
             private_key_path = self.config["private_key_path"]
         if remote_server_username is not None:
             remote_server_username = self.config["remote_server_username"]
-        scp = ("scp -i %(private_key_path)s %(local_path)s "
+        scp = ("scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i %(private_key_path)s %(local_path)s "
                "%(remote_server_username)s@%(external_ip)s:%(remote_path)s") % dict(
                     private_key_path=self.config["private_key_path"],
                     remote_server_username=self.config["remote_server_username"],

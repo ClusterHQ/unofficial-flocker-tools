@@ -27,6 +27,7 @@ if __name__ == "__main__":
     print "Uploading keys to respective nodes:"
 
     # Copy cluster cert, and control cert and key to control node.
+    c.runSSHRaw(c.config["control_node"], "mkdir -p /etc/flocker")
     c.scp("cluster.crt", c.config["control_node"], "/etc/flocker/cluster.crt")
     print " * Uploaded cluster cert to control node."
     for ext in ("crt", "key"):
@@ -47,6 +48,7 @@ if __name__ == "__main__":
 
     # Copy cluster cert, and agent cert and key to agent nodes.
     for node, uuid in node_mapping.iteritems():
+        c.runSSHRaw(node, "mkdir -p /etc/flocker")
         c.scp("cluster.crt", node, "/etc/flocker/cluster.crt")
         c.scp("agent.yml", node, "/etc/flocker/agent.yml")
         print " * Uploaded cluster cert to %s." % (node,)
@@ -57,18 +59,11 @@ if __name__ == "__main__":
     for node, uuid in node_mapping.iteritems():
         if c.config["os"] == "ubuntu":
             c.runSSH(node, """apt-get -y install apt-transport-https software-properties-common
-add-apt-repository -y ppa:james-page/docker
-add-apt-repository -y 'deb https://clusterhq-archive.s3.amazonaws.com/ubuntu-testing/14.04/$(ARCH) /'
-apt-get update
-apt-get -y --force-yes install clusterhq-flocker-node
 service flocker-container-agent restart
 service flocker-dataset-agent restart
 """)
         elif c.config["os"] == "centos":
             c.runSSH(node, """if selinuxenabled; then setenforce 0; fi
-test -e /etc/selinux/config && sed --in-place='.preflocker' 's/^SELINUX=.*$/SELINUX=disabled/g' /etc/selinux/config
-yum install -y https://s3.amazonaws.com/clusterhq-archive/centos/clusterhq-release$(rpm -E %dist).noarch.rpm
-yum install -y clusterhq-flocker-node
 systemctl enable docker.service
 systemctl start docker.service
 """)
