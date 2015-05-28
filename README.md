@@ -1,10 +1,10 @@
-# unofficial-flocker-tools
+# so you want a flocker cluster quickly?
 
 ## what is here
 
 This repo makes it easy to install flocker on some nodes and configure the requisite keys.
 
-See the [official docs](http://doc-dev.clusterhq.com/) for the full long-form installation instructions.
+See the [official docs](http://doc-dev.clusterhq.com/using/installing/index.html) for the full long-form installation instructions.
 
 Prerequisites:
 
