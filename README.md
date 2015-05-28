@@ -4,6 +4,8 @@
 
 This repo makes it easy to install flocker on some nodes and configure the requisite keys.
 
+See the [official docs](http://doc-dev.clusterhq.com/) for the full long-form installation instructions.
+
 Prerequisites:
 
 * flocker-cli for your local system (from http://build.clusterhq.com/results/omnibus/storage-driver-configuration-FLOC-1925/ for now)
