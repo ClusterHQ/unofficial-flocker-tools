@@ -29,6 +29,8 @@ provision some machines, somehow. use ubuntu 14.04 or centos 7.
 
 make sure you can log into the nodes as **root** with a private key.
 
+you may want to pick a node to be the control node and give it a DNS name (set up an A record for it with your DNS provider). using a DNS name is optional -- you can also just use its IP address.
+
 ## cluster.yml
 
 there are 3 example configuration files that correspond to the backend Flocker will use - base your cluster.yml on one of these files:
