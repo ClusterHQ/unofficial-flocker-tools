@@ -1,4 +1,4 @@
-cluster_name: name 
+cluster_name: name
 agent_nodes:
  - 1.2.3.4
  - 1.2.3.5
