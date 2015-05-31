@@ -27,6 +27,8 @@ provision some machines, somehow. use ubuntu 14.04 or centos 7.
 * OpenStack deployment (e.g. Rackspace, private cloud) if you want to use our OpenStack backend
 * ~~Any other infrastructure if you want to try out our alpha ZFS backend~~ (does not work yet)
 
+make sure you can log into the nodes as **root** with a private key.
+
 ## cluster.yml
 
 there are 3 example configuration files that correspond to the backend Flocker will use - base your cluster.yml on one of these files:
