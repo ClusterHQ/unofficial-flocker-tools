@@ -17,21 +17,22 @@ Idea for CLI:
 
 $ ./flocker-volumes.py
 Subcommands:
-    version             show version informatioon
+    version                 show version informatioon
 
-    list-nodes          show list of nodes in the configured cluster
+    list-nodes              show list of nodes in the configured cluster
 
-    list                list flocker datasets
-      --deleted          include deleted datasets
+    list                    list flocker datasets
+      --deleted                   include deleted datasets
 
-    create              create a flocker dataset
-      --host 0f72ae0c    [-h] initial host for dataset to appear on
-      --metadata name=hi [-m] set volume metadata
-      --size 20G         [-s] set size in bytes (default), k, G, T
+    create                  create a flocker dataset
+      --host [-h] 0f72ae0c       initial host for dataset to appear on
+      --metadata [-m] name=vol2  set volume metadata
+      --size [-s] 20G            set size in bytes (default), k, G, T
 
-    destroy             mark a dataset to be deleted
+    destroy <dataset_uuid>   mark a dataset to be deleted
 
-    move                move a dataset from one primary to another
+    move <dataset_uuid> <host_uuid>
+                            move a dataset from one host to another
 
 $ ./flocker-volumes.py version
 Client version: 1.0.0
@@ -65,9 +66,38 @@ Marking volume 14f2fa0c to be destroyed.
 
 from twisted.python.usage import Options
 
-class NodeList(Options):
-    pass
+class Version(Options):
+    def run(self):
+        print "Ho ho ho"
 
+
+class ListNodes(Options):
+    optFlags = [
+        ("deleted", "d", "Show deleted datasets")
+    ]
+    def run(self):
+        pass
+
+
+class Create(Options):
+    optFlags = [
+        ("host", "h", "Initial host for dataset to appear on"),
+        ("metadata", "m", "Set volume metadata"),
+        ("size", "s", "Size", "Set size in bytes (default), k, M, G, T"),
+    ]
+    def run(self):
+        pass
+
+
+class Destroy(Options):
+    synopsis = '<dataset_uuid>'
+    def run(self):
+        pass
+
+class Move(Options):
+    synopsis = '<dataset_uuid> <host_uuid>'
+    def run(self):
+        pass
 
 """
 Later ideas:
