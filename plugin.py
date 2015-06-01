@@ -42,22 +42,22 @@ if __name__ == "__main__":
         print "Uploaded plugin certs for", node
 
     # download and replace the docker binary on each of the nodes
-    for node in c.config["agent_nodes"]:      
+    for node in c.config["agent_nodes"]:
 
-      # stop the docker service
-      print "Stopping the docker service on %s - %s" % (node, DOCKER_SERVICE_NAME)
-      if c.config["os"] == "ubuntu":
-        c.runSSHRaw(node, "stop %s" % (DOCKER_SERVICE_NAME))
-      elif c.config["os"] == "centos":
-        c.runSSHRaw(node, "systemctl stop %s.service" % (DOCKER_SERVICE_NAME))
+        # stop the docker service
+        print "Stopping the docker service on %s - %s" % (node, DOCKER_SERVICE_NAME)
+        if c.config["os"] == "ubuntu":
+          c.runSSHRaw(node, "stop %s" % (DOCKER_SERVICE_NAME))
+        elif c.config["os"] == "centos":
+          c.runSSHRaw(node, "systemctl stop %s.service" % (DOCKER_SERVICE_NAME))
 
-      # download the latest docker binary\
-      print "Downloading the latest docker binary on %s - %s" % (node, DOCKER_BINARY_URL)
-      c.runSSHRaw(node, "wget -O /usr/bin/docker %s" % (DOCKER_BINARY_URL))
+        # download the latest docker binary\
+        print "Downloading the latest docker binary on %s - %s" % (node, DOCKER_BINARY_URL)
+        c.runSSHRaw(node, "wget -O /usr/bin/docker %s" % (DOCKER_BINARY_URL))
 
-      # stop the docker service
-      print "Starting the docker service on %s" % (node)
-      if c.config["os"] == "ubuntu":
-        c.runSSHRaw(node, "start %s" % (DOCKER_SERVICE_NAME))
-      elif c.config["os"] == "centos":
-        c.runSSHRaw(node, "systemctl start %s.service" % (DOCKER_SERVICE_NAME))
+        # stop the docker service
+        print "Starting the docker service on %s" % (node)
+        if c.config["os"] == "ubuntu":
+          c.runSSHRaw(node, "start %s" % (DOCKER_SERVICE_NAME))
+        elif c.config["os"] == "centos":
+          c.runSSHRaw(node, "systemctl start %s.service" % (DOCKER_SERVICE_NAME))
