@@ -16,7 +16,7 @@ class Version(Options):
     show version information
     """
     def run(self):
-        print "Ho ho ho"
+        print "flocker-volumes.py prototype version 0.0.1"
 
 
 class ListNodes(Options):
