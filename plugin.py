@@ -15,6 +15,8 @@ from utils import Configurator
 # a dict that holds the default values for each of the env vars that can be overriden
 settings_defaults = {
   # allow env override for where to download the experimental docker binary from
+  # the docker-volumes binary is a buid from latest docker/master: 
+  # s4caa939 - https://github.com/docker/docker/tree/4caa9392f8aa4e57bfe43880b5f67d15b00ed8a7
   'DOCKER_BINARY_URL':'http://storage.googleapis.com/experiments-clusterhq/docker-binaries/docker-volumes',
   # perhaps the name of the docker service running on the host is different to 'docker'
   # for example - the clusterhq-flocker-node package installed 'docker.io'
