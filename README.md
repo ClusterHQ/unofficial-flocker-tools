@@ -65,7 +65,7 @@ at this point you will need to manually install the latest (highest numbered) pa
 
 this will configure certificates, push them to your nodes, and set up firewall rules for the control service
 
-on AWS, you'll need to add a firewall rule for TCP port 4523 if you want to access the control service/API remotely.
+on AWS, you'll need to add a firewall rule for TCP port 4523 and 4524 if you want to access the control service/API remotely.
 
 ## tutorial
 
