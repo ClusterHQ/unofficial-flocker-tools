@@ -3,13 +3,28 @@
 """
 A prototype version of a CLI tool which shows off flocker's first class volumes
 capabilities.
+
+Run me from a directory containing a cluster.yml and appropriate cluster
+certificates.
 """
 
 from twisted.internet import defer
 from twisted.internet.task import react
 from twisted.python.usage import Options, UsageError
 from twisted.python import log
+from twisted.python.filepath import FilePath
+from txflocker.client import get_client as txflocker_get_client
 import sys
+import os
+import yaml
+
+def get_client():
+    pwd = FilePath(os.getcwd())
+    cluster = yaml.load(pwd.child("cluster.yml").open())
+    return txflocker_get_client(certificates_path=pwd,
+        user_certificate_filename="%s.crt" % (cluster["users"][0],),
+        user_key_filename="%s.key" % (cluster["users"][0],),
+    )
 
 class Version(Options):
     """
@@ -24,7 +39,7 @@ class ListNodes(Options):
     show list of nodes in the configured cluster
     """
     def run(self):
-        pass
+        self.client = get_client()
 
 
 class List(Options):
