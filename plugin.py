@@ -20,6 +20,7 @@ settings_defaults = {
   'DOCKER_BINARY_URL':'http://storage.googleapis.com/experiments-clusterhq/docker-binaries/docker-volumes',
   # perhaps the name of the docker service running on the host is different to 'docker'
   # for example - the clusterhq-flocker-node package installed 'docker.io'
+  # depending on OS this translates to start/systemctl calls to this service name
   'DOCKER_SERVICE_NAME':'docker',
   # what repo does the flocker plugin live in
   'PLUGIN_REPO':'https://github.com/clusterhq/flocker-docker-plugin',
