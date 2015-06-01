@@ -49,4 +49,6 @@ def get_client(reactor=reactor, certificates_path=FilePath("/etc/flocker"),
                 authority, client_certificate)
         return HTTPClient(Agent(reactor, contextFactory=options))
     else:
-        return HTTPClient(Agent(reactor))
+        raise Exception("Not enough information to construct TLS context: "
+                "node_key: %s, cluster_crt: %s, target_hostname: %s" % (
+                    node_key, cluster_crt, target_hostname))
