@@ -12,18 +12,28 @@ import os
 # Usage: plugin.py cluster.yml
 from utils import Configurator
 
-# allow env override for where to download the experimental docker binary from
-DOCKER_BINARY_URL = os.environ.get("DOCKER_BINARY_URL")
+# a dict that holds the default values for each of the env vars that can be overriden
+settings_defaults = {
+  # allow env override for where to download the experimental docker binary from
+  'DOCKER_BINARY_URL':'http://storage.googleapis.com/experiments-clusterhq/docker-binaries/docker-volumes',
+  # perhaps the name of the docker service running on the host is different to 'docker'
+  # for example - the clusterhq-flocker-node package installed 'docker.io'
+  'DOCKER_SERVICE_NAME':'docker',
+  # what repo does the flocker plugin live in
+  'PLUGIN_REPO':'https://github.com/clusterhq/flocker-docker-plugin',
+  # what branch to use for the flocker plugin
+  'PLUGIN_BRANCH':'txflocker-refactoring'
+}
 
-if DOCKER_BINARY_URL is None:
-    DOCKER_BINARY_URL = 'http://storage.googleapis.com/experiments-clusterhq/docker-binaries/docker-volumes'
+# the dict that holds our actual env vars once the overrides have been applied
+settings = {}
 
-# perhaps the name of the docker service running on the host is different to 'docker'
-# for example - the clusterhq-flocker-node package installed 'docker.io'
-DOCKER_SERVICE_NAME = os.environ.get("DOCKER_SERVICE_NAME")
-
-if DOCKER_SERVICE_NAME is None:
-    DOCKER_SERVICE_NAME = 'docker'
+# loop over each of the default vars and check to see if we have been given an override in the environment
+for field in settings_defaults:
+  value = os.environ.get(field)
+  if value is None:
+    value = settings_defaults[field]
+  settings[field] = value
 
 if __name__ == "__main__":
     c = Configurator(configFile=sys.argv[1])
@@ -45,19 +55,19 @@ if __name__ == "__main__":
     for node in c.config["agent_nodes"]:
 
         # stop the docker service
-        print "Stopping the docker service on %s - %s" % (node, DOCKER_SERVICE_NAME)
+        print "Stopping the docker service on %s - %s" % (node, settings['DOCKER_SERVICE_NAME'])
         if c.config["os"] == "ubuntu":
-          c.runSSHRaw(node, "stop %s" % (DOCKER_SERVICE_NAME))
+          c.runSSHRaw(node, "stop %s" % (settings['DOCKER_SERVICE_NAME']))
         elif c.config["os"] == "centos":
-          c.runSSHRaw(node, "systemctl stop %s.service" % (DOCKER_SERVICE_NAME))
+          c.runSSHRaw(node, "systemctl stop %s.service" % (settings['DOCKER_SERVICE_NAME']))
 
         # download the latest docker binary\
-        print "Downloading the latest docker binary on %s - %s" % (node, DOCKER_BINARY_URL)
-        c.runSSHRaw(node, "wget -O /usr/bin/docker %s" % (DOCKER_BINARY_URL))
+        print "Downloading the latest docker binary on %s - %s" % (node, settings['DOCKER_BINARY_URL'])
+        c.runSSHRaw(node, "wget -O /usr/bin/docker %s" % (settings['DOCKER_BINARY_URL']))
 
         # stop the docker service
         print "Starting the docker service on %s" % (node)
         if c.config["os"] == "ubuntu":
-          c.runSSHRaw(node, "start %s" % (DOCKER_SERVICE_NAME))
+          c.runSSHRaw(node, "start %s" % (settings['DOCKER_SERVICE_NAME']))
         elif c.config["os"] == "centos":
-          c.runSSHRaw(node, "systemctl start %s.service" % (DOCKER_SERVICE_NAME))
+          c.runSSHRaw(node, "systemctl start %s.service" % (settings['DOCKER_SERVICE_NAME']))
