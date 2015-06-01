@@ -15,9 +15,12 @@ if __name__ == "__main__":
     c = Configurator(configFile=sys.argv[1])
     control_ip = c.config["control_node"]
     print "Generating plugin certs"
+    # generate and upload plugin.crt and plugin.key for each node
     for node in c.config["agent_nodes"]:
+        # use the node IP to name the local files so they do not overwrite each other
         c.run("flocker-ca create-api-certificate %s" % (node + '-plugin',))
         print "Generated plugin certs for", node
+        # upload the .crt and .key
         for ext in ("crt", "key"):
             c.scp("%s-plugin.%s" % (node, ext),
                 node, "/etc/flocker/plugin.%s" % (ext,))
