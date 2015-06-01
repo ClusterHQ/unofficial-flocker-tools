@@ -8,12 +8,12 @@
 import sys
 import yaml
 
-# Usage: deploy.py cluster.yml
+# Usage: plugin.py cluster.yml
 from utils import Configurator
 
 if __name__ == "__main__":
     c = Configurator(configFile=sys.argv[1])
     control_ip = c.config["control_node"]
     for node in c.config["agent_nodes"]:
-        node_uuid = c.runSSHRaw(node, "python -c \"import json; print json.load(open('/etc/flocker/volume.json'))['uuid']\"")
-        print "Installing flocker-docker-plugin on %s" % (node) 
+        c.run("flocker-ca create-api-certificate %s" % (node + '-plugin',))
+        print "Created plugin user key for", node
