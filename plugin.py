@@ -7,6 +7,7 @@
 
 import sys
 import yaml
+import os
 
 # Usage: plugin.py cluster.yml
 from utils import Configurator
@@ -41,7 +42,7 @@ if __name__ == "__main__":
 
     # download and replace the docker binary on each of the nodes
     for node in c.config["agent_nodes"]:      
-      
+
       # stop the docker service
       print "Stopping the docker service on %s" % (node)
       if c.config["os"] == "ubuntu":
