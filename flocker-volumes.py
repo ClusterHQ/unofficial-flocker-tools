@@ -5,16 +5,32 @@ A prototype version of a CLI tool which shows off flocker's first class volumes
 capabilities.
 """
 
-from twisted.python.usage import Options, UsageError
-import sys
+from twisted.internet import defer
 from twisted.internet.task import react
+from twisted.python.usage import Options, UsageError
+from twisted.python import log
+import sys
 
 class Version(Options):
+    """
+    show version information
+    """
     def run(self):
         print "Ho ho ho"
 
 
+class ListNodes(Options):
+    """
+    show list of nodes in the configured cluster
+    """
+    def run(self):
+        pass
+
+
 class List(Options):
+    """
+    list flocker datasets
+    """
     optFlags = [
         ("deleted", "d", "Show deleted datasets")
     ]
@@ -22,12 +38,10 @@ class List(Options):
         pass
 
 
-class ListNodes(Options):
-    def run(self):
-        pass
-
-
 class Create(Options):
+    """
+    create a flocker dataset
+    """
     optFlags = [
         ("host", "h", "Initial host for dataset to appear on"),
         ("metadata", "m", "Set volume metadata"),
@@ -38,11 +52,18 @@ class Create(Options):
 
 
 class Destroy(Options):
+    """
+    mark a dataset to be deleted
+    """
     synopsis = '<dataset_uuid>'
     def run(self):
         pass
 
+
 class Move(Options):
+    """
+    move a dataset from one host to another
+    """
     synopsis = '<dataset_uuid> <host_uuid>'
     def run(self):
         pass
@@ -57,6 +78,7 @@ commands = {
     "move": Move,
 }
 
+
 class FlockerVolumesCommands(Options):
     subCommands = [
         (cmd, None, cls, cls.__doc__)
@@ -68,29 +90,17 @@ def main(reactor, *argv):
     try:
         base = FlockerVolumesCommands()
         base.parseOptions(argv)
-    except UsageError as e:
-        raise SystemExit(str(e))
+        if base.subCommand is not None:
+            d = defer.maybeDeferred(base.subOptions.run)
+        else:
+            raise UsageError("Please specify a command.")
+        d.addErrback(log.err)
+        return d
+    except UsageError, errortext:
+        print errortext
+        print 'Try --help for usage details.'
+        sys.exit(1)
 
 
 if __name__ == "__main__":
     react(main, sys.argv[1:])
-
-"""
-Later ideas:
-
-TODO: make it possible to see which containers are using which volumes via metadata updates.
-
-$ ./flocker-volumes.py list
-DATASET    SERVER   CONTAINERS      SIZE    METADATA
-1921edea   1.2.3.4  pgsql7,pgsql9   30GB    name=postgresql_7
-14f2fa0c   1.2.3.5  pgsql8          30GB    name=postgresql_8
-b31a0311   <none>   <none>          30GB    name=nonmanifest
-
-$ ./flocker-volumes.py destroy name=badger
-Volume c548725a is currently in use. Please stop it first.
-
-TODO: make metadata name be special/unique.
-
-$ ./flocker-volumes.py create --size 30g name=badger
-Volume "badger" already exists. Please choose another name.
-"""
