@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # This script will generate a user certificate using flocker-ca and upload it
 # ready for the plugin to consume
@@ -41,6 +42,7 @@ for field in settings_defaults:
 if __name__ == "__main__":
     c = Configurator(configFile=sys.argv[1])
     control_ip = c.config["control_node"]
+
     print "Generating plugin certs"
     # generate and upload plugin.crt and plugin.key for each node
     for node in c.config["agent_nodes"]:
@@ -54,9 +56,76 @@ if __name__ == "__main__":
                 node, "/etc/flocker/plugin.%s" % (ext,))
         print "Uploaded plugin certs for", node
 
+    print "Installing flocker plugin"
+    # loop each agent and get the plugin installed/running
+    # clone the plugin and configure an upstart/systemd unit for it to run
+    for node in c.config["agent_nodes"]:
+
+        break;
+        # clone the right repo and checkout the branch
+        print "Cloning the plugin repo on %s - %s", (node, settings['PLUGIN_REPO'])
+        c.runSSHRaw(node, "cd /root && git clone %s" % (settings['PLUGIN_REPO']))
+
+        # we need this so we know what folder to cd into
+        plugin_repo_folder = settings['PLUGIN_REPO'].split('/').pop()
+        print "Checking out branch %s" % (settings['PLUGIN_BRANCH'])
+        print "Using repo folder %s" % (plugin_repo_folder)
+        c.runSSHRaw(node, "cd /root/%s && git checkout %s" % (plugin_repo_folder, settings['PLUGIN_BRANCH']))
+
+        controlservice = 'https://%s:4523/v1' % (control_ip)
+        print "Have control service: %s" % (controlservice)
+        # a bash script that runs the app via twistd
+        # this makes the upstart - systemd files much easier shorter
+        print "Writing runflockerplugin.sh to %s" % (node)
+        c.runSSH(node, """cat << EOF > /root/runflockerplugin.sh
+#!/usr/bin/env bash
+TWISTD=`which twistd`
+rm -f /usr/share/docker/plugins/flocker.sock || true
+cd /root/%s && \
+FLOCKER_CONTROL_SERVICE_BASE_URL=%s \
+MY_NETWORK_IDENTITY=%s \
+$TWISTD -noy /root/%s/powerstripflocker.tac
+EOF
+""" % (plugin_repo_folder, controlservice, node, plugin_repo_folder))
+
+        # configure an upstart job that runs the bash script
+        if c.config["os"] == "ubuntu":
+            print "Writing flocker-plugin upstart job to %s" % (node)
+            c.runSSH(node, """cat <<EOF > /etc/init/flocker-plugin.conf
+# flocker-plugin - flocker-plugin job file
+
+description "Flocker Plugin service"
+author "ClusterHQ <support@clusterhq.com>"
+
+respawn
+
+# Start the process
+exec /usr/bin/env bash /root/runflockerplugin.sh
+EOF
+service flocker-plugin restart
+""")
+        # configure a systemd job that runs the bash script
+        elif c.config["os"] == "centos":
+            print "Writing flocker-plugin systemd job to %s" % (node)
+            c.runSSH(node, """cat <<EOF > /etc/systemd/system/flocker-plugin.service
+[Unit]
+Description=flocker-plugin - flocker-plugin job file
+
+[Service]
+ExecStart=/usr/bin/env bash /root/runflockerplugin.sh
+
+[Install]
+WantedBy=multi-user.target
+EOF
+systemctl enable flocker-plugin.service
+systemctl start flocker-plugin.service
+""")
+
+    print "Replacing docker binary"
     # download and replace the docker binary on each of the nodes
     for node in c.config["agent_nodes"]:
 
+        break;
         # stop the docker service
         print "Stopping the docker service on %s - %s" % (node, settings['DOCKER_SERVICE_NAME'])
         if c.config["os"] == "ubuntu":
@@ -74,3 +143,5 @@ if __name__ == "__main__":
           c.runSSHRaw(node, "start %s" % (settings['DOCKER_SERVICE_NAME']))
         elif c.config["os"] == "centos":
           c.runSSHRaw(node, "systemctl start %s.service" % (settings['DOCKER_SERVICE_NAME']))
+
+
