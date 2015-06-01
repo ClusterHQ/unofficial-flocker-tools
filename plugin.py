@@ -11,6 +11,12 @@ import yaml
 # Usage: plugin.py cluster.yml
 from utils import Configurator
 
+# allow env override for where to download the experimental docker binary from
+DOCKER_BINARY_URL = os.environ.get("DOCKER_BINARY_URL")
+
+if DOCKER_BINARY_URL is None:
+    DOCKER_BINARY_URL = 'http://storage.googleapis.com/experiments-clusterhq/docker-binaries/docker-volumes'
+
 if __name__ == "__main__":
     c = Configurator(configFile=sys.argv[1])
     control_ip = c.config["control_node"]
