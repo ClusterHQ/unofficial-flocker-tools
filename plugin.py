@@ -17,6 +17,13 @@ DOCKER_BINARY_URL = os.environ.get("DOCKER_BINARY_URL")
 if DOCKER_BINARY_URL is None:
     DOCKER_BINARY_URL = 'http://storage.googleapis.com/experiments-clusterhq/docker-binaries/docker-volumes'
 
+# perhaps the name of the docker service running on the host is different to 'docker'
+# for example - the clusterhq-flocker-node package installed 'docker.io'
+DOCKER_SERVICE_NAME = os.environ.get("DOCKER_BINARY_URL")
+
+if DOCKER_SERVICE_NAME is None:
+    DOCKER_SERVICE_NAME = 'docker'
+
 if __name__ == "__main__":
     c = Configurator(configFile=sys.argv[1])
     control_ip = c.config["control_node"]
