@@ -20,7 +20,7 @@ if DOCKER_BINARY_URL is None:
 
 # perhaps the name of the docker service running on the host is different to 'docker'
 # for example - the clusterhq-flocker-node package installed 'docker.io'
-DOCKER_SERVICE_NAME = os.environ.get("DOCKER_BINARY_URL")
+DOCKER_SERVICE_NAME = os.environ.get("DOCKER_SERVICE_NAME")
 
 if DOCKER_SERVICE_NAME is None:
     DOCKER_SERVICE_NAME = 'docker'
@@ -31,6 +31,7 @@ if __name__ == "__main__":
     print "Generating plugin certs"
     # generate and upload plugin.crt and plugin.key for each node
     for node in c.config["agent_nodes"]:
+        break;
         # use the node IP to name the local files so they do not overwrite each other
         c.run("flocker-ca create-api-certificate %s" % (node + '-plugin',))
         print "Generated plugin certs for", node
@@ -44,7 +45,7 @@ if __name__ == "__main__":
     for node in c.config["agent_nodes"]:      
 
       # stop the docker service
-      print "Stopping the docker service on %s" % (node)
+      print "Stopping the docker service on %s - %s" % (node, DOCKER_SERVICE_NAME)
       if c.config["os"] == "ubuntu":
         c.runSSHRaw(node, "stop %s" % (DOCKER_SERVICE_NAME))
       elif c.config["os"] == "centos":
