@@ -27,6 +27,10 @@ provision some machines, somehow. use ubuntu 14.04 or centos 7.
 * OpenStack deployment (e.g. Rackspace, private cloud) if you want to use our OpenStack backend
 * ~~Any other infrastructure if you want to try out our alpha ZFS backend~~ (does not work yet)
 
+make sure you can log into the nodes as **root** with a private key. (e.g. on ubuntu on AWS, `sudo cp .ssh/authorized_keys /root/.ssh/authorized_keys`)
+
+you may want to pick a node to be the control node and give it a DNS name (set up an A record for it with your DNS provider). using a DNS name is optional -- you can also just use its IP address.
+
 ## cluster.yml
 
 there are 3 example configuration files that correspond to the backend Flocker will use - base your cluster.yml on one of these files:
@@ -60,6 +64,8 @@ at this point you will need to manually install the latest (highest numbered) pa
 ```
 
 this will configure certificates, push them to your nodes, and set up firewall rules for the control service
+
+on AWS, you'll need to add a firewall rule for TCP port 4523 and 4524 if you want to access the control service/API remotely.
 
 ## tutorial
 
