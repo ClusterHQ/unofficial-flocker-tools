@@ -56,8 +56,11 @@ class ListNodes(Options):
         def print_table(nodes):
             table = texttable.Texttable()
             table.set_deco(0)
-            table.add_rows([["SERVER", "ADDRESS"]])
-            table.add_rows([[node["host"], node["host_uuid"]] for node in nodes])
+            table.set_cols_align(["l", "l"])
+            table.add_rows([["", ""]] +
+                           [["SERVER", "ADDRESS"]] +
+                           [[node["host"], node["uuid"]] for node in nodes])
+            print table.draw() + "\n"
         d.addCallback(print_table)
         return d
 
@@ -131,7 +134,6 @@ def main(reactor, *argv):
             raise UsageError("Please specify a command.")
         def err(failure):
             log.err(failure)
-            import pdb; pdb.set_trace()
             reactor.stop()
         d.addErrback(err)
         return d
