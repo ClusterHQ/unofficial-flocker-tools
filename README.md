@@ -75,7 +75,7 @@ on AWS, you'll need to add a firewall rule for TCP port 4523 and 4524 if you wan
 
 this will configure api certificates for the docker-plugin and push them to your nodes - it will name them `plugin.{crt,key}`
 
-it will git clone the plugin repo, checkout a brancb and install the dependencies (pip install) and write a service file (upstart/systemd) for the plugin
+it will git clone the plugin repo, checkout a branch and install the dependencies (pip install) and write a service file (upstart/systemd) for the plugin
 
 it will also download a customized docker binary that supports the `--volume-driver` flag and restart the docker service.
 
