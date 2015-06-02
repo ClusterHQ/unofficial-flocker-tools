@@ -22,16 +22,16 @@ settings_defaults = {
   # docker binary from
   # the docker-volumes binary is a buid from latest docker/master: 
   # 4caa9392f8aa4e57bfe43880b5f67d15b00ed8a7
-  'DOCKER_BINARY_URL':'http://storage.googleapis.com/experiments-clusterhq/docker-binaries/docker-volumes', # noqa
+  'DOCKER_BINARY_URL': 'http://storage.googleapis.com/experiments-clusterhq/docker-binaries/docker-volumes', # noqa
   # perhaps the name of the docker service running on the host is 
   # different to 'docker' for example - the clusterhq-flocker-node package 
   # installed 'docker.io' depending on OS this translates to 
   # start/systemctl calls to this service name
-  'DOCKER_SERVICE_NAME':'docker',
+  'DOCKER_SERVICE_NAME': 'docker',
   # what repo does the flocker plugin live in
-  'PLUGIN_REPO':'https://github.com/clusterhq/flocker-docker-plugin',
+  'PLUGIN_REPO': 'https://github.com/clusterhq/flocker-docker-plugin',
   # what branch to use for the flocker plugin
-  'PLUGIN_BRANCH':'txflocker-env-vars'
+  'PLUGIN_BRANCH': 'txflocker-env-vars'
 }
 
 # dict that holds our actual env vars once the overrides have been applied
