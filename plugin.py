@@ -24,7 +24,7 @@ settings_defaults = {
   # depending on OS this translates to start/systemctl calls to this service name
   'DOCKER_SERVICE_NAME':'docker',
   # what repo does the flocker plugin live in
-  'PLUGIN_REPO':'https://github.com/binocarlos/flocker-docker-plugin',
+  'PLUGIN_REPO':'https://github.com/clusterhq/flocker-docker-plugin',
   # what branch to use for the flocker plugin
   'PLUGIN_BRANCH':'txflocker-env-vars'
 }
@@ -79,7 +79,7 @@ if __name__ == "__main__":
             c.runSSHRaw(node, "yum install -y python-devel python-pip")
 
         # pip install the plugin
-        c.runSSHRaw(node, "pip install -r /root/%s/requirements.txt" % (plugin_repo_folder))
+        c.a(node, "pip install -r /root/%s/requirements.txt" % (plugin_repo_folder))
         
         print "Have control service: %s" % (controlservice)
         # a bash script that runs the app via twistd
