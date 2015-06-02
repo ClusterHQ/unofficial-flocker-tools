@@ -1,7 +1,7 @@
 cluster_name: name
 agent_nodes:
- - 1.2.3.4
- - 1.2.3.5
+ - {public: 1.2.3.4, private: 10.2.3.4}
+ - {public: 1.2.3.5, private: 10.2.3.5}
 control_node: dns.name.for.control.node # or IP address (but you must always connect via TLS to the given name here)
 users:
  - user1
