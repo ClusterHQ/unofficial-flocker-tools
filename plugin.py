@@ -18,20 +18,20 @@ from utils import Configurator
 # a dict that holds the default values for each of the env vars 
 # that can be overriden
 settings_defaults = {
-  # allow env override for where to download the experimental 
-  # docker binary from
-  # the docker-volumes binary is a buid from latest docker/master: 
-  # 4caa9392f8aa4e57bfe43880b5f67d15b00ed8a7
-  'DOCKER_BINARY_URL': 'http://storage.googleapis.com/experiments-clusterhq/docker-binaries/docker-volumes', # noqa
-  # perhaps the name of the docker service running on the host is 
-  # different to 'docker' for example - the clusterhq-flocker-node package 
-  # installed 'docker.io' depending on OS this translates to 
-  # start/systemctl calls to this service name
-  'DOCKER_SERVICE_NAME': 'docker',
-  # what repo does the flocker plugin live in
-  'PLUGIN_REPO': 'https://github.com/clusterhq/flocker-docker-plugin',
-  # what branch to use for the flocker plugin
-  'PLUGIN_BRANCH': 'txflocker-env-vars'
+    # allow env override for where to download the experimental 
+    # docker binary from
+    # the docker-volumes binary is a buid from latest docker/master: 
+    # 4caa9392f8aa4e57bfe43880b5f67d15b00ed8a7
+    'DOCKER_BINARY_URL': 'http://storage.googleapis.com/experiments-clusterhq/docker-binaries/docker-volumes', # noqa
+    # perhaps the name of the docker service running on the host is 
+    # different to 'docker' for example - the clusterhq-flocker-node package 
+    # installed 'docker.io' depending on OS this translates to 
+    # start/systemctl calls to this service name
+    'DOCKER_SERVICE_NAME': 'docker',
+    # what repo does the flocker plugin live in
+    'PLUGIN_REPO': 'https://github.com/clusterhq/flocker-docker-plugin',
+    # what branch to use for the flocker plugin
+    'PLUGIN_BRANCH': 'txflocker-env-vars'
 }
 
 # dict that holds our actual env vars once the overrides have been applied
@@ -40,10 +40,10 @@ settings = {}
 # loop over each of the default vars and check to see if we have been  
 # given an override in the environment
 for field in settings_defaults:
-  value = os.environ.get(field)
-  if value is None:
-    value = settings_defaults[field]
-  settings[field] = value
+    value = os.environ.get(field)
+    if value is None:
+        value = settings_defaults[field]
+    settings[field] = value
 
 if __name__ == "__main__":
     c = Configurator(configFile=sys.argv[1])
