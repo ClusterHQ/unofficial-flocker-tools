@@ -59,7 +59,7 @@ class ListNodes(Options):
             table.set_cols_align(["l", "l"])
             table.add_rows([["", ""]] +
                            [["SERVER", "ADDRESS"]] +
-                           [[node["host"], node["uuid"]] for node in nodes])
+                           [[node["uuid"], node["host"]] for node in nodes])
             print table.draw() + "\n"
         d.addCallback(print_table)
         return d
