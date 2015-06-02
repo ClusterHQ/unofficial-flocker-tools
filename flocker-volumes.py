@@ -32,6 +32,7 @@ def get_client():
 def get_base_url():
     pwd = FilePath(os.getcwd())
     control_config = yaml.load(pwd.child("agent.yml").open())["control-service"]
+    control_config["port"] = 4523
     return "https://%(hostname)s:%(port)s/v1" % control_config
 
 
