@@ -17,6 +17,8 @@ from txflocker.client import get_client as txflocker_get_client
 import sys
 import os
 import yaml
+import treq
+import texttable
 
 def get_client():
     pwd = FilePath(os.getcwd())
@@ -25,6 +27,13 @@ def get_client():
         user_certificate_filename="%s.crt" % (cluster["users"][0],),
         user_key_filename="%s.key" % (cluster["users"][0],),
     )
+
+
+def get_base_url():
+    pwd = FilePath(os.getcwd())
+    control_config = yaml.load(pwd.child("agent.yml").open())["control-service"]
+    return "https://%(hostname)s:%(port)s/v1" % control_config
+
 
 class Version(Options):
     """
@@ -40,6 +49,16 @@ class ListNodes(Options):
     """
     def run(self):
         self.client = get_client()
+        self.base_url = get_base_url()
+        d = self.client.get(self.base_url + "/state/nodes")
+        d.addCallback(treq.json_content)
+        def print_table(nodes):
+            table = texttable.Texttable()
+            table.set_deco(0)
+            table.add_rows([["SERVER", "ADDRESS"]])
+            table.add_rows([[node["host"], node["host_uuid"]] for node in nodes])
+        d.addCallback(print_table)
+        return d
 
 
 class List(Options):
@@ -109,7 +128,11 @@ def main(reactor, *argv):
             d = defer.maybeDeferred(base.subOptions.run)
         else:
             raise UsageError("Please specify a command.")
-        d.addErrback(log.err)
+        def err(failure):
+            log.err(failure)
+            import pdb; pdb.set_trace()
+            reactor.stop()
+        d.addErrback(err)
         return d
     except UsageError, errortext:
         print errortext
