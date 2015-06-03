@@ -88,7 +88,7 @@ if __name__ == "__main__":
             c.runSSHRaw(node, "yum install -y python-devel python-pip")
 
         # pip install the plugin
-        c.a(node, "pip install -r /root/%s/requirements.txt" 
+        c.runSSHRaw(node, "pip install -r /root/%s/requirements.txt" 
             % (plugin_repo_folder,))
         
         print "Have control service: %s" % (controlservice,)
