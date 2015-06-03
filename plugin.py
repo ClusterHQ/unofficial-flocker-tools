@@ -52,7 +52,6 @@ if __name__ == "__main__":
     print "Generating plugin certs"
     # generate and upload plugin.crt and plugin.key for each node
     for node in c.config["agent_nodes"]:
-        
         # use the node IP to name the local files 
         # so they do not overwrite each other
         c.run("flocker-ca create-api-certificate %s-plugin" % (node,))
@@ -67,7 +66,6 @@ if __name__ == "__main__":
     # loop each agent and get the plugin installed/running
     # clone the plugin and configure an upstart/systemd unit for it to run
     for node in c.config["agent_nodes"]:
-
         # we need this so we know what folder to cd into
         plugin_repo_folder = settings['PLUGIN_REPO'].split('/').pop()
 
@@ -143,7 +141,6 @@ systemctl start flocker-plugin.service
     print "Replacing docker binary"
     # download and replace the docker binary on each of the nodes
     for node in c.config["agent_nodes"]:
-        
         # stop the docker service
         print "Stopping the docker service on %s - %s" \
             % (node, settings['DOCKER_SERVICE_NAME'],)
