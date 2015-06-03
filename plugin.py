@@ -88,21 +88,6 @@ if __name__ == "__main__":
         # pip install the plugin
         c.runSSHRaw(node, "pip install -r /root/%s/requirements.txt" 
             % (plugin_repo_folder,))
-        
-        print "Have control service: %s" % (controlservice,)
-        # a bash script that runs the app via twistd
-        # this makes the upstart - systemd files much easier shorter
-        print "Writing runflockerplugin.sh to %s" % (node,)
-        c.runSSH(node, """cat << EOF > /root/runflockerplugin.sh
-#!/usr/bin/env bash
-rm -f /usr/share/docker/plugins/flocker.sock || true
-export FLOCKER_CONTROL_SERVICE_BASE_URL=%s
-export MY_NETWORK_IDENTITY=%s
-export USER_CERTIFICATE_FILENAME=plugin.crt
-export USER_KEY_FILENAME=plugin.key
-cd /root/%s && twistd -noy powerstripflocker.tac
-EOF
-""" % (controlservice, node, plugin_repo_folder,))
 
         # configure an upstart job that runs the bash script
         if c.config["os"] == "ubuntu":
@@ -114,12 +99,13 @@ description "Flocker Plugin service"
 author "ClusterHQ <support@clusterhq.com>"
 
 respawn
-
-# Start the process
-exec /usr/bin/env bash /root/runflockerplugin.sh
+env FLOCKER_CONTROL_SERVICE_BASE_URL=%s
+env MY_NETWORK_IDENTITY=%s
+chdir /root/%s
+exec /usr/bin/twistd -noy powerstripflocker.tac
 EOF
 service flocker-plugin restart
-""")
+""" % (controlservice, node, plugin_repo_folder,))
         # configure a systemd job that runs the bash script
         elif c.config["os"] == "centos":
             print "Writing flocker-plugin systemd job to %s" % (node,)
@@ -129,14 +115,17 @@ cat <<EOF > /etc/systemd/system/flocker-plugin.service
 Description=flocker-plugin - flocker-plugin job file
 
 [Service]
-ExecStart=/usr/bin/env bash /root/runflockerplugin.sh
+Environment=FLOCKER_CONTROL_SERVICE_BASE_URL=%s
+Environment=MY_NETWORK_IDENTITY=%s
+ExecStart=/usr/bin/twistd -noy powerstripflocker.tac
+WorkingDirectory=/root/%s
 
 [Install]
 WantedBy=multi-user.target
 EOF
 systemctl enable flocker-plugin.service
 systemctl start flocker-plugin.service
-""")
+""" % (controlservice, node, plugin_repo_folder,))
 
     print "Replacing docker binary"
     # download and replace the docker binary on each of the nodes
