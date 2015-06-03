@@ -59,7 +59,7 @@ if __name__ == "__main__":
         print "Generated plugin certs for", node
         # upload the .crt and .key
         for ext in ("crt", "key"):
-            c.scp("%s-plugin.%s" % (node, ext),
+            c.scp("%s-plugin.%s" % (node, ext,),
                 node, "/etc/flocker/plugin.%s" % (ext,))
         print "Uploaded plugin certs for", node
 
@@ -72,13 +72,13 @@ if __name__ == "__main__":
         plugin_repo_folder = settings['PLUGIN_REPO'].split('/').pop()
 
         # the full api path to the control service
-        controlservice = 'https://%s:4523/v1' % (control_ip)
-        c.runSSHRaw(node, "rm -rf %s" % (plugin_repo_folder))
+        controlservice = 'https://%s:4523/v1' % (control_ip,)
+        c.runSSHRaw(node, "rm -rf %s" % (plugin_repo_folder,))
         # clone the right repo and checkout the branch
-        print "Cloning the plugin repo on %s - %s" 
-            % (node, settings['PLUGIN_REPO'])
+        print "Cloning the plugin repo on %s - %s" \
+            %(node, settings['PLUGIN_REPO'],)
         c.runSSHRaw(node, "git clone -b %s %s || true" 
-            % (settings['PLUGIN_BRANCH'], settings['PLUGIN_REPO']))
+            % (settings['PLUGIN_BRANCH'], settings['PLUGIN_REPO'],))
 
         # install pip and python-dev
         if c.config["os"] == "ubuntu":
@@ -89,12 +89,12 @@ if __name__ == "__main__":
 
         # pip install the plugin
         c.a(node, "pip install -r /root/%s/requirements.txt" 
-            % (plugin_repo_folder))
+            % (plugin_repo_folder,))
         
-        print "Have control service: %s" % (controlservice)
+        print "Have control service: %s" % (controlservice,)
         # a bash script that runs the app via twistd
         # this makes the upstart - systemd files much easier shorter
-        print "Writing runflockerplugin.sh to %s" % (node)
+        print "Writing runflockerplugin.sh to %s" % (node,)
         c.runSSH(node, """cat << EOF > /root/runflockerplugin.sh
 #!/usr/bin/env bash
 rm -f /usr/share/docker/plugins/flocker.sock || true
@@ -104,11 +104,11 @@ export USER_CERTIFICATE_FILENAME=plugin.crt
 export USER_KEY_FILENAME=plugin.key
 cd /root/%s && twistd -noy powerstripflocker.tac
 EOF
-""" % (controlservice, node, plugin_repo_folder))
+""" % (controlservice, node, plugin_repo_folder,))
 
         # configure an upstart job that runs the bash script
         if c.config["os"] == "ubuntu":
-            print "Writing flocker-plugin upstart job to %s" % (node)
+            print "Writing flocker-plugin upstart job to %s" % (node,)
             c.runSSH(node, """cat <<EOF > /etc/init/flocker-plugin.conf
 # flocker-plugin - flocker-plugin job file
 
@@ -124,7 +124,7 @@ service flocker-plugin restart
 """)
         # configure a systemd job that runs the bash script
         elif c.config["os"] == "centos":
-            print "Writing flocker-plugin systemd job to %s" % (node)
+            print "Writing flocker-plugin systemd job to %s" % (node,)
             c.runSSH(node, """# writing flocker-plugin systemd
 cat <<EOF > /etc/systemd/system/flocker-plugin.service
 [Unit]
@@ -145,27 +145,27 @@ systemctl start flocker-plugin.service
     for node in c.config["agent_nodes"]:
         
         # stop the docker service
-        print "Stopping the docker service on %s - %s" 
-            % (node, settings['DOCKER_SERVICE_NAME'])
+        print "Stopping the docker service on %s - %s" \
+            % (node, settings['DOCKER_SERVICE_NAME'],)
 
         if c.config["os"] == "ubuntu":
-          c.runSSHRaw(node, "stop %s" % (settings['DOCKER_SERVICE_NAME']))
+          c.runSSHRaw(node, "stop %s" % (settings['DOCKER_SERVICE_NAME'],))
         elif c.config["os"] == "centos":
           c.runSSHRaw(node, "systemctl stop %s.service" 
-              % (settings['DOCKER_SERVICE_NAME']))
+              % (settings['DOCKER_SERVICE_NAME'],))
 
         # download the latest docker binary\
-        print "Downloading the latest docker binary on %s - %s" 
-            % (node, settings['DOCKER_BINARY_URL'])
+        print "Downloading the latest docker binary on %s - %s" \
+            % (node, settings['DOCKER_BINARY_URL'],)
         c.runSSHRaw(node, "wget -O /usr/bin/docker %s" 
-            % (settings['DOCKER_BINARY_URL']))
+            % (settings['DOCKER_BINARY_URL'],))
 
         # stop the docker service
-        print "Starting the docker service on %s" % (node)
+        print "Starting the docker service on %s" % (node,)
         if c.config["os"] == "ubuntu":
-          c.runSSHRaw(node, "start %s" % (settings['DOCKER_SERVICE_NAME']))
+          c.runSSHRaw(node, "start %s" % (settings['DOCKER_SERVICE_NAME'],))
         elif c.config["os"] == "centos":
           c.runSSHRaw(node, "systemctl start %s.service" 
-              % (settings['DOCKER_SERVICE_NAME']))
+              % (settings['DOCKER_SERVICE_NAME'],))
 
 
