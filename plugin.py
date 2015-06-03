@@ -164,5 +164,3 @@ systemctl start flocker-plugin.service
         elif c.config["os"] == "centos":
             c.runSSHRaw(node, "systemctl start %s.service" 
               % (settings['DOCKER_SERVICE_NAME'],))
-
-
