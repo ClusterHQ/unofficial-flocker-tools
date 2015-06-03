@@ -146,10 +146,10 @@ systemctl start flocker-plugin.service
             % (node, settings['DOCKER_SERVICE_NAME'],)
 
         if c.config["os"] == "ubuntu":
-          c.runSSHRaw(node, "stop %s" % (settings['DOCKER_SERVICE_NAME'],))
+            c.runSSHRaw(node, "stop %s" % (settings['DOCKER_SERVICE_NAME'],))
         elif c.config["os"] == "centos":
-          c.runSSHRaw(node, "systemctl stop %s.service" 
-              % (settings['DOCKER_SERVICE_NAME'],))
+            c.runSSHRaw(node, "systemctl stop %s.service" 
+                % (settings['DOCKER_SERVICE_NAME'],))
 
         # download the latest docker binary\
         print "Downloading the latest docker binary on %s - %s" \
@@ -160,9 +160,9 @@ systemctl start flocker-plugin.service
         # stop the docker service
         print "Starting the docker service on %s" % (node,)
         if c.config["os"] == "ubuntu":
-          c.runSSHRaw(node, "start %s" % (settings['DOCKER_SERVICE_NAME'],))
+            c.runSSHRaw(node, "start %s" % (settings['DOCKER_SERVICE_NAME'],))
         elif c.config["os"] == "centos":
-          c.runSSHRaw(node, "systemctl start %s.service" 
+            c.runSSHRaw(node, "systemctl start %s.service" 
               % (settings['DOCKER_SERVICE_NAME'],))
 
 
