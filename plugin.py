@@ -55,7 +55,7 @@ if __name__ == "__main__":
         
         # use the node IP to name the local files 
         # so they do not overwrite each other
-        c.run("flocker-ca create-api-certificate %s" % (node + '-plugin',))
+        c.run("flocker-ca create-api-certificate %s-plugin" % (node,))
         print "Generated plugin certs for", node
         # upload the .crt and .key
         for ext in ("crt", "key"):
