@@ -94,6 +94,14 @@ if __name__ == "__main__":
 
         # configure an upstart job that runs the bash script
         if c.config["os"] == "ubuntu":
+
+            # ensure that the /usr/share/${DOCKER_SERVICE_NAME}/plugins
+            # folder exists
+            print "Creating the /usr/share/%s/plugins folder" 
+                % (settings['DOCKER_SERVICE_NAME'],)
+            c.runSSHRaw(public_ip, "mkdir -p /usr/share/%s/plugins"
+                % (settings['DOCKER_SERVICE_NAME'],)
+
             print "Writing flocker-plugin upstart job to %s" % (public_ip,)
             c.runSSH(public_ip, """cat <<EOF > /etc/init/flocker-plugin.conf
 # flocker-plugin - flocker-plugin job file
