@@ -17,10 +17,11 @@ if __name__ == "__main__":
     print "Created control cert."
     node_mapping = {}
     for node in c.config["agent_nodes"]:
+        public_ip = node["public"]
         # Created 8eab4b8d-c0a2-4ce2-80aa-0709277a9a7a.crt. Copy ...
         uuid = c.run("flocker-ca create-node-certificate").split(".")[0].split(" ")[1]
-        node_mapping[node] = uuid
-        print "Generated", uuid, "for", node
+        node_mapping[public_ip] = uuid
+        print "Generated", uuid, "for", public_ip
     for user in c.config["users"]:
         c.run("flocker-ca create-api-certificate %s" % (user,))
         print "Created user key for", user
