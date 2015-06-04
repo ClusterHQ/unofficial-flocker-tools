@@ -139,7 +139,8 @@ systemctl start flocker-plugin.service
             % (public_ip, settings['DOCKER_SERVICE_NAME'],)
 
         if c.config["os"] == "ubuntu":
-            c.runSSHRaw(public_ip, "stop %s || true" % (settings['DOCKER_SERVICE_NAME'],))
+            c.runSSHRaw(public_ip, "stop %s || true" 
+                % (settings['DOCKER_SERVICE_NAME'],))
         elif c.config["os"] == "centos":
             c.runSSHRaw(public_ip, "systemctl stop %s.service || true" 
                 % (settings['DOCKER_SERVICE_NAME'],))
@@ -153,7 +154,8 @@ systemctl start flocker-plugin.service
         # stop the docker service
         print "Starting the docker service on %s" % (public_ip,)
         if c.config["os"] == "ubuntu":
-            c.runSSHRaw(public_ip, "start %s" % (settings['DOCKER_SERVICE_NAME'],))
+            c.runSSHRaw(public_ip, "start %s" 
+                % (settings['DOCKER_SERVICE_NAME'],))
         elif c.config["os"] == "centos":
             c.runSSHRaw(public_ip, "systemctl start %s.service" 
               % (settings['DOCKER_SERVICE_NAME'],))
