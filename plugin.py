@@ -97,10 +97,10 @@ if __name__ == "__main__":
 
             # ensure that the /usr/share/${DOCKER_SERVICE_NAME}/plugins
             # folder exists
-            print "Creating the /usr/share/%s/plugins folder" 
+            print "Creating the /usr/share/%s/plugins folder" \
                 % (settings['DOCKER_SERVICE_NAME'],)
-            c.runSSHRaw(public_ip, "mkdir -p /usr/share/%s/plugins"
-                % (settings['DOCKER_SERVICE_NAME'],)
+            c.runSSHRaw(public_ip, "mkdir -p /usr/share/%s/plugins" \
+                % (settings['DOCKER_SERVICE_NAME'],))
 
             print "Writing flocker-plugin upstart job to %s" % (public_ip,)
             c.runSSH(public_ip, """cat <<EOF > /etc/init/flocker-plugin.conf
