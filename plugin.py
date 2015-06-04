@@ -147,7 +147,7 @@ systemctl start flocker-plugin.service
         # download the latest docker binary\
         print "Downloading the latest docker binary on %s - %s" \
             % (public_ip, settings['DOCKER_BINARY_URL'],)
-        c.runSSHRaw(node, "wget -O /usr/bin/docker %s" 
+        c.runSSHRaw(public_ip, "wget -O /usr/bin/docker %s" 
             % (settings['DOCKER_BINARY_URL'],))
 
         # stop the docker service
