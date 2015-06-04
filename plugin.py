@@ -52,47 +52,50 @@ if __name__ == "__main__":
     print "Generating plugin certs"
     # generate and upload plugin.crt and plugin.key for each node
     for node in c.config["agent_nodes"]:
+        public_ip = node["public"]
         # use the node IP to name the local files 
         # so they do not overwrite each other
-        c.run("flocker-ca create-api-certificate %s-plugin" % (node,))
-        print "Generated plugin certs for", node
+        c.run("flocker-ca create-api-certificate %s-plugin" % (public_ip,))
+        print "Generated plugin certs for", public_ip
         # upload the .crt and .key
         for ext in ("crt", "key"):
-            c.scp("%s-plugin.%s" % (node, ext,),
-                node, "/etc/flocker/plugin.%s" % (ext,))
-        print "Uploaded plugin certs for", node
+            c.scp("%s-plugin.%s" % (public_ip, ext,),
+                public_ip, "/etc/flocker/plugin.%s" % (ext,))
+        print "Uploaded plugin certs for", public_ip
 
     print "Installing flocker plugin"
     # loop each agent and get the plugin installed/running
     # clone the plugin and configure an upstart/systemd unit for it to run
     for node in c.config["agent_nodes"]:
+        public_ip = node["public"]
+        private_ip = node["private"]
         # we need this so we know what folder to cd into
         plugin_repo_folder = settings['PLUGIN_REPO'].split('/').pop()
 
         # the full api path to the control service
         controlservice = 'https://%s:4523/v1' % (control_ip,)
-        c.runSSHRaw(node, "rm -rf %s" % (plugin_repo_folder,))
+        c.runSSHRaw(public_ip, "rm -rf %s" % (plugin_repo_folder,))
         # clone the right repo and checkout the branch
         print "Cloning the plugin repo on %s - %s" \
-            %(node, settings['PLUGIN_REPO'],)
-        c.runSSHRaw(node, "git clone -b %s %s || true" 
+            %(public_ip, settings['PLUGIN_REPO'],)
+        c.runSSHRaw(public_ip, "git clone -b %s %s || true" 
             % (settings['PLUGIN_BRANCH'], settings['PLUGIN_REPO'],))
 
         # install pip and python-dev
         if c.config["os"] == "ubuntu":
-            c.runSSHRaw(node, "apt-get install -y python-dev python-pip")
+            c.runSSHRaw(public_ip, "apt-get install -y python-dev python-pip")
         # configure a systemd job that runs the bash script
         elif c.config["os"] == "centos":
-            c.runSSHRaw(node, "yum install -y python-devel python-pip")
+            c.runSSHRaw(public_ip, "yum install -y python-devel python-pip")
 
         # pip install the plugin
-        c.runSSHRaw(node, "pip install -r /root/%s/requirements.txt" 
+        c.runSSHRaw(public_ip, "pip install -r /root/%s/requirements.txt" 
             % (plugin_repo_folder,))
 
         # configure an upstart job that runs the bash script
         if c.config["os"] == "ubuntu":
-            print "Writing flocker-plugin upstart job to %s" % (node,)
-            c.runSSH(node, """cat <<EOF > /etc/init/flocker-plugin.conf
+            print "Writing flocker-plugin upstart job to %s" % (public_ip,)
+            c.runSSH(public_ip, """cat <<EOF > /etc/init/flocker-plugin.conf
 # flocker-plugin - flocker-plugin job file
 
 description "Flocker Plugin service"
@@ -105,11 +108,11 @@ chdir /root/%s
 exec /usr/bin/twistd -noy powerstripflocker.tac
 EOF
 service flocker-plugin restart
-""" % (controlservice, node, plugin_repo_folder,))
+""" % (controlservice, private_ip, plugin_repo_folder,))
         # configure a systemd job that runs the bash script
         elif c.config["os"] == "centos":
-            print "Writing flocker-plugin systemd job to %s" % (node,)
-            c.runSSH(node, """# writing flocker-plugin systemd
+            print "Writing flocker-plugin systemd job to %s" % (public_ip,)
+            c.runSSH(public_ip, """# writing flocker-plugin systemd
 cat <<EOF > /etc/systemd/system/flocker-plugin.service
 [Unit]
 Description=flocker-plugin - flocker-plugin job file
@@ -125,31 +128,32 @@ WantedBy=multi-user.target
 EOF
 systemctl enable flocker-plugin.service
 systemctl start flocker-plugin.service
-""" % (controlservice, node, plugin_repo_folder,))
+""" % (controlservice, private_ip, plugin_repo_folder,))
 
     print "Replacing docker binary"
     # download and replace the docker binary on each of the nodes
     for node in c.config["agent_nodes"]:
+        public_ip = node["public"]
         # stop the docker service
         print "Stopping the docker service on %s - %s" \
-            % (node, settings['DOCKER_SERVICE_NAME'],)
+            % (public_ip, settings['DOCKER_SERVICE_NAME'],)
 
         if c.config["os"] == "ubuntu":
-            c.runSSHRaw(node, "stop %s" % (settings['DOCKER_SERVICE_NAME'],))
+            c.runSSHRaw(public_ip, "stop %s" % (settings['DOCKER_SERVICE_NAME'],))
         elif c.config["os"] == "centos":
-            c.runSSHRaw(node, "systemctl stop %s.service" 
+            c.runSSHRaw(public_ip, "systemctl stop %s.service" 
                 % (settings['DOCKER_SERVICE_NAME'],))
 
         # download the latest docker binary\
         print "Downloading the latest docker binary on %s - %s" \
-            % (node, settings['DOCKER_BINARY_URL'],)
+            % (public_ip, settings['DOCKER_BINARY_URL'],)
         c.runSSHRaw(node, "wget -O /usr/bin/docker %s" 
             % (settings['DOCKER_BINARY_URL'],))
 
         # stop the docker service
-        print "Starting the docker service on %s" % (node,)
+        print "Starting the docker service on %s" % (public_ip,)
         if c.config["os"] == "ubuntu":
-            c.runSSHRaw(node, "start %s" % (settings['DOCKER_SERVICE_NAME'],))
+            c.runSSHRaw(public_ip, "start %s" % (settings['DOCKER_SERVICE_NAME'],))
         elif c.config["os"] == "centos":
-            c.runSSHRaw(node, "systemctl start %s.service" 
+            c.runSSHRaw(public_ip, "systemctl start %s.service" 
               % (settings['DOCKER_SERVICE_NAME'],))
