@@ -72,6 +72,10 @@ if __name__ == "__main__":
         # we need this so we know what folder to cd into
         plugin_repo_folder = settings['PLUGIN_REPO'].split('/').pop()
 
+        # where does the docker plugins folder live
+        docker_plugins = "/usr/share/%s/plugins" \
+            % (settings['DOCKER_SERVICE_NAME'],)
+
         # the full api path to the control service
         controlservice = 'https://%s:4523/v1' % (control_ip,)
         c.runSSHRaw(public_ip, "rm -rf %s" % (plugin_repo_folder,))
@@ -112,11 +116,12 @@ author "ClusterHQ <support@clusterhq.com>"
 respawn
 env FLOCKER_CONTROL_SERVICE_BASE_URL=%s
 env MY_NETWORK_IDENTITY=%s
+env DOCKER_PLUGINS_FOLDER=%s
 chdir /root/%s
 exec /usr/bin/twistd -noy powerstripflocker.tac
 EOF
 service flocker-plugin restart
-""" % (controlservice, private_ip, plugin_repo_folder,))
+""" % (controlservice, private_ip, docker_plugins, plugin_repo_folder,))
         # configure a systemd job that runs the bash script
         elif c.config["os"] == "centos":
             print "Writing flocker-plugin systemd job to %s" % (public_ip,)
@@ -128,6 +133,7 @@ Description=flocker-plugin - flocker-plugin job file
 [Service]
 Environment=FLOCKER_CONTROL_SERVICE_BASE_URL=%s
 Environment=MY_NETWORK_IDENTITY=%s
+Environment=DOCKER_PLUGINS_FOLDER=%s
 ExecStart=/usr/bin/twistd -noy powerstripflocker.tac
 WorkingDirectory=/root/%s
 
@@ -136,7 +142,7 @@ WantedBy=multi-user.target
 EOF
 systemctl enable flocker-plugin.service
 systemctl start flocker-plugin.service
-""" % (controlservice, private_ip, plugin_repo_folder,))
+""" % (controlservice, private_ip, docker_plugins, plugin_repo_folder,))
 
     print "Replacing docker binary"
     # download and replace the docker binary on each of the nodes
