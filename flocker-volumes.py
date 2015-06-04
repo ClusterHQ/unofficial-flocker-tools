@@ -42,6 +42,8 @@ class Version(Options):
     """
     def run(self):
         print "flocker-volumes.py prototype version 0.0.1"
+        print "see https://docs.clusterhq.com/en/latest/labs/"
+        print
 
 
 class ListNodes(Options):
@@ -73,7 +75,20 @@ class List(Options):
         ("deleted", "d", "Show deleted datasets")
     ]
     def run(self):
-        pass
+        self.client = get_client()
+        self.base_url = get_base_url()
+        d = self.client.get(self.base_url + "/state/nodes")
+        d.addCallback(treq.json_content)
+        def print_table(nodes):
+            table = texttable.Texttable()
+            table.set_deco(0)
+            table.set_cols_align(["l", "l"])
+            table.add_rows([["", ""]] +
+                           [["SERVER", "ADDRESS"]] +
+                           [[node["uuid"], node["host"]] for node in nodes])
+            print table.draw() + "\n"
+        d.addCallback(print_table)
+        return d
 
 
 class Create(Options):
