@@ -98,7 +98,7 @@ if __name__ == "__main__":
             # ensure that the /usr/share/${DOCKER_SERVICE_NAME}/plugins
             # folder exists
             print "Creating the /usr/share/docker/plugins folder"
-            c.runSSHRaw(public_ip, "mkdir -p /usr/share/docker/plugins"
+            c.runSSHRaw(public_ip, "mkdir -p /usr/share/docker/plugins")
 
             print "Writing flocker-plugin upstart job to %s" % (public_ip,)
             c.runSSH(public_ip, """cat <<EOF > /etc/init/flocker-plugin.conf
