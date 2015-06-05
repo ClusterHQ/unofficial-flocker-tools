@@ -48,6 +48,36 @@ for field in settings_defaults:
 if __name__ == "__main__":
     c = Configurator(configFile=sys.argv[1])
     control_ip = c.config["control_node"]
+    
+    print "Replacing docker binary"
+    # download and replace the docker binary on each of the nodes
+    for node in c.config["agent_nodes"]:
+        public_ip = node["public"]
+        # stop the docker service
+        print "Stopping the docker service on %s - %s" \
+            % (public_ip, settings['DOCKER_SERVICE_NAME'],)
+
+        if c.config["os"] == "ubuntu":
+            c.runSSHRaw(public_ip, "stop %s || true" 
+                % (settings['DOCKER_SERVICE_NAME'],))
+        elif c.config["os"] == "centos":
+            c.runSSHRaw(public_ip, "systemctl stop %s.service || true" 
+                % (settings['DOCKER_SERVICE_NAME'],))
+
+        # download the latest docker binary\
+        print "Downloading the latest docker binary on %s - %s" \
+            % (public_ip, settings['DOCKER_BINARY_URL'],)
+        c.runSSHRaw(public_ip, "wget -O /usr/bin/docker %s" 
+            % (settings['DOCKER_BINARY_URL'],))
+
+        # stop the docker service
+        print "Starting the docker service on %s" % (public_ip,)
+        if c.config["os"] == "ubuntu":
+            c.runSSHRaw(public_ip, "start %s" 
+                % (settings['DOCKER_SERVICE_NAME'],))
+        elif c.config["os"] == "centos":
+            c.runSSHRaw(public_ip, "systemctl start %s.service" 
+              % (settings['DOCKER_SERVICE_NAME'],))
 
     print "Generating plugin certs"
     # generate and upload plugin.crt and plugin.key for each node
@@ -135,33 +165,3 @@ EOF
 systemctl enable flocker-plugin.service
 systemctl start flocker-plugin.service
 """ % (controlservice, private_ip, plugin_repo_folder,))
-
-    print "Replacing docker binary"
-    # download and replace the docker binary on each of the nodes
-    for node in c.config["agent_nodes"]:
-        public_ip = node["public"]
-        # stop the docker service
-        print "Stopping the docker service on %s - %s" \
-            % (public_ip, settings['DOCKER_SERVICE_NAME'],)
-
-        if c.config["os"] == "ubuntu":
-            c.runSSHRaw(public_ip, "stop %s || true" 
-                % (settings['DOCKER_SERVICE_NAME'],))
-        elif c.config["os"] == "centos":
-            c.runSSHRaw(public_ip, "systemctl stop %s.service || true" 
-                % (settings['DOCKER_SERVICE_NAME'],))
-
-        # download the latest docker binary\
-        print "Downloading the latest docker binary on %s - %s" \
-            % (public_ip, settings['DOCKER_BINARY_URL'],)
-        c.runSSHRaw(public_ip, "wget -O /usr/bin/docker %s" 
-            % (settings['DOCKER_BINARY_URL'],))
-
-        # stop the docker service
-        print "Starting the docker service on %s" % (public_ip,)
-        if c.config["os"] == "ubuntu":
-            c.runSSHRaw(public_ip, "start %s" 
-                % (settings['DOCKER_SERVICE_NAME'],))
-        elif c.config["os"] == "centos":
-            c.runSSHRaw(public_ip, "systemctl start %s.service" 
-              % (settings['DOCKER_SERVICE_NAME'],))
