@@ -74,11 +74,11 @@ if __name__ == "__main__":
 
         # the full api path to the control service
         controlservice = 'https://%s:4523/v1' % (control_ip,)
-        c.runSSHRaw(public_ip, "rm -rf %s" % (plugin_repo_folder,))
+
         # clone the right repo and checkout the branch
         print "Cloning the plugin repo on %s - %s" \
             %(public_ip, settings['PLUGIN_REPO'],)
-        c.runSSHRaw(public_ip, "git clone -b %s %s || true" 
+        c.runSSHRaw(public_ip, "git clone -b %s %s" 
             % (settings['PLUGIN_BRANCH'], settings['PLUGIN_REPO'],))
 
         # install pip and python-dev
