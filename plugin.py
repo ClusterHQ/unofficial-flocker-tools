@@ -92,13 +92,13 @@ if __name__ == "__main__":
         c.runSSHRaw(public_ip, "pip install -r /root/%s/requirements.txt" 
             % (plugin_repo_folder,))
 
+        # ensure that the /usr/share/docker/plugins
+        # folder exists
+        print "Creating the /usr/share/docker/plugins folder"
+        c.runSSHRaw(public_ip, "mkdir -p /usr/share/docker/plugins")
         # configure an upstart job that runs the bash script
-        if c.config["os"] == "ubuntu":
 
-            # ensure that the /usr/share/${DOCKER_SERVICE_NAME}/plugins
-            # folder exists
-            print "Creating the /usr/share/docker/plugins folder"
-            c.runSSHRaw(public_ip, "mkdir -p /usr/share/docker/plugins")
+        if c.config["os"] == "ubuntu":
 
             print "Writing flocker-plugin upstart job to %s" % (public_ip,)
             c.runSSH(public_ip, """cat <<EOF > /etc/init/flocker-plugin.conf
