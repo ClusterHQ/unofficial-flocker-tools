@@ -72,22 +72,68 @@ class List(Options):
     list flocker datasets
     """
     optFlags = [
-        ("deleted", "d", "Show deleted datasets")
+        ("deleted", "d", "Show deleted datasets"),
+        #("human", "h", "Human readable numbers"), ?
     ]
     def run(self):
         self.client = get_client()
         self.base_url = get_base_url()
-        d = self.client.get(self.base_url + "/state/nodes")
-        d.addCallback(treq.json_content)
-        def print_table(nodes):
+        ds = [self.client.get(self.base_url + "/configuration/datasets"),
+              self.client.get(self.base_url + "/state/datasets"),
+              self.client.get(self.base_url + "/state/nodes"),]
+        for d in ds:
+            d.addCallback(treq.json_content)
+        d = defer.gatherResults(ds)
+        def got_results(results):
+            configuration_datasets, state_datasets, state_nodes = results
+
+            # build up a table, based on which datasets are in the
+            # configuration, adding data from the state as necessary
+            configuration_map = dict((d["dataset_id"], d) for d in configuration_datasets)
+            state_map = dict((d["dataset_id"], d) for d in configuration_datasets)
+            nodes_map = dict((n["uuid"], n) for n in state_nodes)
+
+            rows = []
+
+            for (key, dataset) in configuration_map.iteritems():
+                if dataset["deleted"] and self["deleted"]:
+                    if key in state_map:
+                        status = "deleting"
+                    else:
+                        status = "deleted"
+                else:
+                    if key in state_map:
+                        if state_map[key]["primary"] in nodes_map:
+                            status = "attached"
+                        else:
+                            status = "detached"
+                    else:
+                        # not deleted, not in state, probably waiting for it to
+                        # show up.
+                        status = "pending"
+
+                meta = []
+                for k, v in dataset["metadata"].iteritems():
+                    meta.append("%s=%s" % (k, v))
+
+                if dataset["primary"] in nodes_map:
+                    primary = nodes_map[dataset["primary"]]
+                    node = "%s (%s)" % (primary["uuid"][:8], primary["host"])
+
+                rows.append([dataset["dataset_id"],
+                    "%.2fG" % (dataset["maximum_size"] / (1024 * 1024 * 1024.),),
+                    ",".join(meta),
+                    status,
+                    node])
+
             table = texttable.Texttable()
             table.set_deco(0)
-            table.set_cols_align(["l", "l"])
-            table.add_rows([["", ""]] +
-                           [["SERVER", "ADDRESS"]] +
-                           [[node["uuid"], node["host"]] for node in nodes])
+            table.set_cols_align(["l", "l", "l", "l", "l"])
+            rows = [["", "", "", "", ""]] + [
+                    ["DATASET", "SIZE", "METADATA", "STATUS", "SERVER"]] + rows
+            table.add_rows(rows)
             print table.draw() + "\n"
-        d.addCallback(print_table)
+        d.addCallback(got_results)
         return d
 
 
