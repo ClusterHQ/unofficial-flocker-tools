@@ -36,6 +36,12 @@ def get_base_url():
     return "https://%(hostname)s:%(port)s/v1" % control_config
 
 
+def get_table():
+    table = texttable.Texttable(max_width=100)
+    table.set_deco(0)
+    return table
+
+
 class Version(Options):
     """
     show version information
@@ -56,8 +62,7 @@ class ListNodes(Options):
         d = self.client.get(self.base_url + "/state/nodes")
         d.addCallback(treq.json_content)
         def print_table(nodes):
-            table = texttable.Texttable()
-            table.set_deco(0)
+            table = get_table()
             table.set_cols_align(["l", "l"])
             table.add_rows([["", ""]] +
                            [["SERVER", "ADDRESS"]] +
@@ -120,14 +125,13 @@ class List(Options):
                     primary = nodes_map[dataset["primary"]]
                     node = "%s (%s)" % (primary["uuid"][:8], primary["host"])
 
-                rows.append([dataset["dataset_id"],
+                rows.append([dataset["dataset_id"][:8],
                     "%.2fG" % (dataset["maximum_size"] / (1024 * 1024 * 1024.),),
                     ",".join(meta),
                     status,
                     node])
 
-            table = texttable.Texttable()
-            table.set_deco(0)
+            table = get_table()
             table.set_cols_align(["l", "l", "l", "l", "l"])
             rows = [["", "", "", "", ""]] + [
                     ["DATASET", "SIZE", "METADATA", "STATUS", "SERVER"]] + rows
