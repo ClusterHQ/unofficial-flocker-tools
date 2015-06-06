@@ -95,7 +95,7 @@ class List(Options):
             # build up a table, based on which datasets are in the
             # configuration, adding data from the state as necessary
             configuration_map = dict((d["dataset_id"], d) for d in configuration_datasets)
-            state_map = dict((d["dataset_id"], d) for d in configuration_datasets)
+            state_map = dict((d["dataset_id"], d) for d in state_datasets)
             nodes_map = dict((n["uuid"], n) for n in state_nodes)
 
             rows = []
