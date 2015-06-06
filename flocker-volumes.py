@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
 """
-A prototype version of a CLI tool which shows off flocker's first class volumes
-capabilities.
+A prototype version of a CLI tool which shows off flocker's first class
+volumes capabilities.
 
 Run me from a directory containing a cluster.yml and appropriate cluster
-certificates.
+certificates, or specify --cluster-crt, --user-crt, --user-key, and
+--control-service.
 """
 
 from twisted.internet import defer
@@ -15,29 +16,49 @@ from twisted.python import log
 from twisted.python.filepath import FilePath
 from txflocker.client import get_client as txflocker_get_client
 import sys
-import os
 import yaml
 import treq
 import texttable
 
-def get_client():
-    pwd = FilePath(os.getcwd())
-    cluster = yaml.load(pwd.child("cluster.yml").open())
-    return txflocker_get_client(certificates_path=pwd,
-        user_certificate_filename="%s.crt" % (cluster["users"][0],),
-        user_key_filename="%s.key" % (cluster["users"][0],),
+def get_client(options):
+    cluster = FilePath(options["cluster-yml"])
+    if cluster.exists():
+        config = yaml.load(cluster.open())
+        certificates_path = cluster.parent()
+        user_certificate_filename = "%s.crt" % (config["users"][0],)
+        user_key_filename = "%s.key" % (config["users"][0],)
+        control_service = None # figure it out based on cluster.yml
+    else:
+        certificates_path = FilePath(options["certs-path"])
+        certificates_path = FilePath(options["certs-path"])
+        if options["user"] is None:
+            raise UsageError("must specify --user")
+        user_certificate_filename = "%s.crt" % (options["user"],)
+        user_key_filename = "%s.key" % (options["user"],)
+        if options["control-service"] is None:
+            raise UsageError("must specify --control-service")
+        control_service = options["control-service"]
+
+    return txflocker_get_client(certificates_path=certificates_path,
+        user_certificate_filename=user_certificate_filename,
+        user_key_filename=user_key_filename,
+        target_hostname=control_service,
     )
 
 
-def get_base_url():
-    pwd = FilePath(os.getcwd())
-    control_config = yaml.load(pwd.child("agent.yml").open())["control-service"]
-    control_config["port"] = 4523
+def get_base_url(options):
+    pwd = FilePath(options["certs-path"])
+    if options["control-service"] is not None:
+        control_config = {"hostname": options["control-service"]}
+    else:
+        control_config = yaml.load(
+                pwd.child("agent.yml").open())["control-service"]
+    control_config["port"] = options["control-port"]
     return "https://%(hostname)s:%(port)s/v1" % control_config
 
 
 def get_table():
-    table = texttable.Texttable(max_width=100)
+    table = texttable.Texttable(max_width=140)
     table.set_deco(0)
     return table
 
@@ -56,9 +77,13 @@ class ListNodes(Options):
     """
     show list of nodes in the configured cluster
     """
+    optFlags = [
+        ("long", "l", "Show long UUIDs"),
+    ]
     def run(self):
-        self.client = get_client()
-        self.base_url = get_base_url()
+        self.client = get_client(self.parent)
+        self.base_url = get_base_url(self.parent)
+        uuid_length = get_uuid_length(self["long"])
         d = self.client.get(self.base_url + "/state/nodes")
         d.addCallback(treq.json_content)
         def print_table(nodes):
@@ -66,10 +91,18 @@ class ListNodes(Options):
             table.set_cols_align(["l", "l"])
             table.add_rows([["", ""]] +
                            [["SERVER", "ADDRESS"]] +
-                           [[node["uuid"], node["host"]] for node in nodes])
+                           [[node["uuid"][:uuid_length], node["host"]] for node in nodes])
             print table.draw() + "\n"
         d.addCallback(print_table)
         return d
+
+
+def get_uuid_length(long_):
+    if long_:
+        uuid_length = 100
+    else:
+        uuid_length = 8
+    return uuid_length
 
 
 class List(Options):
@@ -78,11 +111,14 @@ class List(Options):
     """
     optFlags = [
         ("deleted", "d", "Show deleted datasets"),
+        ("long", "l", "Show long UUIDs"),
         #("human", "h", "Human readable numbers"), ?
     ]
     def run(self):
-        self.client = get_client()
-        self.base_url = get_base_url()
+        self.client = get_client(self.parent)
+        self.base_url = get_base_url(self.parent)
+        uuid_length = get_uuid_length(self["long"])
+
         ds = [self.client.get(self.base_url + "/configuration/datasets"),
               self.client.get(self.base_url + "/state/datasets"),
               self.client.get(self.base_url + "/state/nodes"),]
@@ -123,10 +159,16 @@ class List(Options):
 
                 if dataset["primary"] in nodes_map:
                     primary = nodes_map[dataset["primary"]]
-                    node = "%s (%s)" % (primary["uuid"][:8], primary["host"])
+                    node = "%s (%s)" % (primary["uuid"][:uuid_length], primary["host"])
 
-                rows.append([dataset["dataset_id"][:8],
-                    "%.2fG" % (dataset["maximum_size"] / (1024 * 1024 * 1024.),),
+                if dataset.get("maximum_size"):
+                    size = "%.2fG" % (dataset["maximum_size"] / (1024 * 1024 * 1024.),)
+                else:
+                    # must be a backend with quotas instead of sizes
+                    size = "<no quota>"
+
+                rows.append([dataset["dataset_id"][:uuid_length],
+                    size,
                     ",".join(meta),
                     status,
                     node])
@@ -141,6 +183,20 @@ class List(Options):
         return d
 
 
+def parse_num(num, unit):
+    unit = unit.lower()
+    if unit == 'tb' or unit == 't' or unit =='tib':
+        return int(float(num)*1024*1024*1024*1024)
+    elif unit == 'gb' or unit == 'g' or unit =='gib':
+        return int(float(num)*1024*1024*1024)
+    elif unit == 'mb' or unit == 'm' or unit =='mib':
+        return int(float(num)*1024*1024)
+    elif unit == 'kb' or unit == 'k' or unit =='kib':
+        return int(float(num)*1024)
+    else:
+        return int(float(num))
+
+
 class Create(Options):
     """
     create a flocker dataset
@@ -151,7 +207,13 @@ class Create(Options):
         ("size", "s", "Size", "Set size in bytes (default), k, M, G, T"),
     ]
     def run(self):
-        pass
+        # TODO search the list of nodes for one prefix
+        self.client = get_client(self.parent)
+        self.base_url = get_base_url(self.parent)
+        d = self.client.post(self.base_url + "/configuration/datasets",
+                {"maximum_size": parse_num(self["size"])})
+        d.addCallback(treq.json_content)
+        return d
 
 
 class Destroy(Options):
@@ -183,6 +245,23 @@ commands = {
 
 
 class FlockerVolumesCommands(Options):
+    optParameters = [
+        ("cluster-yml", None, "./cluster.yml",
+            "Location of cluster.yml file"),
+        ("certs-path", None, ".",
+            "Path to certificates folder"),
+        ("user", None, "user",
+            "Name of user (expects user.key and user.crt)"
+            "(if no cluster.yml)"),
+        ("cluster-crt", None, "cluster.crt",
+            "Name of cluster cert file "
+            "(if no cluster.yml)"),
+        ("control-service", None, None,
+            "Hostname or IP of control service "
+            "(if no cluster.yml)"),
+        ("control-port", None, 4523,
+            "Port for control service REST API"),
+    ]
     subCommands = [
         (cmd, None, cls, cls.__doc__)
         for cmd, cls
@@ -197,6 +276,11 @@ def main(reactor, *argv):
             d = defer.maybeDeferred(base.subOptions.run)
         else:
             raise UsageError("Please specify a command.")
+        def usageError(failure):
+            failure.trap(UsageError)
+            print str(failure.value)
+            return # skips verbose exception printing
+        d.addErrback(usageError)
         def err(failure):
             log.err(failure)
             reactor.stop()

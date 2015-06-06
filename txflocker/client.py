@@ -3,10 +3,8 @@ A collection of utilities for using the flocker REST API.
 """
 
 from treq.client import HTTPClient
-from OpenSSL import SSL
 
 from twisted.internet import reactor, ssl
-from twisted.internet.ssl import optionsForClientTLS
 from twisted.python.filepath import FilePath
 from twisted.web.client import Agent
 
@@ -21,10 +19,6 @@ def get_client(reactor=reactor, certificates_path=FilePath("/etc/flocker"),
 
     That is, validating the control service as well as presenting a
     certificate to the control service for authentication.
-
-    :param reactor: The reactor to use.
-    :param FilePath certificates_path: Directory where certificates and
-        private key can be found.
 
     :return: ``treq`` compatible object.
     """
