@@ -131,17 +131,22 @@ class List(Options):
             # build up a table, based on which datasets are in the
             # configuration, adding data from the state as necessary
             configuration_map = dict((d["dataset_id"], d) for d in configuration_datasets)
-            state_map = dict((d["dataset_id"], d) for d in configuration_datasets)
+            state_map = dict((d["dataset_id"], d) for d in state_datasets)
             nodes_map = dict((n["uuid"], n) for n in state_nodes)
 
             rows = []
 
             for (key, dataset) in configuration_map.iteritems():
-                if dataset["deleted"] and self["deleted"]:
-                    if key in state_map:
-                        status = "deleting"
+                if dataset["deleted"]:
+                    # the user has asked to see deleted datasets
+                    if self["deleted"]:
+                        if key in state_map:
+                            status = "deleting"
+                        else:
+                            status = "deleted"
+                    # we are hiding deleted datasets
                     else:
-                        status = "deleted"
+                        continue
                 else:
                     if key in state_map:
                         if state_map[key]["primary"] in nodes_map:
