@@ -31,7 +31,12 @@ settings_defaults = {
     # what repo does the flocker plugin live in
     'PLUGIN_REPO': 'https://github.com/clusterhq/flocker-docker-plugin',
     # what branch to use for the flocker plugin
-    'PLUGIN_BRANCH': 'txflocker-env-vars'
+    'PLUGIN_BRANCH': 'txflocker-env-vars',
+    # skip downloading the docker binary
+    # for scenarios where vm images have been pre-baked
+    'SKIP_DOCKER_BINARY': '',
+    # skip installing the flocker plugin
+    'SKIP_INSTALL_PLUGIN': ''
 }
 
 # dict that holds our actual env vars once the overrides have been applied
@@ -49,10 +54,16 @@ if __name__ == "__main__":
     c = Configurator(configFile=sys.argv[1])
     control_ip = c.config["control_node"]
     
-    print "Replacing docker binary"
     # download and replace the docker binary on each of the nodes
     for node in c.config["agent_nodes"]:
+
+        # don't download a new docker for reasons only the user knows
+        if settings["SKIP_DOCKER_BINARY"] is not None:
+            break
+
         public_ip = node["public"]
+        print "Replacing docker binary on %s" % (public_ip,)
+
         # stop the docker service
         print "Stopping the docker service on %s - %s" \
             % (public_ip, settings['DOCKER_SERVICE_NAME'],)
@@ -105,22 +116,25 @@ if __name__ == "__main__":
         # the full api path to the control service
         controlservice = 'https://%s:4523/v1' % (control_ip,)
 
-        # clone the right repo and checkout the branch
-        print "Cloning the plugin repo on %s - %s" \
-            %(public_ip, settings['PLUGIN_REPO'],)
-        c.runSSHRaw(public_ip, "git clone -b %s %s" 
-            % (settings['PLUGIN_BRANCH'], settings['PLUGIN_REPO'],))
+        # perhaps the user has pre-compiled images with the plugin
+        # downloaded and installed
+        if settings["SKIP_INSTALL_PLUGIN"] is None:
+            # clone the right repo and checkout the branch
+            print "Cloning the plugin repo on %s - %s" \
+                %(public_ip, settings['PLUGIN_REPO'],)
+            c.runSSHRaw(public_ip, "git clone -b %s %s" 
+                % (settings['PLUGIN_BRANCH'], settings['PLUGIN_REPO'],))
 
-        # install pip and python-dev
-        if c.config["os"] == "ubuntu":
-            c.runSSHRaw(public_ip, "apt-get install -y python-dev python-pip")
-        # configure a systemd job that runs the bash script
-        elif c.config["os"] == "centos":
-            c.runSSHRaw(public_ip, "yum install -y python-devel python-pip")
+            # install pip and python-dev
+            if c.config["os"] == "ubuntu":
+                c.runSSHRaw(public_ip, "apt-get install -y python-dev python-pip")
+            # configure a systemd job that runs the bash script
+            elif c.config["os"] == "centos":
+                c.runSSHRaw(public_ip, "yum install -y python-devel python-pip")
 
-        # pip install the plugin
-        c.runSSHRaw(public_ip, "pip install -r /root/%s/requirements.txt" 
-            % (plugin_repo_folder,))
+            # pip install the plugin
+            c.runSSHRaw(public_ip, "pip install -r /root/%s/requirements.txt" 
+                % (plugin_repo_folder,))
 
         # ensure that the /usr/share/docker/plugins
         # folder exists
