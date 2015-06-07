@@ -426,18 +426,16 @@ commands = {
 class FlockerVolumesCommands(Options):
     optParameters = [
         ("cluster-yml", None, "./cluster.yml",
-            "Location of cluster.yml file"),
+            "Location of cluster.yml file "
+            "(makes other options unnecessary)"),
         ("certs-path", None, ".",
             "Path to certificates folder"),
         ("user", None, "user",
-            "Name of user for which .key and .crt files exist "
-            "(if no cluster.yml)"),
+            "Name of user for which .key and .crt files exist"),
         ("cluster-crt", None, "cluster.crt",
-            "Name of cluster cert file "
-            "(if no cluster.yml)"),
+            "Name of cluster cert file"),
         ("control-service", None, None,
-            "Hostname or IP of control service "
-            "(if no cluster.yml)"),
+            "Hostname or IP of control service"),
         ("control-port", None, 4523,
             "Port for control service REST API"),
     ]
