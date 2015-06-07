@@ -111,6 +111,9 @@ def get_uuid_length(long_):
 
 
 def get_state_check_if_really_empty(client, base_url):
+    # TODO refine this hack so it only does it if configuration is empty.
+    # (otherwise the first time users list volumes before creating any, we
+    # make them wait 5 seconds).
     d = client.get(base_url + "/state/datasets")
     d.addCallback(treq.json_content)
     def check_if_empty(result):
