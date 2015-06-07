@@ -164,13 +164,14 @@ class List(Options):
 
             # build up a table, based on which datasets are in the
             # configuration, adding data from the state as necessary
-            configuration_map = dict((d["dataset_id"], d) for d in configuration_datasets)
+            configuration_map = dict((d["dataset_id"], d) for d in
+                    configuration_datasets)
             state_map = dict((d["dataset_id"], d) for d in state_datasets)
             nodes_map = dict((n["uuid"], n) for n in state_nodes)
 
-            print "got state:"
-            pprint.pprint(state_datasets)
-            print
+            #print "got state:"
+            #pprint.pprint(state_datasets)
+            #print
 
             rows = []
 
@@ -273,17 +274,7 @@ class Create(Options):
                 args["maximum_size"] = parse_num(self["size"])
 
             # primary node
-            candidates = []
-            for node in nodes:
-                if node["uuid"].startswith(self["node"]):
-                    candidates.append(node)
-            if len(candidates) == 0:
-                raise UsageError("no node uuids matching %s" %
-                        (self["node"],))
-            if len(candidates) > 1:
-                raise UsageError("nodes matching %s not unique" %
-                        (self["node"],))
-            args["primary"] = candidates[0]["uuid"]
+            args["primary"] = filter_primary_node(self["node"], nodes)
 
             # metadata
             metadata = {}
@@ -297,7 +288,8 @@ class Create(Options):
                         (self["metadata"],))
             args["metadata"] = metadata
 
-            # TODO: don't allow non-unique name in metadata (by convention)
+            # TODO: don't allow non-unique name in metadata (by
+            # convention)
 
             d = self.client.post(
                     self.base_url + "/configuration/datasets",
@@ -313,8 +305,8 @@ class Create(Options):
             print
             # TODO: poll the API until it shows up, give the user a nice
             # progress bar.
-            # TODO: investigate bug where all datasets go to pending during
-            # waiting for a dataset to show up.
+            # TODO: investigate bug where all datasets go to pending
+            # during waiting for a dataset to show up.
         d.addCallback(created_dataset)
         return d
 
@@ -335,19 +327,10 @@ class Destroy(Options):
         d = self.client.get(self.base_url + "/configuration/datasets")
         d.addCallback(treq.json_content)
         def got_configuration(datasets):
-            candidates = []
-            for dataset in datasets:
-                if dataset["dataset_id"].startswith(self["dataset"]):
-                    candidates.append(dataset)
-            if len(candidates) == 0:
-                raise UsageError("no datasets matching %s found" %
-                        (self["dataset"],))
-            if len(candidates) > 1:
-                raise UsageError("%s is ambiguous" % (self["datasets"],))
-            victim = candidates[0]
+            victim = filter_datasets(self["datasets"], datasets)
             d = self.client.delete(self.base_url +
                     "/configuration/datasets/%s"
-                        % (victim["dataset_id"].encode("ascii"),))
+                        % (victim,))
             d.addCallback(treq.json_content)
             return d
         d.addCallback(got_configuration)
@@ -360,13 +343,74 @@ class Destroy(Options):
         return d
 
 
+def filter_primary_node(prefix, nodes):
+    candidates = []
+    for node in nodes:
+        if node["uuid"].startswith(prefix):
+            candidates.append(node)
+    if len(candidates) == 0:
+        raise UsageError("no node uuids matching %s" %
+                (prefix,))
+    if len(candidates) > 1:
+        raise UsageError("%s is ambiguous node" %
+                (prefix,))
+    return candidates[0]["uuid"].encode("ascii")
+
+
+def filter_datasets(prefix, datasets):
+    candidates = []
+    for dataset in datasets:
+        if dataset["dataset_id"].startswith(prefix):
+            candidates.append(dataset)
+    if len(candidates) == 0:
+        raise UsageError("no dataset uuids matching %s" %
+                (prefix,))
+    if len(candidates) > 1:
+        raise UsageError("%s is ambiguous dataset" % (prefix,))
+    return candidates[0]["dataset_id"].encode("ascii")
+
+
 class Move(Options):
     """
     move a dataset from one node to another
     """
-    synopsis = '<dataset_uuid> <node_uuid>'
+    optParameters = [
+        ("dataset", "d", None, "Dataset to move (uuid)"),
+        ("destination", "t", None, "New primary node (uuid) "
+            "to move the dataset to"),
+    ]
     def run(self):
-        pass
+        if not self.get("dataset"):
+            raise UsageError("must specify --dataset")
+        if not self.get("destination"):
+            raise UsageError("must specify --destination")
+        self.client = get_client(self.parent)
+        self.base_url = get_base_url(self.parent)
+
+        d1 = self.client.get(self.base_url + "/state/nodes")
+        d1.addCallback(treq.json_content)
+        d2 = self.client.get(self.base_url + "/configuration/datasets")
+        d2.addCallback(treq.json_content)
+        def got_results((nodes, datasets)):
+            dataset = filter_datasets(self["dataset"], datasets)
+            primary = filter_primary_node(self["destination"], nodes)
+            args = {"primary": primary}
+            d = self.client.post(
+                    self.base_url
+                        + "/configuration/datasets/%s" % (dataset,),
+                    json.dumps(args),
+                    headers={'Content-Type': ['application/json']})
+            d.addCallback(treq.json_content)
+            return d
+        d = defer.gatherResults([d1, d2])
+        d.addCallback(got_results)
+        def initiated_move(result):
+            print "initiated move of dataset, please check state",
+            print "to observe it actually move."
+            print
+            print result
+        d.addCallback(initiated_move)
+        return d
 
 
 commands = {
