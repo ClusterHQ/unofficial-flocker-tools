@@ -204,10 +204,14 @@ class List(Options):
 
                 if dataset["primary"] in nodes_map:
                     primary = nodes_map[dataset["primary"]]
-                    node = "%s (%s)" % (primary["uuid"][:uuid_length], primary["host"])
+                    node = "%s (%s)" % (primary["uuid"][:uuid_length],
+                            primary["host"])
+                else:
+                    node = "<missing>"
 
                 if dataset.get("maximum_size"):
-                    size = "%.2fG" % (dataset["maximum_size"] / (1024 * 1024 * 1024.),)
+                    size = "%.2fG" % (dataset["maximum_size"]
+                            / (1024 * 1024 * 1024.),)
                 else:
                     # must be a backend with quotas instead of sizes
                     size = "<no quota>"
