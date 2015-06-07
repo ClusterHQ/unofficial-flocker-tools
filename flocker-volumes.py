@@ -412,7 +412,6 @@ class Move(Options):
             print "initiated move of dataset, please check state",
             print "to observe it actually move."
             print
-            print result
         d.addCallback(initiated_move)
         return d
 
