@@ -79,7 +79,7 @@ class Version(Options):
 
 class ListNodes(Options):
     """
-    show list of nodes in the configured cluster
+    show list of nodes in the cluster
     """
     optFlags = [
         ("long", "l", "Show long UUIDs"),
