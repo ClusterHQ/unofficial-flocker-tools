@@ -430,7 +430,7 @@ class FlockerVolumesCommands(Options):
         ("certs-path", None, ".",
             "Path to certificates folder"),
         ("user", None, "user",
-            "Name of user (expects user.key and user.crt)"
+            "Name of user for which .key and .crt files exist "
             "(if no cluster.yml)"),
         ("cluster-crt", None, "cluster.crt",
             "Name of cluster cert file "
