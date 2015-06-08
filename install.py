@@ -10,7 +10,7 @@ from utils import Configurator
 if __name__ == "__main__":
     c = Configurator(configFile=sys.argv[1])
     for node in c.config["agent_nodes"]:
-        public_ip = node["public_ip"]
+        public_ip = node["public"]
         if c.config["os"] == "ubuntu":
             c.runSSH(public_ip, """apt-get -y install apt-transport-https software-properties-common
 add-apt-repository -y ppa:james-page/docker
