@@ -26,7 +26,7 @@ settings_defaults = {
     # different to 'docker' for example - the clusterhq-flocker-node package
     # installed 'docker.io' depending on OS this translates to
     # start/systemctl calls to this service name
-    'DOCKER_SERVICE_NAME': 'docker',
+    'DOCKER_SERVICE_NAME': 'docker.io',
     # what repo does the flocker plugin live in
     'PLUGIN_REPO': 'https://github.com/clusterhq/flocker-docker-plugin',
     # what branch to use for the flocker plugin
