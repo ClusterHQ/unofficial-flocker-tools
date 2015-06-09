@@ -8,7 +8,7 @@ see the [official docs](http://doc-dev.clusterhq.com/using/installing/index.html
 
 prerequisites:
 
-* flocker-cli for your local system (from http://build.clusterhq.com/results/omnibus/storage-driver-configuration-FLOC-1925/ for now)
+* flocker-cli for your local system (from http://build.clusterhq.com/results/omnibus/master/ for now)
 * python 2.7
 * pyyaml module (`sudo pip install pyyaml`)
 
@@ -54,7 +54,7 @@ vim cluster.yml # customize for your cluster
 
 this will install the packages on your nodes
 
-at this point you will need to manually install the latest (highest numbered) packages from http://build.clusterhq.com/results/omnibus/storage-driver-configuration-FLOC-1925/ onto your nodes as well.
+at this point you will need to manually install the latest (highest numbered) packages from http://build.clusterhq.com/results/omnibus/master/ onto your nodes as well.
 
 
 ## deploy
@@ -81,10 +81,10 @@ it will also download a customized docker binary that supports the `--volume-dri
 
 The environment variables that control this are:
 
- * DOCKER_BINARY_URL - the url to download a customized docker binary from
- * DOCKER_SERVICE_NAME - the name of the service docker is installed with (docker, docker.io etc)
- * PLUGIN_REPO - the repo to install the docker plugin from
- * PLUGIN_BRANCH - the branch of the plugin repo to use
+ * `DOCKER_BINARY_URL` - the url to download a customized docker binary from
+ * `DOCKER_SERVICE_NAME` - the name of the service docker is installed with (docker, docker.io etc)
+ * `PLUGIN_REPO` - the repo to install the docker plugin from
+ * `PLUGIN_BRANCH` - the branch of the plugin repo to use
 
 ## tutorial
 
