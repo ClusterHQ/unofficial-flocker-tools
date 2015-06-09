@@ -67,6 +67,25 @@ this will configure certificates, push them to your nodes, and set up firewall r
 
 on AWS, you'll need to add a firewall rule for TCP port 4523 and 4524 if you want to access the control service/API remotely.
 
+## plugin
+
+```
+./plugin.py cluster.yml
+```
+
+this will configure api certificates for the docker-plugin and push them to your nodes - it will name them `/etc/flocker/plugin.{crt,key}`
+
+it will git clone the plugin repo, checkout a branch and install the dependencies (pip install) and write a service file (upstart/systemd) for the plugin
+
+it will also download a customized docker binary that supports the `--volume-driver` flag and restart the docker service.
+
+The environment variables that control this are:
+
+ * DOCKER_BINARY_URL - the url to download a customized docker binary from
+ * DOCKER_SERVICE_NAME - the name of the service docker is installed with (docker, docker.io etc)
+ * PLUGIN_REPO - the repo to install the docker plugin from
+ * PLUGIN_BRANCH - the branch of the plugin repo to use
+
 ## tutorial
 
 ```
