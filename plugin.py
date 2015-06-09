@@ -80,7 +80,11 @@ if __name__ == "__main__":
         c.runSSHRaw(public_ip, "wget -O /usr/bin/docker %s"
             % (settings['DOCKER_BINARY_URL'],))
 
-        # stop the docker service
+        if c.config["os"] == "ubuntu":
+            # newer versions of docker insist on AUFS on ubuntu, probably for good reason.
+            c.runSSHRaw(public_ip, "apt-get install -y linux-image-extra-$(uname -r)")
+
+        # start the docker service
         print "Starting the docker service on %s" % (public_ip,)
         if c.config["os"] == "ubuntu":
             c.runSSHRaw(public_ip, "start %s"
