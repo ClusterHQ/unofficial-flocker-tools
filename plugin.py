@@ -57,7 +57,7 @@ if __name__ == "__main__":
     for node in c.config["agent_nodes"]:
 
         # don't download a new docker for reasons only the user knows
-        if not settings["SKIP_DOCKER_BINARY"]:
+        if settings["SKIP_DOCKER_BINARY"]:
             break
 
         public_ip = node["public"]
@@ -117,7 +117,7 @@ if __name__ == "__main__":
 
         # perhaps the user has pre-compiled images with the plugin
         # downloaded and installed
-        if settings["SKIP_INSTALL_PLUGIN"]:
+        if not settings["SKIP_INSTALL_PLUGIN"]:
             # clone the right repo and checkout the branch
             print "Cloning the plugin repo on %s - %s" \
                 %(public_ip, settings['PLUGIN_REPO'],)
