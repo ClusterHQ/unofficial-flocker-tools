@@ -189,7 +189,11 @@ class List(Options):
                 else:
                     if key in state_map:
                         if state_map[key]["primary"] in nodes_map:
-                            status = "attached"
+                            if (state_map[key]["primary"]==
+                                configuration_map[key]["primary"]):
+                                status = "attached"
+                            else:
+                                status = "pending"
                         else:
                             status = "detached"
                     else:
