@@ -342,7 +342,6 @@ class Destroy(Options):
             print "marked dataset as deleted. poll list manually to see",
             print "it disappear."
             print
-            pprint.pprint(result)
         d.addCallback(done_deletion)
         return d
 
