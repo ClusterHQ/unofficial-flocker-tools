@@ -176,6 +176,8 @@ class List(Options):
             rows = []
 
             for (key, dataset) in configuration_map.iteritems():
+                dataset_state = state_map[key]
+                diverged = False
                 if dataset["deleted"]:
                     # the user has asked to see deleted datasets
                     if self["deleted"]:
@@ -193,6 +195,7 @@ class List(Options):
                                 configuration_map[key]["primary"]):
                                 status = "attached"
                             else:
+                                diverged = True
                                 status = "pending"
                         else:
                             status = "detached"
@@ -208,6 +211,8 @@ class List(Options):
 
                 if dataset["primary"] in nodes_map:
                     primary = nodes_map[dataset["primary"]]
+                    if diverged:
+                        primary = nodes_map[dataset_state["primary"]]
                     node = "%s (%s)" % (primary["uuid"][:uuid_length],
                             primary["host"])
                 else:
