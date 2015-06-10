@@ -331,7 +331,7 @@ class Destroy(Options):
         d = self.client.get(self.base_url + "/configuration/datasets")
         d.addCallback(treq.json_content)
         def got_configuration(datasets):
-            victim = filter_datasets(self["datasets"], datasets)
+            victim = filter_datasets(self["dataset"], datasets)
             d = self.client.delete(self.base_url +
                     "/configuration/datasets/%s"
                         % (victim,))
