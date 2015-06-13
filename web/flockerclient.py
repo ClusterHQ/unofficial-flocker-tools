@@ -1,4 +1,5 @@
 from txflocker.client import get_client as txflocker_get_client
+from txflocker.client import combined_state, parse_num, process_metadata
 from twisted.python.filepath import FilePath
 from twisted.python import log
 from twisted.web import resource, server
@@ -29,12 +30,13 @@ class BaseResource(resource.Resource):
 
 def simpleProxyFactory(proxy_path):
     """
-    GET-only proxy factory
+    GET and POST proxy factory (POST assumes it returns JSON too).
     """
     class ProxyResource(BaseResource):
         def __init__(self, *args, **kw):
             self.proxy_path = proxy_path
             return BaseResource.__init__(self, *args, **kw)
+
         def render_GET(self, request):
             d = self.client.get(self.base_url + self.proxy_path)
             d.addCallback(treq.json_content)
@@ -47,6 +49,7 @@ def simpleProxyFactory(proxy_path):
             d.addCallback(got_result)
             d.addErrback(log.err, "while trying to query backend")
             return server.NOT_DONE_YET
+
     return ProxyResource()
 
 def get_root():
@@ -97,5 +100,39 @@ def get_base_url():
             hostname=get_hostname(),)
 
 class CombinedDatasets(resource.Resource):
-    # GET, POST
-    pass
+    def render_GET(self, request):
+        d = combined_state(get_client(), get_base_url(), deleted=True)
+        def got_state(result):
+            request.setHeader("content-type", "application/json")
+            request.setHeader("access-control-allow-origin", "*")
+            request.write(json.dumps(result))
+            request.finish()
+        d.addCallback(got_state)
+        d.addErrback(log.err, "while trying to GET combined state")
+        return server.NOT_DONE_YET
+    def render_POST(self, request):
+        request_raw = json.loads(request.content.read())
+        try:
+            if "meta" in request_raw:
+                request_raw["metadata"] = process_metadata(request_raw.pop("meta"))
+            if "size" in request_raw:
+                request_raw["maximum_size"] = parse_num(request_raw.pop("size"))
+        except Exception, e:
+            request.setResponseCode(400)
+            request.setHeader("content-type", "application/json")
+            request.setHeader("access-control-allow-origin", "*")
+            request.write(json.dumps(dict(error=str(e))))
+            request.finish()
+            return
+        d = self.client.post(self.base_url + "/configuration/datasets",
+                request.content.read(), headers={
+                    "content-type": "application/json"})
+        d.addCallback(treq.json_content)
+        def got_result(result):
+            request.setHeader("content-type", "application/json")
+            request.setHeader("access-control-allow-origin", "*")
+            request.write(json.dumps(result))
+            request.finish()
+        d.addCallback(got_result)
+        d.addErrback(log.err, "while trying to POST combined state")
+        return server.NOT_DONE_YET
