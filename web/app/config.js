@@ -269,7 +269,7 @@
             )
             .addChild(
                 nga.menu()
-                .title('Admin')
+                .title('Debug')
                 .icon('')
                 .addChild(
                     nga.menu(configuration)
