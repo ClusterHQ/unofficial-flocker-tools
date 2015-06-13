@@ -19,3 +19,4 @@ Thumbs.db
 cluster.yml
 agent.yml
 node_mapping.yml
+*.pid
