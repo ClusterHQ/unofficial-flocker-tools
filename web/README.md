@@ -14,9 +14,10 @@ First convert your user key, user cert and cluster key into a format Chrome can 
 openssl pkcs12 -export -out certificate.p12 -inkey luke.key -in luke.crt -certfile cluster.crt
 ```
 
-You do not need to specify a password.
+You do need to specify a password.
 
-Then go to Chrome settings, type "cert" into the search box, click "Manage Certificates", and import the certificate.p12.
+Then go to Chrome settings, type "cert" into the search box, click "Manage Certificates", and import the certificate.p12, specifying the password you chose earlier.
+On OSX, this will bring up the keychain access dialog where you need to click File -> Import Items...
 
 ## step 2 -- install chrome plugin to disable CORS
 
