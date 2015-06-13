@@ -11,5 +11,5 @@ def getAdapter():
     return site
 
 application = service.Application("Insecure Flocker Client REST API")
-adapterServer = internet.TCPServer(8088, getAdapter())
+adapterServer = internet.TCPServer(80, getAdapter())
 adapterServer.setServiceParent(application)
