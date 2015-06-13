@@ -14,10 +14,9 @@ RUN         apt-get -qy install libyaml-dev
 RUN         apt-get -qy install libffi-dev
 RUN         apt-get -qy install libssl-dev
 
-ADD         . /app/web
-ADD         ./txflocker/ /app/txflocker
+ADD         . /app
 
-WORKDIR     /app/web
+WORKDIR     /app
 
 # Install requirements from the project's setup.py
 RUN         python setup.py install
