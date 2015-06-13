@@ -69,7 +69,7 @@
             .identifier(nga.field('uuid'))
             .readOnly()
 
-        var volume = nga.entity('volume')
+        var volume = nga.entity('datasets')
             .baseApiUrl(BASE_URL)
             .identifier(nga.field('dataset_id'))
             .url(getUrlMapper('datasets'))
@@ -264,7 +264,7 @@
             )
             .addChild(
                 nga.menu(volume)
-                .title('Volumes')
+                .title('Datasets')
                 .icon('')
             )
             .addChild(
