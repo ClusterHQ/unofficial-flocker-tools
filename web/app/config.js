@@ -6,7 +6,7 @@
     //var BASE_URL = 'https://test.labs.clusterhq.com:4523/v1'
     //var BASE_URL = 'v1/'
     //var BASE_URL = 'http://192.168.1.102:8088/v1/'
-    var BASE_URL = 'v1/'
+    var BASE_URL = '/v1/'
 
     var app = angular.module('myApp', ['ng-admin']);
 
