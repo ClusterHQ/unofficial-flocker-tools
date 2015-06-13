@@ -8,23 +8,32 @@ var router = Router()
 var server = http.createServer(router)
 
 var nodes = require('./fixtures/nodes.json')
+var state = require('./fixtures/state.json')
+var configuration = require('./fixtures/configuration.json')
 
 var fileServer = ecstatic({ root: __dirname })
 
-router.addRoute("/v1/nodes", {
-    GET: function (req, res) {
-        res.end(JSON.stringify(nodes))
-    }
-})
+function crud(route, idfield, data){
 
-router.addRoute("/v1/nodes/:id", {
-    GET: function (req, res, opts) {
-        var results = nodes.filter(function(node){
-            return node.uuid.indexOf(opts.params.id)==0
-        })
-        res.end(JSON.stringify(results[0]))
-    }
-})
+    router.addRoute("/v1/" + route, {
+        GET: function (req, res) {
+            res.end(JSON.stringify(data))
+        }
+    })
+
+    router.addRoute("/v1/" + route + "/:id", {
+        GET: function (req, res, opts) {
+            var results = data.filter(function(entry){
+                return entry[idfield].indexOf(opts.params.id)==0
+            })
+            res.end(JSON.stringify(results[0]))
+        }
+    })
+}
+
+crud('nodes', 'uuid', nodes)
+crud('configuration/datasets', 'dataset_id', configuration)
+crud('state/datasets', 'dataset_id', state)
 
 router.addRoute("/*", fileServer)
 
