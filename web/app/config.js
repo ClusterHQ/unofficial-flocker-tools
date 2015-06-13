@@ -101,7 +101,7 @@
             .order(1) // display the post panel first in the dashboard
             .perPage(5) // limit the panel to the 5 latest posts
             .fields([
-                nga.field('host'),
+                nga.field('host').isDetailLink(true),
                 nga.field('uuid').label('uuid').map(short_uuid)
             ]); // fields() called with arguments add fields to the view
 
@@ -111,6 +111,7 @@
             .order(1) // display the post panel first in the dashboard
             .perPage(5) // limit the panel to the 5 latest posts
             .fields([
+                nga.field('short_dataset_id').label('Dataset ID').isDetailLink(true),
                 nga.field('primary', 'reference') // ReferenceMany translates to a select multiple
                     .label('Primary')
                     .targetEntity(node)
@@ -146,8 +147,9 @@
             .description('Show the nodes in your cluster') // description appears under the title
             .infinitePagination(true) // load pages as the user scrolls
             .fields([
-                nga.field('uuid').label('uuid').map(short_uuid), // The default displayed name is the camelCase field name. label() overrides id
-                nga.field('host')
+                nga.field('host'),
+                nga.field('uuid').label('uuid').map(short_uuid)
+                
             ])
             .listActions(['show']);
 
@@ -156,6 +158,7 @@
             .description('Show the datasets in your cluster') // description appears under the title
             .infinitePagination(true) // load pages as the user scrolls
             .fields([
+                nga.field('short_dataset_id').label('Dataset ID').isDetailLink(true),
                 nga.field('primary', 'reference') // ReferenceMany translates to a select multiple
                     .label('Primary')
                     .targetEntity(node)
@@ -197,15 +200,18 @@
 
         node.showView() // a showView displays one entry in full page - allows to display more data than in a a list
             .fields([
-                nga.field('uuid').label('uuid').map(short_uuid), // The default displayed name is the camelCase field name. label() overrides id
-                nga.field('host')
+                nga.field('host'),
+                nga.field('uuid').label('uuid').map(short_uuid)
+                
             ]);
 
         volume.showView() // a showView displays one entry in full page - allows to display more data than in a a list
             .fields([
-                nga.field('dataset_id').label('dataset_id').map(short_uuid),
+                nga.field('short_dataset_id').label('Dataset ID'),
                 nga.field('deleted', 'boolean'),
-                nga.field('maximum_size')
+                nga.field('size'),
+                nga.field('meta'),
+                nga.field('status')
             ]);
 
         configuration.showView() // a showView displays one entry in full page - allows to display more data than in a a list
@@ -233,6 +239,7 @@
             ]);
 
         volume.editionView()
+            .title('Edit dataset "{{ entry.values.short_dataset_id }}"')
             .fields([
                 nga.field('primary', 'reference') // ReferenceMany translates to a select multiple
                     .label('Node')
@@ -245,7 +252,7 @@
         '<div class="navbar-header">' +
             '<a class="navbar-brand" href="#" ng-click="appController.displayHome()">' + 
                 //'<img src="images/clusterhq.png" />' +
-                '<img src="images/logo.png" />' +
+                '<img src="images/logo@2x.png" />' +
             '</a>' +
             '<div class="experiment">Experimental GUI</div>'
         '</div>';

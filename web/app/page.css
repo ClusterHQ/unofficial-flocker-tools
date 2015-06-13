@@ -9,11 +9,12 @@ a.navbar-brand{
 
 .navbar-header img{
     float:left;
-    margin-top:3%;
+    margin-top:2%;
     height:80%;
 }
 
 .experiment{
     float:left;
     padding-top:15px;
+    color:#999;
 }
