@@ -14,11 +14,13 @@ RUN         apt-get -qy install libyaml-dev
 RUN         apt-get -qy install libffi-dev
 RUN         apt-get -qy install libssl-dev
 
-ADD         . /app
+ADD         . /app/web
+ADD         ./txflocker/ /app/txflocker
 
-WORKDIR     /app
+WORKDIR     /app/web
 
 # Install requirements from the project's setup.py
 RUN         python setup.py install
 
-CMD         ["twistd", "-noy", "server.tac"]
+#CMD         ["twistd", "-noy", "server.tac"]
+CMD         ["./start.sh"]
