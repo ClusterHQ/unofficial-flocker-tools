@@ -20,7 +20,6 @@ import sys
 import yaml
 import treq
 import texttable
-import pprint
 import json
 
 def get_client(options):
