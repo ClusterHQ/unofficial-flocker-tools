@@ -107,7 +107,7 @@
 
         volume.dashboardView() // customize the dashboard panel for this entity
             .name('volumes')
-            .title('Your volumes')
+            .title('Your datasets')
             .order(1) // display the post panel first in the dashboard
             .perPage(5) // limit the panel to the 5 latest posts
             .fields([
@@ -150,7 +150,7 @@
             .listActions(['show']);
 
         volume.listView()
-            .title('All volumes') // default title is "[Entity_name] list"
+            .title('All datasets') // default title is "[Entity_name] list"
             .description('Show the volumes in your cluster') // description appears under the title
             .infinitePagination(true) // load pages as the user scrolls
             .fields([
