@@ -1,0 +1,24 @@
+[
+  {
+    "deleted": false,
+    "dataset_id": "5c0ee5ce-8b20-47b1-810c-2dbb0edee524",
+    "maximum_size": 107374182400,
+    "primary": "e7186cc3-b82d-447d-91c1-f453a94c48ca",
+    "metadata": {
+      "name": "apples"
+    },
+    "meta":"name=apples",
+    "size":"100Gb"
+  },
+  {
+    "deleted": false,
+    "dataset_id": "1b2b662c-4185-4957-9317-fdd60dc52104",
+    "maximum_size": 107374182400,
+    "primary": "aba44c05-c0eb-4386-9c77-45657afbf0a4",
+    "metadata": {
+      "name": "oranges"
+    },
+    "meta":"name=oranges",
+    "size":"100Gb"
+  }
+]

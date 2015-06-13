@@ -4,8 +4,9 @@
 
     var DEBUG = true;
     //var BASE_URL = 'https://test.labs.clusterhq.com:4523/v1'
-    var BASE_URL = 'v1/'
+    //var BASE_URL = 'v1/'
     //var BASE_URL = 'http://192.168.1.102:8088/v1/'
+    var BASE_URL = 'v1/'
 
     var app = angular.module('myApp', ['ng-admin']);
 
@@ -150,8 +151,13 @@
             .infinitePagination(true) // load pages as the user scrolls
             .fields([
                 nga.field('dataset_id').label('dataset_id').map(short_uuid),
+                nga.field('primary', 'reference') // ReferenceMany translates to a select multiple
+                    .label('Node')
+                    .targetEntity(node)
+                    .targetField(nga.field('host')),
                 nga.field('deleted', 'boolean'),
-                nga.field('maximum_size')
+                nga.field('meta'),
+                nga.field('size')
                 //status
                 //meta
                 //node
@@ -170,7 +176,7 @@
                 nga.field('primary', 'reference') // ReferenceMany translates to a select multiple
                     .label('Node')
                     .targetEntity(node)
-                    .targetField(nga.field('host')),
+                    .targetField(nga.field('host'))
             ])
             .listActions(['show', 'edit', 'delete']);
 
@@ -216,8 +222,18 @@
                     .label('Node')
                     .targetEntity(node)
                     .targetField(nga.field('host')),
-                nga.field('maximum_size').label('Maximum Size'),
-                nga.field('metadata').label('Metadata')
+                nga.field('size').label('Maximum Size'),
+                nga.field('meta').label('Metadata')
+            ]);
+
+        volume.editionView()
+            .fields([
+                nga.field('primary', 'reference') // ReferenceMany translates to a select multiple
+                    .label('Node')
+                    .targetEntity(node)
+                    .targetField(nga.field('host')),
+                nga.field('size').label('Maximum Size'),
+                nga.field('meta').label('Metadata')
             ]);
 
         // customize header

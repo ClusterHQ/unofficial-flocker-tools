@@ -10,6 +10,7 @@ var server = http.createServer(router)
 var nodes = require('./fixtures/nodes.json')
 var state = require('./fixtures/state.json')
 var configuration = require('./fixtures/configuration.json')
+var volume = require('./fixtures/volume.json')
 
 var fileServer = ecstatic({ root: __dirname })
 
@@ -34,6 +35,7 @@ function crud(route, idfield, data){
 crud('nodes', 'uuid', nodes)
 crud('configuration/datasets', 'dataset_id', configuration)
 crud('state/datasets', 'dataset_id', state)
+crud('datasets', 'dataset_id', volume)
 
 router.addRoute("/*", fileServer)
 
