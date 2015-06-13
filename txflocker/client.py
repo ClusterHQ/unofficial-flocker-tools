@@ -21,13 +21,14 @@ def process_metadata(metadata_str):
             metadata[k] = v
     except:
         raise UsageError("malformed metadata specification "
-                "\"%s\", please use format \"a=b,c=d\"" %
+                "'%s', please use format 'a=b,c=d'" %
                 (metadata_str,))
     return metadata
 
 def parse_num(expression):
     if not expression:
         return None
+    expression = expression.encode("ascii")
     unit = expression.translate(None, "1234567890.")
     num = expression.replace(unit, "")
     unit = unit.lower()
@@ -110,6 +111,8 @@ def combined_state(client, base_url, deleted):
                 node = None
 
             dataset["node"] = node
+
+            dataset["short_dataset_id"] = dataset["dataset_id"][:8]
 
             if dataset.get("maximum_size"):
                 size = "%.2fG" % (dataset["maximum_size"]
