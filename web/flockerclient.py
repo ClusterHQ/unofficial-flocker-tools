@@ -171,11 +171,12 @@ class DatasetResource(resource.Resource):
             d = defer.fail(Exception("must specify primary"))
         else:
             d = client.post(get_base_url() + "/configuration/datasets/%s" %
-                    (self.dataset_id,), {"primary": request_raw["primary"]})
+                    (self.dataset_id,), json.dumps({"primary": request_raw["primary"]}),
+                    headers={"content-type": "application/json"})
+            d.addCallback(treq.json_content)
         def got_result(result):
             request.setHeader("content-type", "application/json")
             request.setHeader("access-control-allow-origin", "*")
-            print "<<<", result
             request.write(json.dumps(dict(result="success")))
             request.finish()
         d.addCallback(got_result)
@@ -212,7 +213,6 @@ class CombinedDatasets(resource.Resource):
             if "size" in request_raw:
                 request_raw["maximum_size"] = parse_num(request_raw.pop("size"))
         except Exception, e:
-            print ">>>", e
             request.setHeader("content-type", "application/json")
             request.setHeader("access-control-allow-origin", "*")
             request.setResponseCode(400)
