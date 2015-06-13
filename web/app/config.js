@@ -151,7 +151,7 @@
 
         volume.listView()
             .title('All datasets') // default title is "[Entity_name] list"
-            .description('Show the volumes in your cluster') // description appears under the title
+            .description('Show the datasets in your cluster') // description appears under the title
             .infinitePagination(true) // load pages as the user scrolls
             .fields([
                 nga.field('dataset_id').label('dataset_id').map(short_uuid),
@@ -172,7 +172,7 @@
 
         configuration.listView()
             .title('All configuration') // default title is "[Entity_name] list"
-            .description('Show the configuration of volumes in your cluster') // description appears under the title
+            .description('Show the configuration of datasets in your cluster') // description appears under the title
             .infinitePagination(true) // load pages as the user scrolls
             .fields([
                 nga.field('dataset_id').label('dataset_id').map(short_uuid),
@@ -187,7 +187,7 @@
 
         state.listView()
             .title('All state') // default title is "[Entity_name] list"
-            .description('Show the state of volumes in your cluster') // description appears under the title
+            .description('Show the state of datasets in your cluster') // description appears under the title
             .infinitePagination(true) // load pages as the user scrolls
             .fields([
                 nga.field('dataset_id').label('dataset_id').map(short_uuid)
