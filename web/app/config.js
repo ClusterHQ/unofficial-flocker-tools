@@ -6,7 +6,7 @@
     //var BASE_URL = 'https://test.labs.clusterhq.com:4523/v1'
     //var BASE_URL = 'v1/'
     //var BASE_URL = 'http://192.168.1.102:8088/v1/'
-    var BASE_URL = '/v1/'
+    var BASE_URL = 'v1/'
 
     var app = angular.module('myApp', ['ng-admin']);
 
@@ -111,7 +111,6 @@
             .order(1) // display the post panel first in the dashboard
             .perPage(5) // limit the panel to the 5 latest posts
             .fields([
-                nga.field('dataset_id').label('dataset_id').map(short_uuid),
                 nga.field('primary', 'reference') // ReferenceMany translates to a select multiple
                     .label('Primary')
                     .targetEntity(node)
@@ -157,7 +156,6 @@
             .description('Show the datasets in your cluster') // description appears under the title
             .infinitePagination(true) // load pages as the user scrolls
             .fields([
-                nga.field('dataset_id').label('dataset_id').map(short_uuid),
                 nga.field('primary', 'reference') // ReferenceMany translates to a select multiple
                     .label('Primary')
                     .targetEntity(node)
@@ -171,7 +169,7 @@
                 //node
                 //size
             ])
-            .listActions(['show', 'edit', 'delete']);
+            .listActions(['show', 'edit'/*, 'delete'*/]);
 
         configuration.listView()
             .title('All configuration') // default title is "[Entity_name] list"
