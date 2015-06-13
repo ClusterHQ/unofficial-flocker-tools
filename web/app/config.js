@@ -5,8 +5,8 @@
     var DEBUG = true;
     //var BASE_URL = 'https://test.labs.clusterhq.com:4523/v1'
     //var BASE_URL = 'v1/'
-    //var BASE_URL = 'http://192.168.1.102:8088/v1/'
-    var BASE_URL = '/v1/'
+    var BASE_URL = 'http://192.168.1.102:8088/v1/'
+    //var BASE_URL = '/v1/'
 
     var app = angular.module('myApp', ['ng-admin']);
 
@@ -231,9 +231,7 @@
                 nga.field('primary', 'reference') // ReferenceMany translates to a select multiple
                     .label('Node')
                     .targetEntity(node)
-                    .targetField(nga.field('host')),
-                nga.field('size').label('Maximum Size'),
-                nga.field('meta').label('Metadata')
+                    .targetField(nga.field('host'))
             ]);
 
         // customize header
