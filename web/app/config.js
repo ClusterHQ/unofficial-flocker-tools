@@ -3,7 +3,8 @@
     "use strict";
 
     var DEBUG = true;
-    var BASE_URL = 'https://test.labs.clusterhq.com:4523/v1'
+    //var BASE_URL = 'https://test.labs.clusterhq.com:4523/v1'
+    var BASE_URL = 'fixtures/'
 
     var app = angular.module('myApp', ['ng-admin']);
 
@@ -51,8 +52,8 @@
 
         // define all entities at the top to allow references between them
         var node = nga.entity('nodes')
-            .baseApiUrl(BASE_URL + '/state/nodes')
-            //.identifier(nga.field('id'))
+            .baseApiUrl(BASE_URL)
+            .identifier(nga.field('uuid'))
 
         // set the application entities
         admin
@@ -72,9 +73,8 @@
             .description('Show the nodes in your cluster') // description appears under the title
             .infinitePagination(true) // load pages as the user scrolls
             .fields([
-                /*
-                nga.field('id').label('id'), // The default displayed name is the camelCase field name. label() overrides id
-                nga.field('title'), // the default list field type is "string", and displays as a string
+                nga.field('uuid').label('uuid'), // The default displayed name is the camelCase field name. label() overrides id
+                nga.field('host')/*, // the default list field type is "string", and displays as a string
                 nga.field('published_at', 'date'),  // Date field type allows date formatting
                 nga.field('average_note', 'float'), // Float type also displays decimal digits
                 nga.field('views', 'number'),
@@ -160,6 +160,7 @@
         var customHeaderTemplate =
         '<div class="navbar-header">' +
             '<a class="navbar-brand" href="#" ng-click="appController.displayHome()">' + 
+                //'<img src="images/clusterhq.png" />' +
                 '<img src="images/logo.png" />' +
             '</a>' +
         '</div>';
