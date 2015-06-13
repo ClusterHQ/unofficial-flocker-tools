@@ -4,6 +4,7 @@ Prerequisites:
 
 * A Flocker cluster, if you don't have one of these then try [unofficial-flocker-tools](https://github.com/ClusterHQ/unofficial-flocker-tools/)
 * `openssl` client, most OS X and Linux distros should already have this installed
+* Google Chrome
 
 ## step 1 -- convert your user key and cert
 
@@ -22,4 +23,6 @@ Then go to Chrome settings, type "cert" into the search box, click "Manage Certi
 Flocker doesn't yet send CORS headers, so we have to workaround.
 Install the [Allow-Control-Allow-Origin: * plugin](https://chrome.google.com/webstore/detail/allow-control-allow-origi/nlfbmbojpeacfghkpbjhddihlkkiljbi/related).
 
+## step 3 -- load up the experimental flocker gui
 
+Go to https://gui.labs.clusterhq.com and type in the address of your control service.
