@@ -159,7 +159,9 @@
         // customize header
         var customHeaderTemplate =
         '<div class="navbar-header">' +
-            '<a class="navbar-brand" href="#" ng-click="appController.displayHome()">Flocker GUI</a>' +
+            '<a class="navbar-brand" href="#" ng-click="appController.displayHome()">' + 
+                '<img src="images/logo.png" />' +
+            '</a>' +
         '</div>';
         admin.header(customHeaderTemplate);
 

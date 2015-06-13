@@ -1,0 +1,10 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+
+<script>
+$(function(){
+    console.log('hello')
+    $.get('https://test.labs.clusterhq.com:4523/v1/version', function(data){
+        console.log(data)
+    })
+})
+</script>

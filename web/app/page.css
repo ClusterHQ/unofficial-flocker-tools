@@ -1,3 +1,12 @@
-.navbar-header{
+.navbar-header, #header-nav{
     background-color:#fff;
+}
+
+a.navbar-brand{
+    margin:0px;
+    padding:0px;
+    margin-top:5%;
+}
+.navbar-header img{
+    height:80%;
 }
