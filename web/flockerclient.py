@@ -36,6 +36,31 @@ class BaseResource(resource.Resource):
         self.client = get_client()
         return resource.Resource.__init__(self, *args, **kw)
 
+class ChildProxyResource(BaseResource):
+    def __init__(self, child_id, proxy_path, *args, **kw):
+        self.child_id = child_id
+        self.proxy_path = proxy_path
+        return BaseResource.__init__(self, *args, **kw)
+
+    def render_GET(self, request):
+        d = self.client.get(self.base_url + self.proxy_path)
+        d.addCallback(treq.json_content)
+        def got_result(results):
+            request.setHeader("content-type", "application/json")
+            request.setHeader("access-control-allow-origin", "*")
+            for result in results:
+                if result["uuid"] == self.child_id:
+                    request.write(json.dumps(result))
+                    request.finish()
+                    return
+            request.setResponseCode(400)
+            request.write(json.dumps(dict(error="unable to find child %s" %
+                (self.child_id,))))
+        d.addCallback(got_result)
+        d.addErrback(log.err, "while trying to query backend" + self.base_url +
+                self.proxy_path + "/" + self.child_id)
+        return server.NOT_DONE_YET
+
 def simpleProxyFactory(proxy_path):
     """
     GET and POST proxy factory (POST assumes it returns JSON too).
@@ -44,6 +69,11 @@ def simpleProxyFactory(proxy_path):
         def __init__(self, *args, **kw):
             self.proxy_path = proxy_path
             return BaseResource.__init__(self, *args, **kw)
+
+        def getChild(self, path, request):
+            fragments = request.uri.split("/")
+            return ChildProxyResource(child_id=fragments.pop().encode("ascii"),
+                    proxy_path=self.proxy_path)
 
         def render_GET(self, request):
             d = self.client.get(self.base_url + self.proxy_path)
@@ -140,14 +170,13 @@ class DatasetResource(resource.Resource):
         if "primary" not in request_raw:
             d = defer.fail(Exception("must specify primary"))
         else:
-            d = client.post(get_base_url() + "/configuration/datasets",
-                    {"primary": request_raw["primary"]}, headers={
-                        "content-type": "application/json"})
-            d.addCallback(treq.json_content)
+            d = client.post(get_base_url() + "/configuration/datasets/%s" %
+                    (self.dataset_id,), {"primary": request_raw["primary"]})
         def got_result(result):
             request.setHeader("content-type", "application/json")
             request.setHeader("access-control-allow-origin", "*")
-            request.write(json.dumps(result))
+            print "<<<", result
+            request.write(json.dumps(dict(result="success")))
             request.finish()
         d.addCallback(got_result)
         def handle_failure(failure):
