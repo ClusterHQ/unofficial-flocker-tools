@@ -5,8 +5,10 @@
 a.navbar-brand{
     margin:0px;
     padding:0px;
-    margin-top:5%;
 }
+
 .navbar-header img{
+    float:left;
+    margin-top:3%;
     height:80%;
 }
