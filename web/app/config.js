@@ -6,7 +6,7 @@
     //var BASE_URL = 'https://test.labs.clusterhq.com:4523/v1'
     //var BASE_URL = 'v1/'
     //var BASE_URL = 'http://192.168.1.102:8088/v1/'
-    var BASE_URL = '/v1/'
+    var BASE_URL = 'v1/'
 
     var app = angular.module('myApp', ['ng-admin']);
 
@@ -101,8 +101,8 @@
             .order(1) // display the post panel first in the dashboard
             .perPage(5) // limit the panel to the 5 latest posts
             .fields([
-                nga.field('uuid').label('uuid').map(short_uuid),
-                nga.field('host')
+                nga.field('host'),
+                nga.field('uuid').label('uuid').map(short_uuid)
             ]); // fields() called with arguments add fields to the view
 
         volume.dashboardView() // customize the dashboard panel for this entity
@@ -116,7 +116,10 @@
                     .label('Primary')
                     .targetEntity(node)
                     .targetField(nga.field('host')),
-                nga.field('deleted', 'boolean')
+                nga.field('status'),
+                nga.field('deleted', 'boolean'),
+                nga.field('meta'),
+                nga.field('size')
             ]);
 
 /*
@@ -246,6 +249,7 @@
                 //'<img src="images/clusterhq.png" />' +
                 '<img src="images/logo.png" />' +
             '</a>' +
+            '<div class="experiment">Experimental GUI</div>'
         '</div>';
         admin.header(customHeaderTemplate);
 
@@ -266,7 +270,7 @@
                 nga.menu(volume)
                 .title('Datasets')
                 .icon('')
-            )
+            )/*
             .addChild(
                 nga.menu()
                 .title('Debug')
@@ -281,7 +285,7 @@
                     .title('State')
                     .icon('')
                 ) 
-            )
+            )*/
         );
 
         nga.configure(admin);

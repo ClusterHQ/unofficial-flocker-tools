@@ -12,3 +12,8 @@ a.navbar-brand{
     margin-top:3%;
     height:80%;
 }
+
+.experiment{
+    float:left;
+    padding-top:15px;
+}
