@@ -20,3 +20,4 @@ cluster.yml
 agent.yml
 node_mapping.yml
 *.pid
+node_modules
