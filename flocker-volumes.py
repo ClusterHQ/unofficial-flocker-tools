@@ -9,18 +9,17 @@ certificates, or specify --cluster-crt, --user-crt, --user-key, and
 --control-service.
 """
 
-from twisted.internet import defer, reactor
+from twisted.internet import defer
 from twisted.internet.task import react
 from twisted.python.usage import Options, UsageError
 from twisted.python import log
 from twisted.python.filepath import FilePath
-from twisted.internet.task import deferLater
 from txflocker.client import get_client as txflocker_get_client
+from txflocker.client import combined_state, parse_num, process_metadata
 import sys
 import yaml
 import treq
 import texttable
-import pprint
 import json
 
 def get_client(options):
@@ -110,30 +109,6 @@ def get_uuid_length(long_):
     return uuid_length
 
 
-def get_state_check_if_really_empty(client, base_url):
-    # TODO refine this hack so it only does it if configuration is empty.
-    # (otherwise the first time users list volumes before creating any, we
-    # make them wait 5 seconds).
-    d = client.get(base_url + "/state/datasets")
-    d.addCallback(treq.json_content)
-    def check_if_empty(result):
-        if result == []:
-            # sometimes the result is incorrectly empty, so an empty state
-            # warrants waiting and trying again to make sure (I have no
-            # idea how long we should wait, 5 seconds is a total guess; I
-            # worry that this issue gets worse as the number of datasets
-            # scales up, which is sorta scary).
-            # https://clusterhq.atlassian.net/browse/FLOC-2135
-            d = deferLater(reactor, 5, client.get,
-                    base_url + "/state/datasets")
-            d.addCallback(treq.json_content)
-            return d
-        else:
-            return result
-    d.addCallback(check_if_empty)
-    return d
-
-
 class List(Options):
     """
     list flocker datasets
@@ -144,84 +119,21 @@ class List(Options):
         ("human", "h", "Human readable numbers"),
     ]
     def run(self):
-        self.client = get_client(self.parent)
-        self.base_url = get_base_url(self.parent)
+        client = get_client(self.parent)
+        base_url = get_base_url(self.parent)
         uuid_length = get_uuid_length(self["long"])
 
-        d1 = self.client.get(self.base_url + "/configuration/datasets")
-        d1.addCallback(treq.json_content)
-
-        d2 = get_state_check_if_really_empty(self.client, self.base_url)
-
-        d3 = self.client.get(self.base_url + "/state/nodes")
-        d3.addCallback(treq.json_content)
-
-        ds = [d1, d2, d3]
-
-        d = defer.gatherResults(ds)
+        d = combined_state(client, base_url, self["deleted"])
         def got_results(results):
-            configuration_datasets, state_datasets, state_nodes = results
-
-            # build up a table, based on which datasets are in the
-            # configuration, adding data from the state as necessary
-            configuration_map = dict((d["dataset_id"], d) for d in
-                    configuration_datasets)
-            state_map = dict((d["dataset_id"], d) for d in state_datasets)
-            nodes_map = dict((n["uuid"], n) for n in state_nodes)
-
-            #print "got state:"
-            #pprint.pprint(state_datasets)
-            #print
-
             rows = []
-
-            for (key, dataset) in configuration_map.iteritems():
-                if dataset["deleted"]:
-                    # the user has asked to see deleted datasets
-                    if self["deleted"]:
-                        if key in state_map:
-                            status = "deleting"
-                        else:
-                            status = "deleted"
-                    # we are hiding deleted datasets
-                    else:
-                        continue
-                else:
-                    if key in state_map:
-                        if state_map[key]["primary"] in nodes_map:
-                            status = "attached"
-                        else:
-                            status = "detached"
-                    else:
-                        # not deleted, not in state, probably waiting for it to
-                        # show up.
-                        status = "pending"
-
-                meta = []
-                if dataset["metadata"]:
-                    for k, v in dataset["metadata"].iteritems():
-                        meta.append("%s=%s" % (k, v))
-
-                if dataset["primary"] in nodes_map:
-                    primary = nodes_map[dataset["primary"]]
-                    node = "%s (%s)" % (primary["uuid"][:uuid_length],
-                            primary["host"])
-                else:
-                    node = "<missing>"
-
-                if dataset.get("maximum_size"):
-                    size = "%.2fG" % (dataset["maximum_size"]
-                            / (1024 * 1024 * 1024.),)
-                else:
-                    # must be a backend with quotas instead of sizes
-                    size = "<no quota>"
-
-                rows.append([dataset["dataset_id"][:uuid_length],
-                    size,
-                    ",".join(meta),
-                    status,
-                    node])
-
+            for result in results:
+                rows.append([result["dataset_id"],
+                    result["size"],
+                    result["meta"],
+                    result["status"],
+                    ("<missing>" if result["node"] is None else
+                        result["node"]["uuid"][:uuid_length]
+                        + " (" + result["node"]["host"] + ")")])
             table = get_table()
             table.set_cols_align(["l", "l", "l", "l", "l"])
             rows = [["", "", "", "", ""]] + [
@@ -230,22 +142,6 @@ class List(Options):
             print table.draw() + "\n"
         d.addCallback(got_results)
         return d
-
-
-def parse_num(expression):
-    unit = expression.translate(None, "1234567890.")
-    num = expression.replace(unit, "")
-    unit = unit.lower()
-    if unit == 'tb' or unit == 't' or unit =='tib':
-        return int(float(num)*1024*1024*1024*1024)
-    elif unit == 'gb' or unit == 'g' or unit =='gib':
-        return int(float(num)*1024*1024*1024)
-    elif unit == 'mb' or unit == 'm' or unit =='mib':
-        return int(float(num)*1024*1024)
-    elif unit == 'kb' or unit == 'k' or unit =='kib':
-        return int(float(num)*1024)
-    else:
-        return int(float(num))
 
 
 class Create(Options):
@@ -281,16 +177,7 @@ class Create(Options):
             args["primary"] = filter_primary_node(self["node"], nodes)
 
             # metadata
-            metadata = {}
-            try:
-                for pair in self["metadata"].split(","):
-                    k, v = pair.split("=")
-                    metadata[k] = v
-            except:
-                raise UsageError("malformed metadata specification "
-                        "\"%s\", please use format \"a=b,c=d\"" %
-                        (self["metadata"],))
-            args["metadata"] = metadata
+            args["metadata"] = process_metadata(self["metadata"])
 
             # TODO: don't allow non-unique name in metadata (by
             # convention)

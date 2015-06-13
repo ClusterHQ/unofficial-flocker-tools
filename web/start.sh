@@ -1,2 +1,2 @@
 #!/bin/bash
-twistd -n web -p 8081 --path .
+PYTHONPATH=..:$PYTHONPATH twistd -noy server.tac
