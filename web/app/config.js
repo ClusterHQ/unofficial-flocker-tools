@@ -2,7 +2,7 @@
 (function () {
     "use strict";
 
-    var DEBUG = true;
+    var DEBUG = false;
     //var BASE_URL = 'https://test.labs.clusterhq.com:4523/v1'
     //var BASE_URL = 'v1/'
     //var BASE_URL = 'http://192.168.1.102:8088/v1/'
@@ -94,7 +94,7 @@
             .addEntity(state)
 
         // customize entities and views
-
+/*
         node.dashboardView() // customize the dashboard panel for this entity
             .name('nodes')
             .title('Your nodes')
@@ -121,7 +121,7 @@
                 nga.field('meta'),
                 nga.field('size')
             ]);
-
+*/
 /*
         configuration.dashboardView() // customize the dashboard panel for this entity
             .name('configuration')
@@ -260,12 +260,13 @@
 
         // customize menu
         admin.menu(nga.menu()
+            /*
             .addChild(
                 nga.menu()
                 .title('Dashboard')
                 .link('dashboard')
                 .icon('')
-            )
+            )*/
             .addChild(
                 nga.menu(node)
                 .title('Nodes')
@@ -297,3 +298,33 @@
     }]);
 
 }());
+
+// a total hack to reload lists every 5 seconds
+function reloadData(){
+    var time = new Date().getTime()
+    var url = document.location.toString()
+    
+    var hashParts = url.split('#')
+    if((hashParts[1] || '').match(/^\/\w+\/list/)){
+        var urlParts = url.split('?')
+        var query = urlParts[1] || ''
+        var currentValue = 'ASC'
+        var pairs = query.split('&').filter(function(pair){
+            var parts = pair.split('=')
+            if(parts[0]=='sortDir'){
+                currentValue = parts[1]
+                return false
+            }
+            return true
+        })
+
+        var newValue = currentValue=='ASC' ? 'DESC' : 'ASC'
+        pairs.push('sortDir=' + newValue)
+        var newURL = urlParts[0] + '?' + pairs.join('&')
+        document.location = newURL
+    }
+    
+}
+
+setInterval(reloadData, 5000)
+
