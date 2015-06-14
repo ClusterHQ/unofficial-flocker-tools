@@ -86,7 +86,8 @@ def combined_state(client, base_url, deleted):
                     continue
             else:
                 if key in state_map:
-                    if state_map[key]["primary"] in nodes_map:
+                    if ("primary" in state_map[key] and
+                            state_map[key]["primary"] in nodes_map):
                         status = "attached"
                     else:
                         status = "detached"
