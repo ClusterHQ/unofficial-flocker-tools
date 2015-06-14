@@ -88,13 +88,13 @@ def combined_state(client, base_url, deleted):
                 if key in state_map:
                     if ("primary" in state_map[key] and
                             state_map[key]["primary"] in nodes_map):
-                        status = "attached"
+                        status = u"attached \u2705"
                     else:
-                        status = "detached"
+                        status = u"detached"
                 else:
                     # not deleted, not in state, probably waiting for it to
                     # show up.
-                    status = "pending"
+                    status = u"pending \u231b"
 
             dataset["status"] = status
 
