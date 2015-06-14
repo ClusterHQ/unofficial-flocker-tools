@@ -164,7 +164,7 @@
                     .targetEntity(node)
                     .targetField(nga.field('host')),
                 nga.field('status'),
-                nga.field('deleted', 'boolean'),
+               // nga.field('deleted', 'boolean'),
                 nga.field('meta'),
                 nga.field('size')
                 //status
@@ -180,7 +180,7 @@
             .infinitePagination(true) // load pages as the user scrolls
             .fields([
                 nga.field('dataset_id').label('dataset_id').map(short_uuid),
-                nga.field('deleted', 'boolean'),
+                //nga.field('deleted', 'boolean'),
                 nga.field('maximum_size'),
                 nga.field('primary', 'reference') // ReferenceMany translates to a select multiple
                     .label('Node')
@@ -208,7 +208,7 @@
         volume.showView() // a showView displays one entry in full page - allows to display more data than in a a list
             .fields([
                 nga.field('short_dataset_id').label('Dataset ID'),
-                nga.field('deleted', 'boolean'),
+               // nga.field('deleted', 'boolean'),
                 nga.field('size'),
                 nga.field('meta'),
                 nga.field('status')
@@ -217,7 +217,7 @@
         configuration.showView() // a showView displays one entry in full page - allows to display more data than in a a list
             .fields([
                 nga.field('dataset_id').label('dataset_id').map(short_uuid),
-                nga.field('deleted', 'boolean'),
+                //nga.field('deleted', 'boolean'),
                 nga.field('maximum_size')
             ]);
 
