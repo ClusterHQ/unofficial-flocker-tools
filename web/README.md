@@ -18,7 +18,7 @@ docker run -p 80:80 \
     -v $CERTS/flockerdemo.key:/user.key \
     -v $CERTS/flockerdemo.crt:/user.crt \
     -v $CERTS/cluster.crt:/cluster.crt \
-    clusterhq/experimental-flocker-volumes-gui
+    clusterhq/experimental-volumes-gui
 ```
 
 TODO: test boot2docker
