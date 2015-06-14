@@ -15,7 +15,7 @@ export CONTROL_SERVICE=your.control.service
 export USERNAME=certuser
 docker run -ti -p 80:80 \
     -e CONTROL_SERVICE=$CONTROL_SERVICE \
-    -e USERNAME=$USERNAME \
+    -e USERNAME=user \
     -e CERTS_PATH=/ \
     -v $CERTS/$USERNAME.key:/user.key \
     -v $CERTS/$USERNAME.crt:/user.crt \
