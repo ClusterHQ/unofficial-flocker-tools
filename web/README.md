@@ -9,14 +9,16 @@ Prerequisites:
 ## step 1 -- run the container with your local keys
 
 ```
-export CERTS=/srv/projects/docker-plugins-demo/runner/unofficial-flocker-tools
-export CONTROL_SERVICE=54.157.225.189
-docker run -p 80:80 \
+cd unofficial-flocker-tools/web
+export CERTS=$PWD/..
+export CONTROL_SERVICE=your.control.service
+export USERNAME=certuser
+docker run -ti -p 80:80 \
     -e CONTROL_SERVICE=$CONTROL_SERVICE \
-    -e USERNAME=user \
+    -e USERNAME=$USERNAME \
     -e CERTS_PATH=/ \
-    -v $CERTS/flockerdemo.key:/user.key \
-    -v $CERTS/flockerdemo.crt:/user.crt \
+    -v $CERTS/$USERNAME.key:/user.key \
+    -v $CERTS/$USERNAME.crt:/user.crt \
     -v $CERTS/cluster.crt:/cluster.crt \
     clusterhq/experimental-volumes-gui
 ```
