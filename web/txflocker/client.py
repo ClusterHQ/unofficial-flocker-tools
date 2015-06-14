@@ -94,7 +94,7 @@ def combined_state(client, base_url, deleted):
                 else:
                     # not deleted, not in state, probably waiting for it to
                     # show up.
-                    status = "pending"
+                    status = u"pending... \u231b"
 
             dataset["status"] = status
 
