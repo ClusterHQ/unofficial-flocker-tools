@@ -13,7 +13,7 @@ cd unofficial-flocker-tools/web
 export CERTS=$PWD/..
 export CONTROL_SERVICE=your.control.service
 export USERNAME=certuser
-docker run -ti -p 80:80 \
+docker run -d -p 80:80 \
     -e CONTROL_SERVICE=$CONTROL_SERVICE \
     -e USERNAME=user \
     -e CERTS_PATH=/ \
@@ -27,7 +27,11 @@ TODO: test boot2docker
 
 ## step 2 -- load up the experimental flocker gui
 
-Go to [http://localhost/client](http://localhost/client).
+Go to [http://localhost/client](http://localhost/client) or, if you are using boot2docker:
+
+```
+open http://$(boot2docker ip)/client/
+```
 
 ## step 3
 
