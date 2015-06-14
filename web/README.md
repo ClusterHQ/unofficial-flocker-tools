@@ -27,10 +27,10 @@ TODO: test boot2docker
 
 ## step 2 -- load up the experimental flocker gui
 
-Go to [http://localhost/client](http://localhost/client) or, if you are using boot2docker:
+Go to [http://localhost/client](http://localhost/client/#/nodes/list) or, if you are using boot2docker:
 
 ```
-open http://$(boot2docker ip)/client/
+open http://$(boot2docker ip)/client/#/nodes/list
 ```
 
 ## step 3
