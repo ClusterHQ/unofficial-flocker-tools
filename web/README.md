@@ -25,7 +25,7 @@ TODO: test boot2docker
 
 ## step 2 -- load up the experimental flocker gui
 
-Go to [http://localhost](http://localhost).
+Go to [http://localhost/client](http://localhost/client).
 
 ## step 3
 
