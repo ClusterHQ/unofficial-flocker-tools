@@ -13,7 +13,8 @@ cd unofficial-flocker-tools/web
 export CERTS=$PWD/..
 export CONTROL_SERVICE=your.control.service
 export USERNAME=certuser
-docker run -d -p 80:80 \
+docker run --name experimental-volumes-gui \
+    -d -p 80:80 \
     -e CONTROL_SERVICE=$CONTROL_SERVICE \
     -e USERNAME=user \
     -e CERTS_PATH=/ \
