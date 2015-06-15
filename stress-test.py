@@ -106,11 +106,9 @@ class MoveVolumes(Options):
                     sys.exit(1)
 
 
-
 commands = {
     "move-volumes": MoveVolumes,
 }
-
 
 def main(reactor, *argv):
     try:
