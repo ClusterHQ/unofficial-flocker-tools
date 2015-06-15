@@ -13,7 +13,7 @@ import treq
 Supported verb/url tuples:
 
     GET /v1/nodes
-    GET /v1/nodes/:uuid TODO
+    GET /v1/nodes/:uuid
 
     GET /v1/datasets
     GET /v1/datasets/:uuid
@@ -57,6 +57,14 @@ class ChildProxyResource(BaseResource):
             request.write(json.dumps(dict(error="unable to find child %s" %
                 (self.child_id,))))
         d.addCallback(got_result)
+        def handle_failure(failure):
+            request.setResponseCode(400)
+            request.setHeader("content-type", "application/json")
+            request.setHeader("access-control-allow-origin", "*")
+            request.write(json.dumps(dict(error=str(failure))))
+            request.finish()
+            return failure
+        d.addErrback(handle_failure)
         d.addErrback(log.err, "while trying to query backend" + self.base_url +
                 self.proxy_path + "/" + self.child_id)
         return server.NOT_DONE_YET
@@ -85,6 +93,14 @@ def simpleProxyFactory(proxy_path):
                 request.write(json.dumps(result))
                 request.finish()
             d.addCallback(got_result)
+            def handle_failure(failure):
+                request.setResponseCode(400)
+                request.setHeader("content-type", "application/json")
+                request.setHeader("access-control-allow-origin", "*")
+                request.write(json.dumps(dict(error=str(failure))))
+                request.finish()
+                return failure
+            d.addErrback(handle_failure)
             d.addErrback(log.err, "while trying to query backend")
             return server.NOT_DONE_YET
 
