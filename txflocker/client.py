@@ -74,6 +74,7 @@ def combined_state(client, base_url, deleted):
 
         for (key, dataset) in configuration_map.iteritems():
             dataset = copy.copy(dataset)
+            state_primary = None
             if dataset["deleted"]:
                 # the user has asked to see deleted datasets
                 if deleted:
@@ -88,6 +89,7 @@ def combined_state(client, base_url, deleted):
                 if key in state_map:
                     if ("primary" in state_map[key] and
                             state_map[key]["primary"] in nodes_map):
+                        state_primary = state_map[key]["primary"]
                         status = u"attached \u2705"
                     else:
                         status = u"detached"
@@ -107,6 +109,12 @@ def combined_state(client, base_url, deleted):
 
             if dataset["primary"] in nodes_map:
                 primary = nodes_map[dataset["primary"]]
+                if state_primary != primary["uuid"]:
+                    print "==="
+                    print "WARNING: %s has diverged primary." % (key,)
+                    print "state = %s, configuration = %s" % (
+                            state_primary, primary["uuid"])
+                    print "==="
                 node = dict(uuid=primary["uuid"], host=primary["host"])
             else:
                 node = None
