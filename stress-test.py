@@ -92,15 +92,22 @@ class MoveVolumes(Options):
             start_time = time.time()
             while not found:
                 state = yield get_json(self.parent, "/state/datasets")
+
+                matching_datasets = []
                 for dataset in state:
-                    if (dataset["dataset_id"] == dataset_id
-                            and "primary" in dataset
-                            and dataset["primary"] == next_node["uuid"]):
-                        print "found dataset on next node in %.2f seconds!" % (time.time() - start_time,)
-                        found = True
-                time.sleep(1)
-                sys.stdout.write(".")
+                    if dataset["dataset_id"] == dataset_id:
+                        matching_datasets.append(dataset)
+
+                sys.stdout.write(str(len(matching_datasets)) + " ")
                 sys.stdout.flush()
+
+                if len(matching_datasets) == 1:
+                    if ("primary" in matching_datasets[0] and
+                            matching_datasets[0]["primary"] == next_node["uuid"]):
+                        print "found dataset uniquely on next node in %.2f seconds!" % (time.time() - start_time,)
+                        found = True
+
+                time.sleep(1)
                 if time.time() - EVENT_TIMEOUT > start_time:
                     print "TIMED OUT :("
                     sys.exit(1)
