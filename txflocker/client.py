@@ -14,6 +14,8 @@ import treq
 import copy
 
 def process_metadata(metadata_str):
+    if not metadata_str:
+        return {}
     metadata = {}
     try:
         for pair in metadata_str.split(","):
