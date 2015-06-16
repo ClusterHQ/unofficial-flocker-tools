@@ -30,7 +30,7 @@ settings_defaults = {
     # what repo does the flocker plugin live in
     'PLUGIN_REPO': 'https://github.com/clusterhq/flocker-docker-plugin',
     # what branch to use for the flocker plugin
-    'PLUGIN_BRANCH': 'tls-to-control-service',
+    'PLUGIN_BRANCH': 'master',
     # skip downloading the docker binary
     # for scenarios where vm images have been pre-baked
     'SKIP_DOCKER_BINARY': '',
