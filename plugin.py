@@ -159,7 +159,7 @@ respawn
 env FLOCKER_CONTROL_SERVICE_BASE_URL=%s
 env MY_NETWORK_IDENTITY=%s
 chdir /root/%s
-exec /usr/bin/twistd -noy powerstripflocker.tac
+exec /usr/bin/twistd -noy flockerdockerplugin.tac
 EOF
 service flocker-plugin restart
 """ % (controlservice, private_ip, plugin_repo_folder,))
@@ -174,7 +174,7 @@ Description=flocker-plugin - flocker-plugin job file
 [Service]
 Environment=FLOCKER_CONTROL_SERVICE_BASE_URL=%s
 Environment=MY_NETWORK_IDENTITY=%s
-ExecStart=/usr/bin/twistd -noy powerstripflocker.tac
+ExecStart=/usr/bin/twistd -noy flockerdockerplugin.tac
 WorkingDirectory=/root/%s
 
 [Install]

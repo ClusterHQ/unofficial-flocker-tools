@@ -1,0 +1,20 @@
+.navbar-header, #header-nav{
+    background-color:#fff;
+}
+
+a.navbar-brand{
+    margin:0px;
+    padding:0px;
+}
+
+.navbar-header img{
+    float:left;
+    margin-top:2%;
+    height:80%;
+}
+
+.experiment{
+    float:left;
+    padding-top:15px;
+    color:#999;
+}
