@@ -131,7 +131,7 @@ def combined_state(client, base_url, deleted):
     return d
 
 def get_client(reactor=reactor, certificates_path=FilePath("/etc/flocker"),
-        user_certificate_filename="node.crt", user_key_filename="node.key",
+        user_certificate_filename="plugin.crt", user_key_filename="plugin.key",
         cluster_certificate_filename="cluster.crt", target_hostname=None):
     """
     Create a ``treq``-API object that implements the REST API TLS
