@@ -160,7 +160,7 @@ class DatasetResource(resource.Resource):
         return resource.Resource.__init__(self, *args, **kw)
 
     def render_GET(self, request):
-        d = combined_state(get_client(), get_base_url(), deleted=True)
+        d = combined_state(get_client(), get_base_url(), deleted=False)
         def got_state(results):
             request.setHeader("content-type", "application/json")
             request.setHeader("access-control-allow-origin", "*")
