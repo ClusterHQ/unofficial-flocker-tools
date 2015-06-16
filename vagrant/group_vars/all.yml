@@ -6,7 +6,7 @@ env:
       [
         { name: 'flcli',
           box: 'ubuntu/trusty64',
-          ram: '512',
+          ram: '768',
           ip: '192.168.35.10',
           playbook: 'flocker-cli.yml',
           inventory: 'vagrant-inventory',
@@ -14,7 +14,7 @@ env:
         },
         { name: 'flnode1',
           box: 'ubuntu/trusty64',
-          ram: '512',
+          ram: '768',
           ip: '192.168.35.11',
           playbook: 'flocker-node.yml',
           inventory: 'vagrant-inventory',
@@ -22,7 +22,7 @@ env:
         },
         { name: 'flnode2',
           box: 'ubuntu/trusty64',
-          ram: '512',
+          ram: '768',
           ip: '192.168.35.12',
           playbook: 'flocker-node.yml',
           vagrant_port: 2234

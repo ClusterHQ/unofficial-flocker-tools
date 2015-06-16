@@ -4,6 +4,13 @@
   max_fail_percentage: 1
   sudo: true
   user: vagrant
+  
+  pre_tasks:
+    - name: clean partial lists
+    - command: rm -f /var/lib/apt/lists/*
+
+    - name: update apt cache
+      command: apt-get update
 
   roles:
       # configure /etc/resolv.conf
@@ -12,7 +19,7 @@
       # deploy SSH keys
       - Azulinho.azulinho-ssh-keys
 
-    # install pip
+      # install pip
       - mbasanta.pip
 
   post_tasks:
@@ -59,9 +66,9 @@
         state=link
       with_items:
         - { src: "/etc/flocker/control-{{flocker.control_node}}.key",
-            dst: "/etc/flocker/control-service-{{flocker.control_node.key" }
+            dst: "/etc/flocker/control-service-{{flocker.control_node}}.key" }
         - { src: "/etc/flocker/control-{{flocker.control_node}}.crt",
-            dst: "/etc/flocker/control-service-{{flocker.control_node.crt" }
+            dst: "/etc/flocker/control-service-{{flocker.control_node}}.crt" }
 
     # create the node certificates and register the resulting filenames
     # into uuid_agents
@@ -104,6 +111,13 @@
   sudo: true
   user: vagrant
 
+  pre_tasks:
+    - name: clean partial lists
+    - command: rm -f /var/lib/apt/lists/*
+
+    - name: update apt cache
+      command: apt-get update
+
   roles:
     # configure /etc/resolv.conf
     - Azulinho.azulinho-google-dns
@@ -115,6 +129,7 @@
     - mbasanta.pip
 
   post_tasks:
+
     - name: install pyaml
       pip: name=pyaml
 
