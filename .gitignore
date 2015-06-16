@@ -20,4 +20,8 @@ cluster.yml
 agent.yml
 node_mapping.yml
 *.pid
-node_modules
+node_modules*.pyc
+vagrant/roles
+vagrant/vagrant-*.pkg.tar.xz
+*.pyc
+*.bak

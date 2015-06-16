@@ -1,0 +1,14 @@
+#
+#       Ansible inventory file for: vagrant
+#
+
+[flocker_cli_servers]
+flcli group=flocker_cli_servers deploy_env=vagrant ansible_ssh_host=127.0.0.1 ansible_ssh_port=2232
+
+[flocker_node_servers]
+flnode1 group=flocker_node_servers deploy_env=vagrant ansible_ssh_host=127.0.0.1 ansible_ssh_port=2233
+flnode2 group=flocker_node_servers deploy_env=vagrant ansible_ssh_host=127.0.0.1 ansible_ssh_port=2234
+
+[vagrant:children]
+flocker_node_servers
+flocker_cli_servers

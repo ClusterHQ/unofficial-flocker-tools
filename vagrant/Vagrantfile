@@ -1,0 +1,71 @@
+# -*- mode: ruby -*-
+# # vi: set ft=ruby :
+
+# Specify minimum Vagrant version and Vagrant API version
+Vagrant.require_version ">= 1.6.0"
+VAGRANTFILE_API_VERSION = "2"
+
+# Require YAML module
+require 'yaml'
+
+# Read YAML file with box details
+servers = YAML.load_file('group_vars/all.yml')['env']['vagrant']['servers']
+
+# Create boxes
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+  config.ssh.insert_key = false
+  config.ssh.private_key_path = "#{ENV['HOME']}/.vagrant.d/insecure_private_key"
+
+
+  if Vagrant.has_plugin?("vagrant-cachier")
+      # Configure cached packages to be shared between instances of the same base box.
+      # More info on http://fgrehm.viewdocs.io/vagrant-cachier/usage
+      config.cache.scope = :box
+  end
+
+  # Iterate through entries in YAML file
+  servers.each do |server|
+    config.vm.define server["name"] do |srv|
+      srv.vm.box = server["box"]
+      srv.vm.hostname = server["name"]
+      srv.vm.network "private_network", ip: server["ip"]
+      srv.ssh.guest_port = server['vagrant_port']
+      srv.vm.network "forwarded_port", guest: 22, host: server['vagrant_port']
+      srv.vm.provider :virtualbox do |vb|
+        vb.name = server["name"]
+        vb.memory = server["ram"]
+      end
+    end
+  end
+
+
+  config.vm.provision :ansible do |ansible|
+    # Some Ansible Helpers:
+    # export TAGS="tagname" so that only actions tagged with 'tagname'
+    # are executed in this ansible run
+    if defined? ENV['TAGS']
+      ansible.tags = ENV['TAGS']
+    end
+    # export START_AT_TASK="task name" so the Ansible run will be executed
+    # from this particular task
+    if defined? ENV['START_AT_TASK']
+      ansible.start_at_task = ENV['START_AT_TASK']
+    end
+
+    ansible.verbose = 'vvv'
+    ansible.sudo = true
+    ansible.playbook = 'site.yml'
+    ansible.inventory_path = 'vagrant-inventory'
+    ansible.limit = 'all'
+    ansible.raw_ssh_args = ['-o ControlMaster=no',
+                            '-o ControlPath=None']
+
+    ansible.extra_vars = {
+      'deploy_environment'    => 'vagrant',
+    }
+  end
+
+
+
+end
