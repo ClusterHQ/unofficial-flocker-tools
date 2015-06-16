@@ -22,7 +22,7 @@ cd unofficial-flocker-tools
 pip install -r requirements.txt
 ```
 
-You may need to install the [library headers for `cryptography`](https://cryptography.io/en/latest/installation/#building-cryptography-on-linux) first.
+You may need to install the [development libraries for `cryptography`](https://cryptography.io/en/latest/installation/#building-cryptography-on-linux) first.
 
 ## get some nodes
 
