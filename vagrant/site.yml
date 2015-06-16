@@ -7,7 +7,7 @@
   
   pre_tasks:
     - name: clean partial lists
-    - command: rm -f /var/lib/apt/lists/*
+      command: rm -f /var/lib/apt/lists/*
 
     - name: update apt cache
       command: apt-get update
@@ -113,7 +113,7 @@
 
   pre_tasks:
     - name: clean partial lists
-    - command: rm -f /var/lib/apt/lists/*
+      command: rm -f /var/lib/apt/lists/*
 
     - name: update apt cache
       command: apt-get update
