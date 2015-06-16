@@ -10,14 +10,19 @@ prerequisites:
 
 * flocker-cli for your local system (from http://build.clusterhq.com/results/omnibus/master/ for now)
 * python 2.7
-* pyyaml module (`sudo pip install pyyaml`)
+* pip
 
-## get the repo
+## get the repo and install dependencies
+
+**Note**: You may wish to [make a virtualenv](http://docs.python-guide.org/en/latest/dev/virtualenvs/).
 
 ```
 git clone https://github.com/lukemarsden/unofficial-flocker-tools
 cd unofficial-flocker-tools
+pip install -r requirements.txt
 ```
+
+You may need to install the [development libraries for `cryptography`](https://cryptography.io/en/latest/installation/#building-cryptography-on-linux) first.
 
 ## get some nodes
 
