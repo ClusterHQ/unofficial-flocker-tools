@@ -35,7 +35,7 @@ pip install .
 
 this will install the following scripts in your `$PATH`:
 
-* flocker-deploy
+* flocker-config
 * flocker-install
 * flocker-plugin-install
 * flocker-tutorial
