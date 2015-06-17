@@ -9,8 +9,21 @@
     - name: clean partial lists
       command: rm -f /var/lib/apt/lists/*
 
+    - name: clean partial lists
+      command: rm -rf /var/lib/apt/lists/partial/*
+
+    - name: remove old pkgs
+      command: apt-get clean
+
+    - name: remove old pkgs
+      command: apt-get autoremove
+
     - name: update apt cache
       command: apt-get update
+
+    - name: update apt upgrade
+      command: apt-get upgrade
+
 
   roles:
       # configure /etc/resolv.conf
@@ -115,8 +128,20 @@
     - name: clean partial lists
       command: rm -f /var/lib/apt/lists/*
 
+    - name: clean partial lists
+      command: rm -rf /var/lib/apt/lists/partial/*
+
+    - name: remove old pkgs
+      command: apt-get clean
+
+    - name: remove old pkgs
+      command: apt-get autoremove
+
     - name: update apt cache
       command: apt-get update
+
+    - name: update apt upgrade
+      command: apt-get upgrade
 
   roles:
     # configure /etc/resolv.conf
