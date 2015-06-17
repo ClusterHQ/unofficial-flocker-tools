@@ -18,15 +18,28 @@ prerequisites:
 
 ## get the repo and install dependencies
 
-**Note**: You may wish to [make a virtualenv](http://docs.python-guide.org/en/latest/dev/virtualenvs/).
+**note**: You may wish to [make a virtualenv](http://docs.python-guide.org/en/latest/dev/virtualenvs/):
 
 ```
-git clone https://github.com/lukemarsden/unofficial-flocker-tools
+virtualenv venv
+source venv/bin/activate
+```
+
+download the repo and install
+
+```
+git clone https://github.com/ClusterHQ/unofficial-flocker-tools
 cd unofficial-flocker-tools
-pip install -r requirements.txt
+pip install .
 ```
 
-You may need to install the [development libraries for `cryptography`](https://cryptography.io/en/latest/installation/#building-cryptography-on-linux) first.
+this will install the following scripts in your `$PATH`:
+
+* flocker-deploy
+* flocker-install
+* flocker-plugin-install
+* flocker-tutorial
+* flocker-volumes
 
 ## get some nodes
 
