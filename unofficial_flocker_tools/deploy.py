@@ -9,7 +9,7 @@ import yaml
 # Usage: deploy.py cluster.yml
 from utils import Configurator
 
-if __name__ == "__main__":
+def main():
     c = Configurator(configFile=sys.argv[1])
     c.run("flocker-ca initialize %s" % (c.config["cluster_name"],))
     print "Initialized cluster CA."
@@ -99,3 +99,6 @@ firewall-cmd --add-service flocker-control-agent
         print "This should give you a list of your nodes:"
         print prefix + " " + url + "/state/nodes | jq ."
         print "Try running tutorial.py cluster.yml for more..."
+
+if __name__ == "__main__":
+    main()

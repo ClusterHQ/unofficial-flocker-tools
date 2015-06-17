@@ -2,15 +2,19 @@
 
 ## what is here
 
-this repo makes it easy to install flocker on some nodes and configure the requisite keys.
+this repo makes it easy to install and use flocker on some nodes and configure the requisite keys.
 
-see the [official docs](http://doc-dev.clusterhq.com/using/installing/index.html) for the full long-form installation instructions.
+see the [official docs](https://docs.clusterhq.com/en/1.0.0/using/installing/index.html) for the full long-form installation instructions.
 
 prerequisites:
 
-* flocker-cli for your local system (from http://build.clusterhq.com/results/omnibus/master/ for now)
+* flocker-cli for your local system (from https://docs.clusterhq.com/en/1.0.0/using/installing/index.html#installing-flocker-cli)
 * python 2.7
 * pip
+* OS packages:
+  * Ubuntu/Debian: `build-essential libssl-dev libffi-dev python-dev`
+  * RHEL/Fedora: `gcc libffi-devel python-devel openssl-devel`
+* optional: virtualenv
 
 ## get the repo and install dependencies
 

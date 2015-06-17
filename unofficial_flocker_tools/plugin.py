@@ -49,7 +49,7 @@ for field in settings_defaults:
         value = settings_defaults[field]
     settings[field] = value
 
-if __name__ == "__main__":
+def main():
     c = Configurator(configFile=sys.argv[1])
     control_ip = c.config["control_node"]
 
@@ -183,3 +183,6 @@ EOF
 systemctl enable flocker-plugin.service
 systemctl start flocker-plugin.service
 """ % (controlservice, private_ip, plugin_repo_folder,))
+
+if __name__ == "__main__":
+    main()

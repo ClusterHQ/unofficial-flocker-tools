@@ -7,7 +7,7 @@ import sys
 # Usage: deploy.py cluster.yml
 from utils import Configurator
 
-if __name__ == "__main__":
+def main():
     c = Configurator(configFile=sys.argv[1])
     for node in c.config["agent_nodes"]:
         public_ip = node["public"]
@@ -28,3 +28,6 @@ yum install -y clusterhq-flocker-node
     print "Installed clusterhq-flocker-node on all nodes"
     print "To configure and deploy the cluster:"
     print "./deploy.py cluster.yml"
+
+if __name__ == "__main__":
+    main()

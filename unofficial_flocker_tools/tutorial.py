@@ -2,7 +2,7 @@
 import sys
 import yaml
 from utils import Configurator
-if __name__ == "__main__":
+def main():
     c = Configurator(configFile=sys.argv[1])
     if not c.config["users"]:
         print "no users!"
@@ -29,3 +29,6 @@ if __name__ == "__main__":
         print "\nNow move the container to another machine, and the dataset will follow!"
         print "NODE_UUID_2=" + node_mapping.values()[1]
         print prefix + header + """ -XPOST -d '{"node_uuid": "'${NODE_UUID_2}'"}' """ + url + "/configuration/containers/mongodb | jq ."
+
+if __name__ == "__main__":
+    main()

@@ -358,5 +358,8 @@ def main(reactor, *argv):
         sys.exit(1)
 
 
-if __name__ == "__main__":
+def _main():
     react(main, sys.argv[1:])
+
+if __name__ == "__main__":
+    _main()
