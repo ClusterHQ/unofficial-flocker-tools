@@ -28,9 +28,9 @@ settings_defaults = {
     # start/systemctl calls to this service name
     'DOCKER_SERVICE_NAME': 'docker.io',
     # what repo does the flocker plugin live in
-    'PLUGIN_REPO': 'https://github.com/robhaswell/flocker-docker-plugin',
+    'PLUGIN_REPO': 'https://github.com/clusterhq/flocker-docker-plugin',
     # what branch to use for the flocker plugin
-    'PLUGIN_BRANCH': 'setup.py-LABS-93',
+    'PLUGIN_BRANCH': 'master',
     # skip downloading the docker binary
     # for scenarios where vm images have been pre-baked
     'SKIP_DOCKER_BINARY': '',
