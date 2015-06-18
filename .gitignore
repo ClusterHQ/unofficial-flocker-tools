@@ -21,3 +21,4 @@ agent.yml
 node_mapping.yml
 *.pid
 node_modules
+venv
