@@ -53,13 +53,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       ansible.start_at_task = ENV['START_AT_TASK']
     end
 
-    ansible.verbose = 'v'
+    ansible.verbose = 'vvv'
     ansible.sudo = true
     ansible.playbook = 'site.yml'
     ansible.inventory_path = 'vagrant-inventory'
     ansible.limit = 'all'
-    ansible.raw_ssh_args = ['-o ControlMaster=no',
-                            '-o ControlPath=None']
+    #ansible.raw_ssh_args = ['-o ControlMaster=no',
+                            #'-o ControlPath=None']
 
     ansible.extra_vars = {
       'deploy_environment'    => 'vagrant',

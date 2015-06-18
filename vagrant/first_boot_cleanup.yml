@@ -1,0 +1,52 @@
+
+- hosts:
+  - all
+  max_fail_percentage: 1
+  sudo: true
+  user: vagrant
+
+  tasks:
+
+    # Clean up old APT repository files
+    # to prevent errors around invalid keys
+    # during the first vagrant boot
+    #
+    - name: is this our first boot
+      command: ls /etc/ansible_flags/first_boot_complete
+      register: first_boot_complete
+      ignore_errors: true
+
+    - name: clean partial lists
+      command: rm -f /var/lib/apt/lists/*
+      when: first_boot_complete.rc != 0
+
+    - name: clean partial lists
+      command: rm -rf /var/lib/apt/lists/partial/*
+      when: first_boot_complete.rc != 0
+
+    - name: remove old pkgs
+      command: apt-get -qq clean
+      when: first_boot_complete.rc != 0
+
+    - name: remove old pkgs
+      command: apt-get -qq autoremove
+      when: first_boot_complete.rc != 0
+
+    - name: update apt cache
+      command: apt-get -qq update
+      when: first_boot_complete.rc != 0
+
+    - name: update apt upgrade
+      command: apt-get -qq upgrade -y
+      when: first_boot_complete.rc != 0
+
+    - name: create /etc/ansible_flags
+      file: name=/etc/ansible_flags
+        state=directory
+      when: first_boot_complete.rc != 0
+
+    - name: first boot cleanup complete
+      file: path=/etc/ansible_flags/first_boot_complete
+        state=touch
+      when: first_boot_complete.rc != 0
+

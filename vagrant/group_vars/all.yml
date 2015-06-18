@@ -2,13 +2,19 @@ env:
   vagrant:
     # the servers block contain the ip address of our servers
     #
-    servers:
+    servers: &servers
       [
+        { name: 'redis',
+          box: 'ubuntu/trusty64',
+          ram: '512',
+          ip: '192.168.35.8',
+          inventory: 'vagrant-inventory',
+          vagrant_port: 2230
+        },
         { name: 'flcli',
           box: 'ubuntu/trusty64',
           ram: '768',
           ip: '192.168.35.10',
-          playbook: 'flocker-cli.yml',
           inventory: 'vagrant-inventory',
           vagrant_port: 2232
         },
@@ -16,7 +22,6 @@ env:
           box: 'ubuntu/trusty64',
           ram: '768',
           ip: '192.168.35.11',
-          playbook: 'flocker-node.yml',
           inventory: 'vagrant-inventory',
           vagrant_port: 2233
         },
@@ -24,12 +29,14 @@ env:
           box: 'ubuntu/trusty64',
           ram: '768',
           ip: '192.168.35.12',
-          playbook: 'flocker-node.yml',
           vagrant_port: 2234
         }
       ]
 
     flocker:
+      <<: *servers
+      redis_node: 192.168.35.8
+      redis_port: 6379
       cluster_name: flocker
       control_node: 192.168.35.10
       agent_nodes:

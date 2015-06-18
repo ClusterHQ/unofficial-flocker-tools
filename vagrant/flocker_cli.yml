@@ -1,0 +1,135 @@
+
+# Deploys the flocker-cli tools to the flocker_cli_server(s)
+# Initializes the flocker CA
+# generates API user keys
+# and flocker node certificates
+#
+- hosts:
+  - flocker_cli_servers
+  max_fail_percentage: 1
+  sudo: true
+  user: vagrant
+
+  roles:
+    # configure /etc/resolv.conf pointing to google DNS
+    - Azulinho.azulinho-google-dns
+
+    # deploy SSH keys from group_vars/all
+    - Azulinho.azulinho-ssh-keys
+
+    # install pip
+    - mbasanta.pip
+
+  post_tasks:
+    - name: install pyaml
+      pip: name=pyaml
+
+    - name: add flocker repository
+      apt_repository:
+        repo='deb https://clusterhq-archive.s3.amazonaws.com/ubuntu-testing/14.04/$(ARCH) /'
+        state=present
+
+    - name: install flocker
+      apt:
+        name=clusterhq-flocker-cli
+        update_cache=yes
+        state=latest
+        force=yes
+
+    - name: create /etc/flocker
+      file: path=/etc/flocker
+        state=directory
+
+    - name: flocker-ca initialize
+      command: /opt/flocker/bin/flocker-ca initialize {{flocker.cluster_name}}
+        chdir=/etc/flocker
+        creates=cluster.key
+
+    # creates /etc/flocker/control-192.168.35.10.crt
+    - name: flocker-ca create-control-certificate
+      command: /opt/flocker/bin/flocker-ca create-control-certificate {{flocker.control_node}}
+        chdir=/etc/flocker
+        creates="control-{{flocker.control_node}}.crt"
+      register: control_node_uuid
+
+    # we need to symlink the /etc/flocker/control-* to
+    # /etc/flocker-control-server-*
+    #
+    - name: symlinks control-service files
+      file: src={{item.src}}
+        dest={{item.dst}}
+        mode=0600
+        force=yes
+        state=link
+      with_items:
+        - { src: "/etc/flocker/control-{{flocker.control_node}}.key",
+            dst: "/etc/flocker/control-service-{{flocker.control_node}}.key" }
+        - { src: "/etc/flocker/control-{{flocker.control_node}}.crt",
+            dst: "/etc/flocker/control-service-{{flocker.control_node}}.crt" }
+
+    # create directories to hold the certificate files for our nodes
+    - name: create directories in /etc/flocker/ for our nodes
+      file: path=/etc/flocker/{{item}}
+        state=directory
+      with_items: flocker.agent_nodes
+
+    # create the node certificates and register the resulting filenames
+    # into uuid_agents
+    - name: flocker-ca create-node-certificate for servers
+      command: /opt/flocker/bin/flocker-ca create-node-certificate -o {{item}}
+        chdir=/etc/flocker/
+      register: uuids_agents
+      with_items: flocker.agent_nodes
+
+    # Ansible typically executes its actions from a management host (push mode)
+    # so here we download the (crt|key) files we just built to our management
+    # workstation, we will upload these later on to the correct nodes.
+    # this restricts ssh access between the different hosts
+    # an alternative approach would be to store it as an ansible fact
+    # and retrieve it using hostsvars on another server
+    #
+    #- name: fetch agents files from host
+      #fetch: src="/etc/flocker/{{item.1.stdout.split(' ')[1].split('.')[0].crt"
+        #dest="{{flocker.agent_agent_nodes[item[0]['stdout'].split(' ')[1]].crt"
+      #with_items: uuids_agents.results
+      #when: item.1.changed
+
+    #TODO: FIX THIS
+    - name: record agent filenames
+      shell: ls -r /etc/flocker/{{item}}/*.crt |tail -1 |awk '{ print $NF '} | cut -f 5 -d '/' | cut -f 1 -d '.'
+      with_items: flocker.agent_nodes
+      register: filenames[item]
+
+    - name: fetch agents files from host
+      fetch: src=/etc/flocker/{{item}}/{{filenames[item]}}.crt
+        dest={{item}}.crt
+      with_items: flocker.agent_nodes
+      when: uuids_agents.changed
+
+    - name: fetch agents files from host
+      fetch: src=/etc/flocker/{{item}}/{{filenames[item]}}.key
+        dest={{item}}.key
+      with_items: flocker.agent_nodes
+      when: uuids_agents.changed
+
+    # Create the API certificate for each user
+    - name: flocker-ca create-api-certificate for users
+      command: /opt/flocker/bin/flocker-ca create-api-certificate {{item}}
+        chdir=/etc/flocker
+        creates={{item}}.crt
+      register: uuids_users
+      with_items: flocker.users
+
+    # And download them to our management workstation
+    - name: fetch user cert to our workstation
+      fetch: src=/etc/flocker/{{item.stdout.split(' ')[1].split('.')[0]}}.crt
+        dest={{item.stdout.split(' ')[1].split('.')[0]}}.crt
+      with_items: uuids_users.results
+      when: item.changed == true
+
+    - name: fetch user key to our workstation
+      fetch: src=/etc/flocker/{{item.stdout.split(' ')[1].split('.')[0]}}.key
+        dest={{item.stdout.split(' ')[1].split('.')[0]}}.key
+      with_items: uuids_users.results
+      when: item.changed == true
+

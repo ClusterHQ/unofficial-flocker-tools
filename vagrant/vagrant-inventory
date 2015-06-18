@@ -2,6 +2,9 @@
 #       Ansible inventory file for: vagrant
 #
 
+[consul_servers]
+consul group=consul_servers deploy_env=vagrant ansible_ssh_host=127.0.0.1 ansible_ssh_port=2231
+
 [flocker_cli_servers]
 flcli group=flocker_cli_servers deploy_env=vagrant ansible_ssh_host=127.0.0.1 ansible_ssh_port=2232
 
@@ -9,6 +12,11 @@ flcli group=flocker_cli_servers deploy_env=vagrant ansible_ssh_host=127.0.0.1 an
 flnode1 group=flocker_node_servers deploy_env=vagrant ansible_ssh_host=127.0.0.1 ansible_ssh_port=2233
 flnode2 group=flocker_node_servers deploy_env=vagrant ansible_ssh_host=127.0.0.1 ansible_ssh_port=2234
 
+[redis_servers]
+redis group=redis_servers deploy_env=vagrant ansible_ssh_host=127.0.0.1 ansible_ssh_port=2230
+
 [vagrant:children]
 flocker_node_servers
 flocker_cli_servers
+consul_servers
+redis_servers

@@ -13,6 +13,7 @@ vagrant_plugins = {'ansible': '0.2.0',
 galaxy_roles = ['Azulinho.azulinho-google-dns',
                 'Azulinho.azulinho-ssh-keys',
                 'aeriscloud.docker',
+                'DavidWittman.redis',
                 'mbasanta.pip']
 
 INSTALLED_VAGRANT_PLUGINS = local('vagrant plugin list', capture=True)

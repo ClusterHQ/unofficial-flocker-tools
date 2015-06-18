@@ -1,0 +1,63 @@
+- hosts:
+  - flocker_node_servers
+  max_fail_percentage: 1
+  sudo: true
+  user: vagrant
+  gather_facts: true
+
+  roles:
+    # configure /etc/resolv.conf
+    - Azulinho.azulinho-google-dns
+
+    # deploy SSH keys
+    - Azulinho.azulinho-ssh-keys
+
+    # install pip
+    - mbasanta.pip
+
+  post_tasks:
+
+    - name: install pyaml
+      pip: name=pyaml
+
+    - name: add docker repository
+      apt_repository:
+        repo='ppa:james-page/docker'
+        state=present
+
+    - name: install docker.io
+      apt:
+        name=docker.io
+        update_cache=yes
+        state=present
+
+    - name: add flocker repository
+      apt_repository:
+        repo='deb https://clusterhq-archive.s3.amazonaws.com/ubuntu-testing/14.04/$(ARCH) /'
+        state=present
+
+    - name: install flocker
+      apt:
+        name=clusterhq-flocker-node
+        update_cache=yes
+        state=latest
+        force=yes
+
+    - name: create /etc/flocker
+      file: path=/etc/flocker
+        state=directory
+
+    - name: create agent.yml
+      copy: dest=/etc/flocker/agent.yml
+        content="{{ flocker['agent_config']) | to_nice_yaml }}"
+
+    # copy the generated files by flocker-tools to our flocker-nodes
+    - name: copy node files to host
+      copy: src={{item}}.crt
+        dest=/etc/flocker/node.crt
+      with_items: flocker.agent_nodes
+
+    - name: copy node files to host
+      copy: src={{item}}.key
+        dest=/etc/flocker/node.key
+      with_items: flocker.agent_nodes
