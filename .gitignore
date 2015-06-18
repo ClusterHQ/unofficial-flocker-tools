@@ -22,3 +22,6 @@ node_mapping.yml
 *.pid
 node_modules
 venv
+build
+dist
+*.egg-info
