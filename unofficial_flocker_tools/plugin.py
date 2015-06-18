@@ -124,10 +124,14 @@ def main():
 
             if c.config["os"] == "ubuntu":
                 print c.runSSHRaw(public_ip, 
-                    "apt-get install -y python-pip python-dev")
+                    "apt-get install -y "
+                    "python-pip python-dev build-essential "
+                    "libssl-dev libffi-dev")
             elif c.config["os"] == "centos":
                 print c.runSSHRaw(public_ip, 
-                    "yum install -y python-pip python-devel")
+                    "yum install -y "
+                    "python-pip python-devel "
+                    "gcc libffi-devel python-devel openssl-devel")
 
             # pip install the plugin
             print c.runSSHRaw(public_ip, "pip install git+%s@%s"
