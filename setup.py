@@ -8,10 +8,10 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'flocker-config= unofficial_flocker_tools.deploy:main',
-            'flocker-install= unofficial_flocker_tools.install:main',
-            'flocker-plugin-install= unofficial_flocker_tools.plugin:main',
-            'flocker-tutorial= unofficial_flocker_tools.tutorial:main',
+            'flocker-config = unofficial_flocker_tools.deploy:main',
+            'flocker-install = unofficial_flocker_tools.install:main',
+            'flocker-plugin-install = unofficial_flocker_tools.plugin:main',
+            'flocker-tutorial = unofficial_flocker_tools.tutorial:main',
             'flocker-volumes = unofficial_flocker_tools.flocker_volumes:_main',
         ],
     },
