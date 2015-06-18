@@ -28,9 +28,9 @@ settings_defaults = {
     # start/systemctl calls to this service name
     'DOCKER_SERVICE_NAME': 'docker.io',
     # what repo does the flocker plugin live in
-    'PLUGIN_REPO': 'https://github.com/clusterhq/flocker-docker-plugin',
+    'PLUGIN_REPO': 'https://github.com/robhaswell/flocker-docker-plugin',
     # what branch to use for the flocker plugin
-    'PLUGIN_BRANCH': 'master',
+    'PLUGIN_BRANCH': 'setup.py-LABS-93',
     # skip downloading the docker binary
     # for scenarios where vm images have been pre-baked
     'SKIP_DOCKER_BINARY': '',
@@ -114,31 +114,26 @@ def main():
     for node in c.config["agent_nodes"]:
         public_ip = node["public"]
         private_ip = node["private"]
-        # we need this so we know what folder to cd into
-        plugin_repo_folder = settings['PLUGIN_REPO'].split('/').pop()
-
+        
         # the full api path to the control service
         controlservice = 'https://%s:4523/v1' % (control_ip,)
 
         # perhaps the user has pre-compiled images with the plugin
         # downloaded and installed
         if not settings["SKIP_INSTALL_PLUGIN"]:
-            # clone the right repo and checkout the branch
-            print "Cloning the plugin repo on %s - %s" \
-                % (public_ip, settings['PLUGIN_REPO'],)
-            c.runSSHRaw(public_ip, "git clone -b %s %s"
-                % (settings['PLUGIN_BRANCH'], settings['PLUGIN_REPO'],))
 
-            # install pip and python-dev
             if c.config["os"] == "ubuntu":
-                c.runSSHRaw(public_ip, "apt-get install -y python-dev python-pip")
-            # configure a systemd job that runs the bash script
+                print c.runSSHRaw(public_ip, 
+                    "apt-get install -y python-pip python-dev")
             elif c.config["os"] == "centos":
-                c.runSSHRaw(public_ip, "yum install -y python-devel python-pip")
+                print c.runSSHRaw(public_ip, 
+                    "yum install -y python-pip python-devel")
 
             # pip install the plugin
-            c.runSSHRaw(public_ip, "pip install -r /root/%s/requirements.txt"
-                % (plugin_repo_folder,))
+            print c.runSSHRaw(public_ip, "pip install git+%s@%s"
+                % (settings['PLUGIN_REPO'], settings['PLUGIN_BRANCH'],))
+        else:
+            print "Skipping installing plugin: %r" % (settings["SKIP_INSTALL_PLUGIN"],)
 
         # ensure that the /usr/share/docker/plugins
         # folder exists
@@ -148,9 +143,9 @@ def main():
 
         if c.config["os"] == "ubuntu":
 
-            print "Writing flocker-plugin upstart job to %s" % (public_ip,)
-            c.runSSH(public_ip, """cat <<EOF > /etc/init/flocker-plugin.conf
-# flocker-plugin - flocker-plugin job file
+            print "Writing flocker-docker-plugin upstart job to %s" % (public_ip,)
+            c.runSSH(public_ip, """cat <<EOF > /etc/init/flocker-docker-plugin.conf
+# flocker-plugin - flocker-docker-plugin job file
 
 description "Flocker Plugin service"
 author "ClusterHQ <support@clusterhq.com>"
@@ -158,31 +153,29 @@ author "ClusterHQ <support@clusterhq.com>"
 respawn
 env FLOCKER_CONTROL_SERVICE_BASE_URL=%s
 env MY_NETWORK_IDENTITY=%s
-chdir /root/%s
-exec /usr/bin/twistd -noy flockerdockerplugin.tac
+exec /usr/local/bin/flocker-docker-plugin
 EOF
-service flocker-plugin restart
-""" % (controlservice, private_ip, plugin_repo_folder,))
+service flocker-docker-plugin restart
+""" % (controlservice, private_ip,))
         # configure a systemd job that runs the bash script
         elif c.config["os"] == "centos":
-            print "Writing flocker-plugin systemd job to %s" % (public_ip,)
-            c.runSSH(public_ip, """# writing flocker-plugin systemd
-cat <<EOF > /etc/systemd/system/flocker-plugin.service
+            print "Writing flocker-docker-plugin systemd job to %s" % (public_ip,)
+            c.runSSH(public_ip, """# writing flocker-docker-plugin systemd
+cat <<EOF > /etc/systemd/system/flocker-docker-plugin.service
 [Unit]
-Description=flocker-plugin - flocker-plugin job file
+Description=flocker-plugin - flocker-docker-plugin job file
 
 [Service]
 Environment=FLOCKER_CONTROL_SERVICE_BASE_URL=%s
 Environment=MY_NETWORK_IDENTITY=%s
-ExecStart=/usr/bin/twistd -noy flockerdockerplugin.tac
-WorkingDirectory=/root/%s
+ExecStart=/usr/local/bin/flocker-docker-plugin
 
 [Install]
 WantedBy=multi-user.target
 EOF
-systemctl enable flocker-plugin.service
-systemctl start flocker-plugin.service
-""" % (controlservice, private_ip, plugin_repo_folder,))
+systemctl enable flocker-docker-plugin.service
+systemctl start flocker-docker-plugin.service
+""" % (controlservice, private_ip,))
 
 if __name__ == "__main__":
     main()
