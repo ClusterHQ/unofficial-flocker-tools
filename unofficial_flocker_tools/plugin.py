@@ -125,7 +125,7 @@ def main():
         if not settings["SKIP_INSTALL_PLUGIN"]:
             # clone the right repo and checkout the branch
             print "Cloning the plugin repo on %s - %s" \
-                %(public_ip, settings['PLUGIN_REPO'],)
+                % (public_ip, settings['PLUGIN_REPO'],)
             c.runSSHRaw(public_ip, "git clone -b %s %s"
                 % (settings['PLUGIN_BRANCH'], settings['PLUGIN_REPO'],))
 
