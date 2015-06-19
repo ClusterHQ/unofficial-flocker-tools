@@ -116,6 +116,33 @@ flocker-tutorial cluster.yml
 
 this will print out a tutorial customized to your deployment.
 
+## volumes cli
+
+A CLI tool to interact with the Flocker REST API.
+
+```
+$ flocker-volumes --help
+Usage: flocker-volumes [options]
+Options:
+      --cluster-yml=      Location of cluster.yml file (makes other options
+                          unnecessary) [default: ./cluster.yml]
+      --certs-path=       Path to certificates folder [default: .]
+      --user=             Name of user for which .key and .crt files exist
+                          [default: user]
+      --cluster-crt=      Name of cluster cert file [default: cluster.crt]
+      --control-service=  Hostname or IP of control service
+      --control-port=     Port for control service REST API [default: 4523]
+      --version           Display Twisted version and exit.
+      --help              Display this help and exit.
+Commands:
+    create          create a flocker dataset
+    destroy         mark a dataset to be deleted
+    list            list flocker datasets
+    list-nodes      show list of nodes in the cluster
+    move            move a dataset from one node to another
+    version         show version information
+```
+
 ## notes
 
 * you need to ensure that machines can be SSH'd into as root
