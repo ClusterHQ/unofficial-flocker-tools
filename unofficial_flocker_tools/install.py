@@ -27,7 +27,7 @@ yum install -y clusterhq-flocker-node
 
     print "Installed clusterhq-flocker-node on all nodes"
     print "To configure and deploy the cluster:"
-    print "flocker-deploy cluster.yml"
+    print "flocker-config cluster.yml"
 
 if __name__ == "__main__":
     main()
