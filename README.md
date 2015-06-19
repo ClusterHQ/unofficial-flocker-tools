@@ -71,7 +71,7 @@ vim cluster.yml # customize for your cluster
 ## install
 
 ```
-./install.py cluster.yml
+flocker-install cluster.yml
 ```
 
 this will install the packages on your nodes
@@ -79,10 +79,10 @@ this will install the packages on your nodes
 at this point you will need to manually install the latest (highest numbered) packages from http://build.clusterhq.com/results/omnibus/master/ onto your nodes as well.
 
 
-## deploy
+## config
 
 ```
-./deploy.py cluster.yml
+flocker-config cluster.yml
 ```
 
 this will configure certificates, push them to your nodes, and set up firewall rules for the control service
@@ -92,7 +92,7 @@ on AWS, you'll need to add a firewall rule for TCP port 4523 and 4524 if you wan
 ## plugin
 
 ```
-./plugin.py cluster.yml
+flocker-plugin-install cluster.yml
 ```
 
 this will configure api certificates for the docker-plugin and push them to your nodes - it will name them `/etc/flocker/plugin.{crt,key}`
@@ -111,7 +111,7 @@ The environment variables that control this are:
 ## tutorial
 
 ```
-./tutorial.py cluster.yml
+flocker-tutorial cluster.yml
 ```
 
 this will print out a tutorial customized to your deployment.
