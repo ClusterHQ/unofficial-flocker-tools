@@ -9,6 +9,3 @@ def main():
         resource = resource_filename("unofficial_flocker_tools", "samples/" + filename)
         shutil.copyfile(resource, filename)
         print filename
-
-if __name__ == "__main__":
-    main()
