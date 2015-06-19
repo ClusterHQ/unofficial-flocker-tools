@@ -143,6 +143,14 @@ Commands:
     version         show version information
 ```
 
+## sample files
+
+A tool to copy the sample configuration files into the current working directory.
+
+```bash
+$ flocker-sample-files
+```
+
 ## notes
 
 * you need to ensure that machines can be SSH'd into as root
