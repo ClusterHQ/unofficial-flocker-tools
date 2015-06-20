@@ -71,7 +71,7 @@ vim cluster.yml # customize for your cluster
 ## install
 
 ```
-./install.py cluster.yml
+flocker-install cluster.yml
 ```
 
 this will install the packages on your nodes
@@ -79,10 +79,10 @@ this will install the packages on your nodes
 at this point you will need to manually install the latest (highest numbered) packages from http://build.clusterhq.com/results/omnibus/master/ onto your nodes as well.
 
 
-## deploy
+## config
 
 ```
-./deploy.py cluster.yml
+flocker-config cluster.yml
 ```
 
 this will configure certificates, push them to your nodes, and set up firewall rules for the control service
@@ -92,7 +92,7 @@ on AWS, you'll need to add a firewall rule for TCP port 4523 and 4524 if you wan
 ## plugin
 
 ```
-./plugin.py cluster.yml
+flocker-plugin-install cluster.yml
 ```
 
 this will configure api certificates for the docker-plugin and push them to your nodes - it will name them `/etc/flocker/plugin.{crt,key}`
@@ -111,10 +111,45 @@ The environment variables that control this are:
 ## tutorial
 
 ```
-./tutorial.py cluster.yml
+flocker-tutorial cluster.yml
 ```
 
 this will print out a tutorial customized to your deployment.
+
+## volumes cli
+
+A CLI tool to interact with the Flocker REST API.
+
+```
+$ flocker-volumes --help
+Usage: flocker-volumes [options]
+Options:
+      --cluster-yml=      Location of cluster.yml file (makes other options
+                          unnecessary) [default: ./cluster.yml]
+      --certs-path=       Path to certificates folder [default: .]
+      --user=             Name of user for which .key and .crt files exist
+                          [default: user]
+      --cluster-crt=      Name of cluster cert file [default: cluster.crt]
+      --control-service=  Hostname or IP of control service
+      --control-port=     Port for control service REST API [default: 4523]
+      --version           Display Twisted version and exit.
+      --help              Display this help and exit.
+Commands:
+    create          create a flocker dataset
+    destroy         mark a dataset to be deleted
+    list            list flocker datasets
+    list-nodes      show list of nodes in the cluster
+    move            move a dataset from one node to another
+    version         show version information
+```
+
+## sample files
+
+A tool to copy the sample configuration files into the current working directory.
+
+```
+$ flocker-sample-files
+```
 
 ## notes
 
