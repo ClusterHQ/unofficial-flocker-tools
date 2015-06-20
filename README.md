@@ -147,7 +147,7 @@ Commands:
 
 A tool to copy the sample configuration files into the current working directory.
 
-```bash
+```
 $ flocker-sample-files
 ```
 
