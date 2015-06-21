@@ -1,39 +1,15 @@
-# Trying out the volumes GUI
+# Unofficial Flocker Tools
 
-Prerequisites:
+This repository contains several ClusterHQ Labs projects.
 
-* A Flocker cluster, if you don't have one of these then try [unofficial-flocker-tools](https://github.com/ClusterHQ/unofficial-flocker-tools/)
-* Docker
-* A web browser (tested on Google Chrome)
+* [Experimental Installer](https://docs.clusterhq.com/en/latest/labs/installer
+.html)
+* [Prototype Volumes CLI](https://docs.clusterhq.com/en/latest/labs/volumes-cl
+i.html)
+* [Prototype Volumes GUI](https://docs.clusterhq.com/en/latest/labs/volumes-gu
+i.html)
 
-## step 1 -- run the container with your local keys
+## Documentation
 
-```
-cd unofficial-flocker-tools/web
-export CERTS=$PWD/..
-export CONTROL_SERVICE=your.control.service
-export USERNAME=certuser
-docker run --name experimental-volumes-gui \
-    -d -p 80:80 \
-    -e CONTROL_SERVICE=$CONTROL_SERVICE \
-    -e USERNAME=user \
-    -e CERTS_PATH=/ \
-    -v $CERTS/$USERNAME.key:/user.key \
-    -v $CERTS/$USERNAME.crt:/user.crt \
-    -v $CERTS/cluster.crt:/cluster.crt \
-    clusterhq/experimental-volumes-gui
-```
-
-TODO: test boot2docker
-
-## step 2 -- load up the experimental flocker gui
-
-Go to [http://localhost/client](http://localhost/client/#/nodes/list) or, if you are using boot2docker:
-
-```
-open http://$(boot2docker ip)/client/#/nodes/list
-```
-
-## step 3
-
-There is no step 3.
+Please refer to the individual projects above for instructions on how to use this repo.
+You may want to start with the installer docs.
