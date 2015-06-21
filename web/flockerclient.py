@@ -212,7 +212,7 @@ class CombinedDatasets(resource.Resource):
         fragments = request.uri.split("/")
         return DatasetResource(dataset_id=fragments.pop().encode("ascii"))
     def render_GET(self, request):
-        d = combined_state(get_client(), get_base_url(), deleted=True)
+        d = combined_state(get_client(), get_base_url(), deleted=False)
         def got_state(result):
             request.setHeader("content-type", "application/json")
             request.setHeader("access-control-allow-origin", "*")
