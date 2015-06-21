@@ -2,12 +2,9 @@
 
 This repository contains several ClusterHQ Labs projects.
 
-* [Experimental Installer](https://docs.clusterhq.com/en/latest/labs/installer
-.html)
-* [Prototype Volumes CLI](https://docs.clusterhq.com/en/latest/labs/volumes-cl
-i.html)
-* [Prototype Volumes GUI](https://docs.clusterhq.com/en/latest/labs/volumes-gu
-i.html)
+* [Experimental Installer](https://docs.clusterhq.com/en/latest/labs/installer.html)
+* [Prototype Volumes CLI](https://docs.clusterhq.com/en/latest/labs/volumes-cli.html)
+* [Prototype Volumes GUI](https://docs.clusterhq.com/en/latest/labs/volumes-gui.html)
 
 ## Documentation
 
