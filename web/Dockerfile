@@ -19,7 +19,7 @@ ADD         . /app
 WORKDIR     /app
 
 # Install requirements from the project's setup.py
-RUN         python setup.py install
+RUN         pip install .
 
 #CMD         ["twistd", "-noy", "server.tac"]
 CMD         ["./start.sh"]
