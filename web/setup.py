@@ -3,12 +3,9 @@
 """
 Setup Flocker Experimental GUI.
 """
-import os
-from setuptools import setup, find_packages
+from setuptools import setup
 
-
-with open("README.md") as readme:
-    description = readme.read()
+description = "Experimental Flocker GUI"
 
 setup(
     # This is the human-targetted name of the software being packaged.
