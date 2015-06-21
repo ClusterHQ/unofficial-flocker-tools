@@ -326,5 +326,5 @@ function reloadData(){
     
 }
 
-setInterval(reloadData, 5000)
+setInterval(reloadData, 10000)
 
