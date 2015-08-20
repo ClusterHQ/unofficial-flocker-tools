@@ -73,20 +73,21 @@ systemctl start docker.service
             c.runSSH(node, """echo
 rm -rf /tmp/flocker-command-log
 echo > /tmp/flocker-command-log
-docker run -d --net=host --privileged \\
+docker run --restart=always -d --net=host --privileged \\
     -v /etc/flocker:/etc/flocker \\
     -v /var/run/docker.sock:/var/run/docker.sock \\
     --name=flocker-container-agent \\
     clusterhq/flocker-container-agent
-docker run --net=host --privileged \\
+docker run --restart=always -d --net=host --privileged \\
     -e DEBUG=1 \\
     -v /tmp/flocker-command-log:/tmp/flocker-command-log \\
     -v /flocker:/flocker -v /:/host -v /etc/flocker:/etc/flocker \\
-    -v /dev:/dev -d \\
+    -v /dev:/dev \\
     --name=flocker-dataset-agent \\
     clusterhq/flocker-dataset-agent
 """)
 
+    import pdb; pdb.set_trace()
     if c.config["os"] == "ubuntu":
         c.runSSH(c.config["control_node"], """cat <<EOF > /etc/init/flocker-control.override
 start on runlevel [2345]
@@ -107,10 +108,8 @@ firewall-cmd --permanent --add-service flocker-control-agent
 firewall-cmd --add-service flocker-control-agent
 """)
     elif c.config["os"] == "coreos":
-        c.runSSH(node, """docker run -d --net=host -v /etc/flocker:/etc/flocker \\
-    --name=flocker-control-service \\
-    clusterhq/flocker-control-service
-""")
+        c.runSSH(c.config["control_node"], """echo
+docker run --restart=always -d --net=host -v /etc/flocker:/etc/flocker --name=flocker-control-service clusterhq/flocker-control-service""")
 
     print "Configured and started control service, opened firewall."
 
