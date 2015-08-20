@@ -70,7 +70,9 @@ systemctl start docker.service
 """)
 
         elif c.config["os"] == "coreos":
-            c.runSSH(node, """touch /tmp/flocker-command-log
+            c.runSSH(node, """echo
+rm -rf /tmp/flocker-command-log
+echo > /tmp/flocker-command-log
 docker run -d --net=host --privileged \\
     -v /etc/flocker:/etc/flocker \\
     -v /var/run/docker.sock:/var/run/docker.sock \\

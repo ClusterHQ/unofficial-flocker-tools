@@ -19,7 +19,7 @@ setup(
             "flocker-volumes = unofficial_flocker_tools.flocker_volumes:_main",
         ],
     },
-    version="0.1",
+    version="0.2",
     description="Unofficial tools to make installing and using Flocker easier and more fun.",
     author="Luke Marsden",
     author_email="luke@clusterhq.com",
