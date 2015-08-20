@@ -5,7 +5,7 @@ agent_nodes:
 control_node: dns.name.for.control.node # or IP address (but you must always connect via TLS to the given name here)
 users:
  - user1
-os: XXX # ubuntu or centos
+os: XXX # ubuntu, centos or coreos
 private_key_path: XXX # the key used to SSH as root onto the nodes
 agent_config:
   version: 1
