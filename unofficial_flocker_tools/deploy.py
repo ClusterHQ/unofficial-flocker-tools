@@ -39,12 +39,12 @@ def main():
     # Dump agent_config into a file and scp it to /etc/flocker/agent.yml on the
     # nodes.
     f = open("agent.yml", "w")
-    agent_config = yaml.dump(c.config["agent_config"], f)
+    yaml.dump(c.config["agent_config"], f)
     f.close()
 
     # Record the node mapping for later.
     f = open("node_mapping.yml", "w")
-    agent_config = yaml.dump(node_mapping, f)
+    yaml.dump(node_mapping, f)
     f.close()
 
     # Copy cluster cert, and agent cert and key to agent nodes.
@@ -69,6 +69,24 @@ systemctl enable docker.service
 systemctl start docker.service
 """)
 
+        elif c.config["os"] == "coreos":
+            c.runSSH(node, """echo
+rm -rf /tmp/flocker-command-log
+echo > /tmp/flocker-command-log
+docker run --restart=always -d --net=host --privileged \\
+    -v /etc/flocker:/etc/flocker \\
+    -v /var/run/docker.sock:/var/run/docker.sock \\
+    --name=flocker-container-agent \\
+    clusterhq/flocker-container-agent
+docker run --restart=always -d --net=host --privileged \\
+    -e DEBUG=1 \\
+    -v /tmp/flocker-command-log:/tmp/flocker-command-log \\
+    -v /flocker:/flocker -v /:/host -v /etc/flocker:/etc/flocker \\
+    -v /dev:/dev \\
+    --name=flocker-dataset-agent \\
+    clusterhq/flocker-dataset-agent
+""")
+
     if c.config["os"] == "ubuntu":
         c.runSSH(c.config["control_node"], """cat <<EOF > /etc/init/flocker-control.override
 start on runlevel [2345]
@@ -88,6 +106,10 @@ firewall-cmd --add-service flocker-control-api
 firewall-cmd --permanent --add-service flocker-control-agent
 firewall-cmd --add-service flocker-control-agent
 """)
+    elif c.config["os"] == "coreos":
+        c.runSSH(c.config["control_node"], """echo
+docker run --restart=always -d --net=host -v /etc/flocker:/etc/flocker --name=flocker-control-service clusterhq/flocker-control-service""")
+
     print "Configured and started control service, opened firewall."
 
     if c.config["users"]:
@@ -95,7 +117,6 @@ firewall-cmd --add-service flocker-control-agent
         prefix = ("curl -s --cacert $PWD/cluster.crt --cert $PWD/%(user)s.crt "
                   "--key $PWD/%(user)s.key" % dict(user=c.config["users"][0],))
         url = "https://%(control_node)s:4523/v1" % dict(control_node=c.config["control_node"],)
-        header = ' --header "Content-type: application/json"'
         print "This should give you a list of your nodes:"
         print prefix + " " + url + "/state/nodes | jq ."
         print "Try running tutorial.py cluster.yml for more..."
