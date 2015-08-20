@@ -87,7 +87,6 @@ docker run --restart=always -d --net=host --privileged \\
     clusterhq/flocker-dataset-agent
 """)
 
-    import pdb; pdb.set_trace()
     if c.config["os"] == "ubuntu":
         c.runSSH(c.config["control_node"], """cat <<EOF > /etc/init/flocker-control.override
 start on runlevel [2345]
