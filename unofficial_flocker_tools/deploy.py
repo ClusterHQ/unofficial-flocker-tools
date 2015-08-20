@@ -71,13 +71,11 @@ systemctl start docker.service
 
         elif c.config["os"] == "coreos":
             c.runSSH(node, """touch /tmp/flocker-command-log
-
 docker run -d --net=host --privileged \\
     -v /etc/flocker:/etc/flocker \\
     -v /var/run/docker.sock:/var/run/docker.sock \\
     --name=flocker-container-agent \\
     clusterhq/flocker-container-agent
-
 docker run --net=host --privileged \\
     -e DEBUG=1 \\
     -v /tmp/flocker-command-log:/tmp/flocker-command-log \\
@@ -107,8 +105,7 @@ firewall-cmd --permanent --add-service flocker-control-agent
 firewall-cmd --add-service flocker-control-agent
 """)
     elif c.config["os"] == "coreos":
-        c.runSSH(node, """
-docker run -d --net=host -v /etc/flocker:/etc/flocker \\
+        c.runSSH(node, """docker run -d --net=host -v /etc/flocker:/etc/flocker \\
     --name=flocker-control-service \\
     clusterhq/flocker-control-service
 """)
