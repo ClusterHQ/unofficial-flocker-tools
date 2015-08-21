@@ -30,7 +30,7 @@ def post_json(parent, url, data):
     d.addCallback(treq.json_content)
     return d
 
-EVENT_TIMEOUT = 120
+EVENT_TIMEOUT = 240
 
 class MoveVolumes(Options):
     """
