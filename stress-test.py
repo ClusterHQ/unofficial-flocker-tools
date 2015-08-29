@@ -30,12 +30,12 @@ def post_json(parent, url, data):
     d.addCallback(treq.json_content)
     return d
 
-EVENT_TIMEOUT = 240
+EVENT_TIMEOUT = 300
 
 class MoveVolumes(Options):
     """
     create a volume and move it around forever.
-    log if it ever gets stuck for more than a minute.
+    log if it ever gets stuck for more than five minutes.
     """
     optParameters = [
         ("dataset", "d", None, "Dataset to move (uuid)"),
