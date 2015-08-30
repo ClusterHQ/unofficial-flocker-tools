@@ -71,7 +71,6 @@ systemctl start docker.service
 
         elif c.config["os"] == "coreos":
             c.runSSH(node, """echo
-rm -rf /tmp/flocker-command-log
 echo > /tmp/flocker-command-log
 docker run --restart=always -d --net=host --privileged \\
     -v /etc/flocker:/etc/flocker \\
@@ -108,7 +107,8 @@ firewall-cmd --add-service flocker-control-agent
 """)
     elif c.config["os"] == "coreos":
         c.runSSH(c.config["control_node"], """echo
-docker run --restart=always -d --net=host -v /etc/flocker:/etc/flocker --name=flocker-control-service clusterhq/flocker-control-service""")
+docker run --name=flocker-control-volume -v /var/lib/flocker clusterhq/flocker-control-service true
+docker run --restart=always -d --net=host -v /etc/flocker:/etc/flocker --volumes-from=flocker-control-volume --name=flocker-control-service clusterhq/flocker-control-service""")
 
     print "Configured and started control service, opened firewall."
 

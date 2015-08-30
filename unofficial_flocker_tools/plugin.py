@@ -3,10 +3,9 @@
 
 # This script will generate a user certificate using flocker-ca and upload it
 # ready for the plugin to consume
-# It will then upload an experimental build of docker
-# (i.e. one that supports --volume-drvier)
-# It will then git clone this repo and configure the plugin to run
-# with the certs
+# It will then install a build of docker that supports --volume-driver
+# It will then pip to install the plugin to run with the certs and set up
+# startup scripts according to the platform
 
 import sys
 import os
@@ -19,9 +18,7 @@ from utils import Configurator
 settings_defaults = {
     # allow env override for where to download the experimental
     # docker binary from
-    # the docker-volumes binary is a buid from latest docker/master:
-    # 4caa9392f8aa4e57bfe43880b5f67d15b00ed8a7
-    'DOCKER_BINARY_URL': 'http://storage.googleapis.com/experiments-clusterhq/docker-binaries/docker-volumes', # noqa
+    'DOCKER_BINARY_URL': 'https://get.docker.com/builds/Linux/x86_64/docker-latest',
     # perhaps the name of the docker service running on the host is
     # different to 'docker' for example - the clusterhq-flocker-node package
     # installed 'docker.io' depending on OS this translates to
@@ -70,11 +67,11 @@ def main():
         if c.config["os"] == "ubuntu":
             c.runSSHRaw(public_ip, "stop %s || true"
                 % (settings['DOCKER_SERVICE_NAME'],))
-        elif c.config["os"] == "centos":
+        elif c.config["os"] == "centos" or c.config["os"] == "coreos":
             c.runSSHRaw(public_ip, "systemctl stop %s.service || true"
                 % (settings['DOCKER_SERVICE_NAME'],))
 
-        # download the latest docker binary\
+        # download the latest docker binary
         print "Downloading the latest docker binary on %s - %s" \
             % (public_ip, settings['DOCKER_BINARY_URL'],)
         c.runSSHRaw(public_ip, "wget -O /usr/bin/docker %s"
@@ -90,7 +87,7 @@ def main():
         if c.config["os"] == "ubuntu":
             c.runSSHRaw(public_ip, "start %s"
                 % (settings['DOCKER_SERVICE_NAME'],))
-        elif c.config["os"] == "centos":
+        elif c.config["os"] == "centos" or c.config["os"] == "coreos":
             c.runSSHRaw(public_ip, "systemctl start %s.service"
               % (settings['DOCKER_SERVICE_NAME'],))
 
@@ -122,27 +119,31 @@ def main():
         # downloaded and installed
         if not settings["SKIP_INSTALL_PLUGIN"]:
 
+            pip_install = False
             if c.config["os"] == "ubuntu":
                 print c.runSSHRaw(public_ip, 
                     "apt-get install -y "
                     "python-pip python-dev build-essential "
                     "libssl-dev libffi-dev")
+                pip_install = True
             elif c.config["os"] == "centos":
                 print c.runSSHRaw(public_ip, 
                     "yum install -y "
                     "python-pip python-devel "
                     "gcc libffi-devel python-devel openssl-devel")
+                pip_install = True
 
-            # pip install the plugin
-            print c.runSSHRaw(public_ip, "pip install git+%s@%s"
-                % (settings['PLUGIN_REPO'], settings['PLUGIN_BRANCH'],))
+            if pip_install:
+                # pip install the plugin
+                print c.runSSHRaw(public_ip, "pip install git+%s@%s"
+                    % (settings['PLUGIN_REPO'], settings['PLUGIN_BRANCH'],))
         else:
             print "Skipping installing plugin: %r" % (settings["SKIP_INSTALL_PLUGIN"],)
 
-        # ensure that the /usr/share/docker/plugins
+        # ensure that the /run/docker/plugins
         # folder exists
-        print "Creating the /usr/share/docker/plugins folder"
-        c.runSSHRaw(public_ip, "mkdir -p /usr/share/docker/plugins")
+        print "Creating the /run/docker/plugins folder"
+        c.runSSHRaw(public_ip, "mkdir -p /run/docker/plugins")
         # configure an upstart job that runs the bash script
 
         if c.config["os"] == "ubuntu":
@@ -180,6 +181,17 @@ EOF
 systemctl enable flocker-docker-plugin.service
 systemctl start flocker-docker-plugin.service
 """ % (controlservice, private_ip,))
+        # DOCKER DOCKER DOCKER DOCKER
+        elif c.config["os"] == "coreos":
+            print "Starting flocker-docker-plugin as docker container on CoreOS on %s" % (public_ip,)
+            c.runSSH(node, """echo
+docker run --restart=always -d --net=host --privileged \\
+-e FLOCKER_CONTROL_SERVICE_BASE_URL=%s \\
+-e MY_NETWORK_IDENTITY=%s \\
+-v /etc/flocker:/etc/flocker \\
+-v /var/run/docker.sock:/var/run/docker.sock \\
+--name=flocker-docker-plugin \\
+clusterhq/flocker-docker-plugin""" % (controlservice, private_ip,))
 
 if __name__ == "__main__":
     main()
