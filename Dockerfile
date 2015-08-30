@@ -17,6 +17,7 @@ RUN         apt-get -qy install python-dev
 RUN         apt-get -qy install libyaml-dev
 RUN         apt-get -qy install libffi-dev
 RUN         apt-get -qy install libssl-dev
+RUN         apt-get -qy install dialog
 
 ADD         . /app
 

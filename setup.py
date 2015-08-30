@@ -29,5 +29,6 @@ setup(
         "Twisted>=14",
         "treq>=14",
         "pyasn1>=0.1",
+        "python2-pythondialog",
     ],
 )
