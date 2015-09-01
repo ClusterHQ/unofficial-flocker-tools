@@ -17,16 +17,18 @@ def main():
         user = "ubuntu"
     elif c.config["os"] == "centos":
         user = "centos"
-    cmd = ("sudo sh -c 'echo; mkdir -p /root/.ssh && "
-           "cp /home/%s/.ssh/authorized_keys /root/.ssh/authorized_keys'" % (user,))
+    cmd1 = "sudo mkdir -p /root/.ssh"
+    cmd2 = "sudo cp /home/%s/.ssh/authorized_keys /root/.ssh/authorized_keys'" % (user,)
     ips = []
     for node in c.config["agent_nodes"]:
         ips.append(node["public"])
     for public_ip in ips:
-        c.runSSHRaw(public_ip, cmd, username=user)
+        c.runSSHRaw(public_ip, cmd1, username=user)
+        c.runSSHRaw(public_ip, cmd2, username=user)
         print "Enabled root access to %s" % (public_ip,)
     if c.config["control_node"] not in ips:
-        c.runSSHRaw(c.config["control_node"], cmd, username=user)
+        c.runSSHRaw(c.config["control_node"], cmd1, username=user)
+        c.runSSHRaw(c.config["control_node"], cmd2, username=user)
         print "Enabled root access to %s" % (c.config["control_node"],)
 
     # Install some software
