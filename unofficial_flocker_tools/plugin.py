@@ -209,7 +209,6 @@ docker run --restart=always -d --net=host --privileged \\
 -e FLOCKER_CONTROL_SERVICE_BASE_URL=%s \\
 -e MY_NETWORK_IDENTITY=%s \\
 -v /etc/flocker:/etc/flocker \\
--v /var/run/docker.sock:/var/run/docker.sock \\
 --name=flocker-docker-plugin \\
 clusterhq/flocker-docker-plugin""" % (controlservice, private_ip,))
 
