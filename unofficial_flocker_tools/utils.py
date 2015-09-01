@@ -8,6 +8,8 @@ class Configurator(object):
         self.config = yaml.load(open(configFile))
         # set some defaults
         self.config["private_key_path"] = self.config.get("private_key_path", "~/.ssh/id_rsa")
+        if "CONTAINERIZED" in os.environ:
+            self.config["private_key_path"] = "/host" + self.config["private_key_path"]
         self.config["remote_server_username"] = self.config.get("remote_server_username", "root")
 
     def runSSH(self, ip, command, username=None):
