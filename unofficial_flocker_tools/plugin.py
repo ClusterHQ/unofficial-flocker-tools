@@ -209,6 +209,7 @@ systemctl start flocker-docker-plugin.service
 -e FLOCKER_CONTROL_SERVICE_BASE_URL=%s \\
 -e MY_NETWORK_IDENTITY=%s \\
 -v /etc/flocker:/etc/flocker \\
+-v /run/docker:/run/docker \\
 --name=flocker-docker-plugin \\
 clusterhq/flocker-docker-plugin""" % (controlservice, private_ip,))
 
