@@ -9,6 +9,27 @@ from utils import Configurator
 
 def main():
     c = Configurator(configFile=sys.argv[1])
+
+    # Permit root access
+    if c.config["os"] == "coreos":
+        user = "core"
+    elif c.config["os"] == "ubuntu":
+        user = "ubuntu"
+    elif c.config["os"] == "centos":
+        user = "centos"
+    cmd = ("sudo mkdir -p /root/.ssh && "
+           "sudo cp .ssh/authorized_keys /root/.ssh/authorized_keys")
+    ips = []
+    for node in c.config["agent_nodes"]:
+        ips.append(node["public"])
+    for public_ip in ips:
+        c.runSSHRaw(public_ip, cmd, username=user)
+        print "Enabled root access to %s" % (public_ip,)
+    if c.config["control_node"] not in ips:
+        c.runSSHRaw(c.config["control_node"], cmd, username=user)
+        print "Enabled root access to %s" % (c.config["control_node"],)
+
+    # Install some software
     for node in c.config["agent_nodes"]:
         public_ip = node["public"]
         if c.config["os"] == "ubuntu":
@@ -24,9 +45,6 @@ test -e /etc/selinux/config && sed --in-place='.preflocker' 's/^SELINUX=.*$/SELI
 yum install -y https://s3.amazonaws.com/clusterhq-archive/centos/clusterhq-release$(rpm -E %dist).noarch.rpm
 yum install -y clusterhq-flocker-node
 """)
-        elif c.config["os"] == "coreos":
-            print "CoreOS requires no package installation."
-            return
 
     # if the dataset.backend is ZFS then install ZFS and mount a flocker pool
     # then create and distribute SSH keys amoungst the nodes
@@ -35,7 +53,12 @@ yum install -y clusterhq-flocker-node
         # XXX todo - find out a way to handle a restart mid-script
         if c.config["os"] == "centos":
             print >> sys.stderr, (
-                "Auto-install of ZFS on centos is "
+                "Auto-install of ZFS on CentOS is "
+                "not currently supported")
+            sys.exit(1)
+        if c.config["os"] == "coreos":
+            print >> sys.stderr, (
+                "Auto-install of ZFS on CoreOS is "
                 "not currently supported")
             sys.exit(1)
 

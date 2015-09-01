@@ -10,21 +10,21 @@ class Configurator(object):
         self.config["private_key_path"] = self.config.get("private_key_path", "~/.ssh/id_rsa")
         self.config["remote_server_username"] = self.config.get("remote_server_username", "root")
 
-    def runSSH(self, ip, command):
+    def runSSH(self, ip, command, username=None):
         command = 'ssh -o LogLevel=error -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i %s %s@%s %s' % (self.config["private_key_path"],
-                self.config["remote_server_username"],
+                username if username is not None else self.config["remote_server_username"],
                 ip, " ".join(map(quote, ["sh", "-c", command])))
         return subprocess.check_output(command, shell=True)
 
-    def runSSHRaw(self, ip, command):
+    def runSSHRaw(self, ip, command, username=None):
         command = 'ssh -o LogLevel=error -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i %s %s@%s %s' % (self.config["private_key_path"],
-                self.config["remote_server_username"],
+                username if username is not None else self.config["remote_server_username"],
                 ip, command)
         return subprocess.check_output(command, shell=True)
 
-    def runSSHPassthru(self, ip, command):
+    def runSSHPassthru(self, ip, command, username=None):
         command = 'ssh -o LogLevel=error -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i %s %s@%s %s' % (self.config["private_key_path"],
-                self.config["remote_server_username"],
+                username if username is not None else self.config["remote_server_username"],
                 ip, " ".join(map(quote, command)))
         return os.system(command)
 

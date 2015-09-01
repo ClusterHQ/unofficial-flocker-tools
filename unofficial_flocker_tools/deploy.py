@@ -27,6 +27,7 @@ def main():
         print "Created user key for", user
     print "Uploading keys to respective nodes:"
 
+
     # Copy cluster cert, and control cert and key to control node.
     c.runSSHRaw(c.config["control_node"], "mkdir -p /etc/flocker")
     c.scp("cluster.crt", c.config["control_node"], "/etc/flocker/cluster.crt")
