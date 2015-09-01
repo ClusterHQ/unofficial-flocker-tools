@@ -67,9 +67,11 @@ def main():
         if c.config["os"] == "ubuntu":
             c.runSSHRaw(public_ip, "stop %s || true"
                 % (settings['DOCKER_SERVICE_NAME'],))
-        elif c.config["os"] == "centos" or c.config["os"] == "coreos":
+        elif c.config["os"] == "centos":
             c.runSSHRaw(public_ip, "systemctl stop %s.service || true"
                 % (settings['DOCKER_SERVICE_NAME'],))
+        elif c.config["os"] == "coreos":
+            c.runSSHRaw(public_ip, "systemctl stop docker.service || true")
 
         # download the latest docker binary
         print "Downloading the latest docker binary on %s - %s" \
@@ -87,9 +89,11 @@ def main():
         if c.config["os"] == "ubuntu":
             c.runSSHRaw(public_ip, "start %s"
                 % (settings['DOCKER_SERVICE_NAME'],))
-        elif c.config["os"] == "centos" or c.config["os"] == "coreos":
+        elif c.config["os"] == "centos":
             c.runSSHRaw(public_ip, "systemctl start %s.service"
               % (settings['DOCKER_SERVICE_NAME'],))
+        elif c.config["os"] == "coreos":
+            c.runSSHRaw(public_ip, "systemctl start docker.service")
 
     print "Generating plugin certs"
     # generate and upload plugin.crt and plugin.key for each node

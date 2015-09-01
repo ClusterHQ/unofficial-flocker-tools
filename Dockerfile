@@ -17,6 +17,7 @@ RUN         apt-get -qy install python-dev
 RUN         apt-get -qy install libyaml-dev
 RUN         apt-get -qy install libffi-dev
 RUN         apt-get -qy install libssl-dev
+RUN         pip install twisted==14.0.0 treq==0.2.1 service_identity pycrypto pyrsistent pyyaml==3.10
 
 ADD         . /app
 
