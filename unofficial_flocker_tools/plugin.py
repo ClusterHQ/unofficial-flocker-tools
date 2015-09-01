@@ -77,7 +77,7 @@ def main():
             print "Downloading the latest docker binary on %s - %s" \
                 % (public_ip, settings['DOCKER_BINARY_URL'],)
             c.runSSHRaw(public_ip, "mkdir -p /root/bin")
-            c.runSSHRaw(public_ip, "wget -O /root/bin/docker %s"
+            c.runSSHRaw(public_ip, "wget -qO /root/bin/docker %s"
                 % (settings['DOCKER_BINARY_URL'],))
             c.runSSHRaw(public_ip, "chmod +x /root/bin/docker")
             c.runSSHRaw(public_ip,
