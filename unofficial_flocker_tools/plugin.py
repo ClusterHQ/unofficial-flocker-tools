@@ -203,7 +203,7 @@ systemctl start flocker-docker-plugin.service
         # DOCKER DOCKER DOCKER DOCKER
         elif c.config["os"] == "coreos":
             print "Starting flocker-docker-plugin as docker container on CoreOS on %s" % (public_ip,)
-            c.runSSH(node, """echo
+            c.runSSH(public_ip, """echo
 docker run --restart=always -d --net=host --privileged \\
 -e FLOCKER_CONTROL_SERVICE_BASE_URL=%s \\
 -e MY_NETWORK_IDENTITY=%s \\
