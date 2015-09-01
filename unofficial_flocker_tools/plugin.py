@@ -87,7 +87,7 @@ def main():
             c.runSSHRaw(public_ip,
                     "sed -i s@/usr/lib/coreos@/root/bin@g /etc/systemd/system/docker.service")
             c.runSSHRaw(public_ip,
-                    "sed -i 's@exec docker@exec /root/bin/docker@g' /root/bin/dockerd")
+                    "sed -i \\'s@exec docker@exec /root/bin/docker@g\\' /root/bin/dockerd")
         else:
             print "Downloading the latest docker binary on %s - %s" \
                 % (public_ip, settings['DOCKER_BINARY_URL'],)
