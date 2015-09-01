@@ -18,7 +18,7 @@ def main():
     elif c.config["os"] == "centos":
         user = "centos"
     cmd1 = "sudo mkdir -p /root/.ssh"
-    cmd2 = "sudo cp /home/%s/.ssh/authorized_keys /root/.ssh/authorized_keys'" % (user,)
+    cmd2 = "sudo cp /home/%s/.ssh/authorized_keys /root/.ssh/authorized_keys" % (user,)
     ips = []
     for node in c.config["agent_nodes"]:
         ips.append(node["public"])
