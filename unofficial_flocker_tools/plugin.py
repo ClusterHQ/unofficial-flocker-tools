@@ -61,8 +61,7 @@ def main():
         print "Replacing docker binary on %s" % (public_ip,)
 
         # stop the docker service
-        print "Stopping the docker service on %s - %s" \
-            % (public_ip, settings['DOCKER_SERVICE_NAME'],)
+        print "Stopping the docker service on %s" % (public_ip,)
 
         if c.config["os"] == "ubuntu":
             c.runSSHRaw(public_ip, "stop %s || true"
@@ -75,12 +74,20 @@ def main():
 
         # download the latest docker binary
         if c.config["os"] == "coreos":
-            # bwahaha, oh dear (remove this when coreos supports docker 1.8)
-            c.runSSHRaw(public_ip, "mount -o remount,rw /usr")
             print "Downloading the latest docker binary on %s - %s" \
                 % (public_ip, settings['DOCKER_BINARY_URL'],)
-            c.runSSHRaw(public_ip, "wget -O /usr/bin/docker %s"
+            c.runSSHRaw(public_ip, "mkdir -p /root/bin")
+            c.runSSHRaw(public_ip, "wget -O /root/bin/docker %s"
                 % (settings['DOCKER_BINARY_URL'],))
+            c.runSSHRaw(public_ip, "chmod +x /root/bin/docker")
+            c.runSSHRaw(public_ip,
+                    "cp /usr/lib/coreos/dockerd /root/bin/dockerd")
+            c.runSSHRaw(public_ip,
+                    "cp /usr/lib/systemd/system/docker.service /etc/systemd/system/")
+            c.runSSHRaw(public_ip,
+                    "sed -i s@/usr/lib/coreos@/root/bin@g /etc/systemd/system/docker.service")
+            c.runSSHRaw(public_ip,
+                    "sed -i 's@exec docker@exec /root/bin/docker@g' /root/bin/dockerd")
         else:
             print "Downloading the latest docker binary on %s - %s" \
                 % (public_ip, settings['DOCKER_BINARY_URL'],)
