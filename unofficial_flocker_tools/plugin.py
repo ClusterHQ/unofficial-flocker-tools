@@ -74,10 +74,18 @@ def main():
             c.runSSHRaw(public_ip, "systemctl stop docker.service || true")
 
         # download the latest docker binary
-        print "Downloading the latest docker binary on %s - %s" \
-            % (public_ip, settings['DOCKER_BINARY_URL'],)
-        c.runSSHRaw(public_ip, "wget -O /usr/bin/docker %s"
-            % (settings['DOCKER_BINARY_URL'],))
+        if c.config["os"] == "coreos":
+            # bwahaha, oh dear (remove this when coreos supports docker 1.8)
+            c.runSSHRaw(public_ip, "mount -o remount,rw /usr")
+            print "Downloading the latest docker binary on %s - %s" \
+                % (public_ip, settings['DOCKER_BINARY_URL'],)
+            c.runSSHRaw(public_ip, "wget -O /usr/bin/docker %s"
+                % (settings['DOCKER_BINARY_URL'],))
+        else:
+            print "Downloading the latest docker binary on %s - %s" \
+                % (public_ip, settings['DOCKER_BINARY_URL'],)
+            c.runSSHRaw(public_ip, "wget -O /usr/bin/docker %s"
+                % (settings['DOCKER_BINARY_URL'],))
 
         if c.config["os"] == "ubuntu":
             # newer versions of docker insist on AUFS on ubuntu, probably for good reason.
