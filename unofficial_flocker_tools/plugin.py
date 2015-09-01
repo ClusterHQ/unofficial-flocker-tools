@@ -131,6 +131,7 @@ def main():
     for node in c.config["agent_nodes"]:
         public_ip = node["public"]
         private_ip = node["private"]
+        print "Using %s => %s" % (public_ip, private_ip)
         
         # the full api path to the control service
         controlservice = 'https://%s:4523/v1' % (control_ip,)
