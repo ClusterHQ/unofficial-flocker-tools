@@ -4,4 +4,6 @@ for CMD in flocker-{ca,deploy,config,install,plugin-install,sample-files,tutoria
 #!/bin/sh
 docker run -ti -v \$PWD:/pwd clusterhq/uft $CMD \$@
 EOF
-sudo chmod +x /usr/local/bin/uft-$CMD; done
+sudo chmod +x /usr/local/bin/uft-$CMD
+echo "Installed /usr/local/bin/uft-$CMD"
+done
