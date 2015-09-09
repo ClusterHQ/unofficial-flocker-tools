@@ -17,7 +17,7 @@ RUN         apt-get -qy update && \
             cd /app && pip install . && \
             apt-get remove --purge -y $(apt-mark showauto) && \
             apt-get -y install apt-transport-https software-properties-common && \
-            apt-get -y --force-yes install python clusterhq-flocker-cli && \
+            apt-get -y --force-yes install python python-pip clusterhq-flocker-cli && \
             rm -rf /var/lib/apt/lists/*
 
 WORKDIR     /pwd
