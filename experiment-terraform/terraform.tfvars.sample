@@ -1,0 +1,6 @@
+aws_access_key = "your AWS access key"
+aws_secret_key = "your AWS secret key"
+aws_region = "region you want nodes deployed in e.g. us-east-1"
+aws_availability_zone = "zone you want nodes deployed in e.g. us-east-1a"
+aws_key_name = "name of EC2 keypair"
+private_key_path = "absolute path to EC2 keypair on your local machine"

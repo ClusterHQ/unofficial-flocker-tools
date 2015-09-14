@@ -1,0 +1,20 @@
+cluster_name: ${cluster_name}
+agent_nodes:
+${agent_nodes}
+# TODO make this use a floating IP
+control_node: ${master_dns_name}
+users:
+ - user
+os: ${operating_system}
+private_key_path: ${private_key_path}
+agent_config:
+  version: 1
+  control-service:
+     hostname: ${master_dns_name}
+     port: 4524
+  dataset:
+    backend: "aws"
+    region: "${aws_region}"
+    zone: "${aws_availability_zone}"
+    access_key_id: "${aws_access_key}"
+    secret_access_key: "${aws_secret_key}"
