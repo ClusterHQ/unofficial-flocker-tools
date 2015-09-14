@@ -10,7 +10,7 @@ ADD         . /app
 RUN         apt-get -qy update && \
             apt-get -y install apt-transport-https software-properties-common wget zip && \
             wget -qO /tmp/terraform.zip https://dl.bintray.com/mitchellh/terraform/terraform_0.6.3_linux_amd64.zip && \
-            cd /tmp && unzip terraform.zip && cp terraform_0.6.3_linux_amd64/* /usr/local/bin/ && \
+            cd /tmp && unzip terraform.zip && rm terraform.zip && cp terraform* /usr/local/bin/ && \
             add-apt-repository -y "deb https://clusterhq-archive.s3.amazonaws.com/ubuntu/$(lsb_release --release --short)/\$(ARCH) /" && \
             apt-get -qy update && \
             apt-get -qy upgrade && \
