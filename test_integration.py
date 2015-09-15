@@ -39,34 +39,36 @@ class UnofficialFlockerInstallerTests(TestCase):
         test_dir.makedirs()
         v = dict(testdir=test_dir.path, get_flocker=GET_FLOCKER,
                  configuration=configuration)
-        os.system("""curl -sSL %(get_flocker)s | sh && \
-                     cd %(testdir)s && \
-                     uft-flocker-sample-files""" % v)
-        SECRETS_FILE.copyTo(test_dir.child("terraform").child("terraform.tfvars.json"))
-        os.system("""cd %(testdir)s && \
-                     uft-flocker-get-nodes --%(configuration)s && \
-                     uft-flocker-install cluster.yml && \
-                     uft-flocker-config cluster.yml && \
-                     uft-flocker-plugin-install cluster.yml
-        """ % v)
-        cluster_config = yaml.load(test_dir.child("cluster.yml").open())
-        node1 = cluster_config['agent_nodes'][0]
-        node2 = cluster_config['agent_nodes'][1]
-        self.assertNotEqual(node1, node2)
-        node1public = node1['public']
-        node2public = node2['public']
-        run(node1public, """
-            docker run -v foo:/data --volume-driver=flocker busybox sh -c "echo hello > /data/foo"
-        """)
-        output = run(node2public, """
-            docker run -v foo:/data --volume-driver=flocker busybox cat /data/foo
-        """)
-        self.assertEqual(output, "hello")
-        os.system("""cd %(testdir)s && \
-                     uft-flocker-volumes destroy --dataset=$(uft-flocker-volumes list | awk -F '-' '{print $0}) && \
-                     while [ $(uft-flocker-volumes list |wc -l) != "1" ]; do echo waiting for volumes to be deleted; sleep 1; done && \
-                     uft-flocker-destroy-nodes
-        """ % v)
+        try:
+            os.system("""curl -sSL %(get_flocker)s | sh && \
+                         cd %(testdir)s && \
+                         uft-flocker-sample-files""" % v)
+            SECRETS_FILE.copyTo(test_dir.child("terraform").child("terraform.tfvars.json"))
+            os.system("""cd %(testdir)s && \
+                         uft-flocker-get-nodes --%(configuration)s && \
+                         uft-flocker-install cluster.yml && \
+                         uft-flocker-config cluster.yml && \
+                         uft-flocker-plugin-install cluster.yml""" % v)
+            cluster_config = yaml.load(test_dir.child("cluster.yml").open())
+            node1 = cluster_config['agent_nodes'][0]
+            node2 = cluster_config['agent_nodes'][1]
+            self.assertNotEqual(node1, node2)
+            node1public = node1['public']
+            node2public = node2['public']
+            run(node1public, [
+                'docker run -v foo:/data --volume-driver=flocker busybox '
+                'sh -c "echo hello > /data/foo"'])
+            output = run(node2public, [
+                'docker run -v foo:/data --volume-driver=flocker busybox '
+                'cat /data/foo'])
+            self.assertEqual(output, "hello")
+            os.system("""cd %(testdir)s && \
+                         uft-flocker-volumes destroy --dataset=$(uft-flocker-volumes list | awk -F '-' '{print $0}) && \
+                         while [ $(uft-flocker-volumes list |wc -l) != "1" ]; do echo waiting for volumes to be deleted; sleep 1; done && \
+                         uft-flocker-destroy-nodes""" % v)
+        finally:
+            os.system("""cd %(testdir)s && \
+                         uft-flocker-destroy-nodes""" % v)
 
     def test_ubuntu_aws(self):
         return self._run_integration_test("ubuntu-aws")
