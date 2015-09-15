@@ -24,8 +24,8 @@ class UnofficialFlockerInstallerTests(TestCase):
         test_dir = FilePath(self.mktemp())
         test_dir.makedirs()
         os.system("""cd %(testdir)s && \
-            docker run -v $PWD:/config -v /var/run/docker.sock:/var/run/docker.sock ubuntu:14.04 \
-                "apt-get install curl && \
+            docker run -v $PWD:/config -v /var/run/docker.sock:/var/run/docker.sock ubuntu:14.04 bash -c \
+                "apt-get install -y curl && \
                  curl -sSL https://get.flocker.io/ | sh && \
                  cd /config && \
                  uft-flocker-get-nodes --%(configuration)s && \
@@ -47,8 +47,8 @@ class UnofficialFlockerInstallerTests(TestCase):
         """)
         self.assertEqual(output, "hello")
         os.system("""cd %(testdir)s && \
-            docker run -v $PWD:/config -v /var/run/docker.sock:/var/run/docker.sock ubuntu:14.04 \
-                "apt-get install curl && \
+            docker run -v $PWD:/config -v /var/run/docker.sock:/var/run/docker.sock ubuntu:14.04 bash -c \
+                "apt-get install -y curl && \
                  curl -sSL https://get.flocker.io/ | sh && \
                  cd /config && \
                  uft-flocker-volumes destroy --dataset=$(uft-flocker-volumes list | awk -F '-' '{print $0}) && \
