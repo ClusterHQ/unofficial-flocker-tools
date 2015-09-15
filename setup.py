@@ -21,7 +21,7 @@ setup(
             "flocker-destroy-nodes = unofficial_flocker_tools.destroy_nodes:main",
         ],
     },
-    version="0.4",
+    version="0.5",
     description="Unofficial tools to make installing and using Flocker easier and more fun.",
     author="Luke Marsden",
     author_email="luke@clusterhq.com",
