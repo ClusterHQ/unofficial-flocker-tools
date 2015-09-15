@@ -31,9 +31,12 @@ def main():
         c.runSSHRaw(c.config["control_node"], cmd2, username=user)
         print "Enabled root access to %s" % (c.config["control_node"],)
 
-    # Install some software
-    for node in c.config["agent_nodes"]:
-        public_ip = node["public"]
+    # Install flocker node software on all the nodes
+    nodes = c.config["agent_nodes"]
+    node_public_ips = [c["public"] for c in nodes]
+    node_public_ips.append(c.config["control_node"])
+
+    for public_ip in node_public_ips:
         if c.config["os"] == "ubuntu":
             c.runSSH(public_ip, """apt-get -y install apt-transport-https software-properties-common
 add-apt-repository -y 'deb https://clusterhq-archive.s3.amazonaws.com/ubuntu-testing/14.04/$(ARCH) /'

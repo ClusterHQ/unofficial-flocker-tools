@@ -19,11 +19,8 @@ settings_defaults = {
     # allow env override for where to download the experimental
     # docker binary from
     'DOCKER_BINARY_URL': 'https://get.docker.com/builds/Linux/x86_64/docker-latest',
-    # perhaps the name of the docker service running on the host is
-    # different to 'docker' for example - the clusterhq-flocker-node package
-    # installed 'docker.io' depending on OS this translates to
-    # start/systemctl calls to this service name
-    'DOCKER_SERVICE_NAME': 'docker.io',
+    # the name of the docker service running on the host
+    'DOCKER_SERVICE_NAME': 'docker-engine',
     # what repo does the flocker plugin live in
     'PLUGIN_REPO': 'https://github.com/clusterhq/flocker-docker-plugin',
     # what branch to use for the flocker plugin
@@ -53,8 +50,14 @@ def main():
     # download and replace the docker binary on each of the nodes
     for node in c.config["agent_nodes"]:
 
-        # don't download a new docker for reasons only the user knows
-        if settings["SKIP_DOCKER_BINARY"]:
+        if c.config["os"] != "coreos":
+            print "Skipping installing new docker binary because we're on",
+            print "ubuntu/centos, assuming we installed a sufficiently recent one",
+            print "already."
+            break
+
+        # don't download a new docker for reasons only the user knows.
+        if settings["SKIP_DOCKER_BINARY"] or c.config["os"] != "coreos":
             break
 
         public_ip = node["public"]
@@ -132,7 +135,7 @@ def main():
         public_ip = node["public"]
         private_ip = node["private"]
         print "Using %s => %s" % (public_ip, private_ip)
-        
+
         # the full api path to the control service
         controlservice = 'https://%s:4523/v1' % (control_ip,)
 
@@ -142,13 +145,13 @@ def main():
 
             pip_install = False
             if c.config["os"] == "ubuntu":
-                print c.runSSHRaw(public_ip, 
+                print c.runSSHRaw(public_ip,
                     "apt-get install -y "
                     "python-pip python-dev build-essential "
                     "libssl-dev libffi-dev")
                 pip_install = True
             elif c.config["os"] == "centos":
-                print c.runSSHRaw(public_ip, 
+                print c.runSSHRaw(public_ip,
                     "yum install -y "
                     "python-pip python-devel "
                     "gcc libffi-devel python-devel openssl-devel")

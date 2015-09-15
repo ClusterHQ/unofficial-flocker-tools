@@ -27,7 +27,6 @@ def main():
         print "Created user key for", user
     print "Uploading keys to respective nodes:"
 
-
     # Copy cluster cert, and control cert and key to control node.
     c.runSSHRaw(c.config["control_node"], "mkdir -p /etc/flocker")
     c.scp("cluster.crt", c.config["control_node"], "/etc/flocker/cluster.crt")
@@ -120,7 +119,6 @@ docker run --restart=always -d --net=host -v /etc/flocker:/etc/flocker --volumes
         url = "https://%(control_node)s:4523/v1" % dict(control_node=c.config["control_node"],)
         print "This should give you a list of your nodes:"
         print prefix + " " + url + "/state/nodes | jq ."
-        print "Try running tutorial.py cluster.yml for more..."
 
 if __name__ == "__main__":
     main()
