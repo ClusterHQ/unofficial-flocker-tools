@@ -15,6 +15,7 @@ RUN         apt-get -qy update && \
             apt-get -qy update && \
             apt-get -qy upgrade && \
             apt-get -qy install python-pip python-dev libyaml-dev libffi-dev libssl-dev && \
+            pip install --upgrade pip && \
             pip install --no-cache-dir twisted==14.0.0 treq==0.2.1 service_identity pycrypto pyrsistent pyyaml==3.10 && \
             cd /app && pip install --no-cache-dir . && \
             apt-get remove --purge -y $(apt-mark showauto) && \
