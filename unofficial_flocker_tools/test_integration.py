@@ -15,10 +15,8 @@ KEY = FilePath(os.path.expanduser("~") + "/cloud-keys/key.pem")
 
 class UnofficialFlockerInstallerTests(TestCase):
     """
-    Real flocker-plugin tests against two nodes using the flocker
-    acceptance testing framework.
+    Complete spin-up tests.
     """
-
     # Slow builds because we're provisioning VMs.
     timeout = 60 * 60
 
@@ -48,6 +46,14 @@ class UnofficialFlockerInstallerTests(TestCase):
             docker run -v foo:/data --volume-driver=flocker busybox cat /data/foo
         """)
         self.assertEqual(output, "hello")
+        os.system("""cd %(testdir)s && \
+            docker run -v $PWD:/config -v /var/run/docker.sock:/var/run/docker.sock ubuntu:14.04 \
+                "apt-get install curl && \
+                 curl -sSL https://get.flocker.io/ | sh && \
+                 cd /config && \
+                 uft-flocker-volumes destroy --dataset=$(uft-flocker-volumes list | awk -F '-' '{print $0}) && \
+                 while [ $(uft-flocker-volumes list |wc -l) != "1" ]; do echo waiting for volumes to be deleted; sleep 1; done"
+        """ % dict(testdir=test_dir.path, configuration=configuration))
 
     def test_ubuntu_aws(self):
         return self._run_integration_test("ubuntu-aws")
