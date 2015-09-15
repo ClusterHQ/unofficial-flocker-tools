@@ -36,7 +36,7 @@ class UnofficialFlockerInstallerTests(TestCase):
                  uft-flocker-config cluster.yml && \
                  uft-flocker-plugin-install cluster.yml"
         """ % dict(testdir=test_dir.path, get_flocker=GET_FLOCKER, configuration=configuration))
-        cluster_config = yaml.load(test_dir.child("config.yml").open())
+        cluster_config = yaml.load(test_dir.child("cluster.yml").open())
         node1 = cluster_config['agent_nodes'][0]
         node2 = cluster_config['agent_nodes'][1]
         self.assertNotEqual(node1, node2)
