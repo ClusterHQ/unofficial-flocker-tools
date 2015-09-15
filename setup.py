@@ -4,10 +4,10 @@ setup(
     name="UnofficialFlockerTools",
     packages=[
         "unofficial_flocker_tools",
-        "unofficial_flocker_tools.txflocker"
+        "unofficial_flocker_tools.txflocker",
     ],
     package_data={
-        "unofficial_flocker_tools": ["samples/*"],
+        "unofficial_flocker_tools": ["samples/*", "terraform_templates/*"],
     },
     entry_points={
         "console_scripts": [
@@ -17,6 +17,8 @@ setup(
             "flocker-sample-files = unofficial_flocker_tools.sample_files:main",
             "flocker-tutorial = unofficial_flocker_tools.tutorial:main",
             "flocker-volumes = unofficial_flocker_tools.flocker_volumes:_main",
+            "flocker-get-nodes= unofficial_flocker_tools.get_nodes:main",
+            "flocker-destroy-nodes = unofficial_flocker_tools.destroy_nodes:main",
         ],
     },
     version="0.4",

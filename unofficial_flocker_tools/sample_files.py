@@ -9,3 +9,7 @@ def main():
         resource = resource_filename("unofficial_flocker_tools", "samples/" + filename)
         shutil.copyfile(resource, filename)
         print filename
+
+    terraform_templates = resource_filename("unofficial_flocker_tools", "terraform_templates")
+    print terraform_templates
+    shutil.copytree(terraform_templates, ".")
