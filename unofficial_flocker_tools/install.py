@@ -36,13 +36,16 @@ def main():
         public_ip = node["public"]
         if c.config["os"] == "ubuntu":
             c.runSSH(public_ip, """apt-get -y install apt-transport-https software-properties-common
-add-apt-repository -y ppa:james-page/docker
 add-apt-repository -y 'deb https://clusterhq-archive.s3.amazonaws.com/ubuntu-testing/14.04/$(ARCH) /'
 apt-get update
+curl -sSL https://get.docker.com/ | sh
 apt-get -y --force-yes install clusterhq-flocker-node
 """)
         elif c.config["os"] == "centos":
             c.runSSH(public_ip, """if selinuxenabled; then setenforce 0; fi
+yum update
+curl -sSL https://get.docker.com/ | sh
+service docker start
 test -e /etc/selinux/config && sed --in-place='.preflocker' 's/^SELINUX=.*$/SELINUX=disabled/g' /etc/selinux/config
 yum install -y https://s3.amazonaws.com/clusterhq-archive/centos/clusterhq-release$(rpm -E %dist).noarch.rpm
 yum install -y clusterhq-flocker-node
