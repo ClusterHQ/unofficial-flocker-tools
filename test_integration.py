@@ -30,6 +30,7 @@ class UnofficialFlockerInstallerTests(TestCase):
                  curl -sSL https://get.docker.com/builds/Linux/x86_64/docker-latest > /usr/local/bin/docker && chmod +x /usr/local/bin/docker && \
                  curl -sSL %(get_flocker)s | sh && \
                  cd /config && \
+                 uft-flocker-sample-files && \
                  uft-flocker-get-nodes --%(configuration)s && \
                  uft-flocker-install cluster.yml && \
                  uft-flocker-config cluster.yml && \
