@@ -27,6 +27,7 @@ class UnofficialFlockerInstallerTests(TestCase):
         os.system("""cd %(testdir)s && \
             docker run -v $PWD:/config -v /var/run/docker.sock:/var/run/docker.sock ubuntu:14.04 bash -c \
                 "apt-get install -y curl && \
+                 curl -sSL https://get.docker.com/builds/Linux/x86_64/docker-latest > /usr/local/bin/docker && chmod +x /usr/local/bin/docker && \
                  curl -sSL %(get_flocker)s | sh && \
                  cd /config && \
                  uft-flocker-get-nodes --%(configuration)s && \
@@ -50,6 +51,7 @@ class UnofficialFlockerInstallerTests(TestCase):
         os.system("""cd %(testdir)s && \
             docker run -v $PWD:/config -v /var/run/docker.sock:/var/run/docker.sock ubuntu:14.04 bash -c \
                 "apt-get install -y curl && \
+                 curl -sSL https://get.docker.com/builds/Linux/x86_64/docker-latest > /usr/local/bin/docker && chmod +x /usr/local/bin/docker && \
                  curl -sSL %(get_flocker)s | sh && \
                  cd /config && \
                  uft-flocker-volumes destroy --dataset=$(uft-flocker-volumes list | awk -F '-' '{print $0}) && \
