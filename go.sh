@@ -1,5 +1,5 @@
 #!/bin/sh
-# XXX remove :terraform from below before merging
+# XXX remove :terraform from below before merging to master
 for CMD in flocker-ca flocker-deploy flocker-config flocker-install flocker-plugin-install flocker-sample-files flocker-tutorial flocker-volumes flocker-get-nodes flocker-destroy-nodes; do
     cat <<EOF |sudo tee /usr/local/bin/uft-$CMD >/dev/null
 #!/bin/sh

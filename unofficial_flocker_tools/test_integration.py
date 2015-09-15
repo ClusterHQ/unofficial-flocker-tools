@@ -12,6 +12,7 @@ from twisted.python.filepath import FilePath
 import yaml
 
 KEY = FilePath(os.path.expanduser("~") + "/cloud-keys/key.pem")
+GET_FLOCKER = "https://get-dev.flocker.io/" # XXX remove "-dev" before merging to master
 
 class UnofficialFlockerInstallerTests(TestCase):
     """
@@ -26,13 +27,13 @@ class UnofficialFlockerInstallerTests(TestCase):
         os.system("""cd %(testdir)s && \
             docker run -v $PWD:/config -v /var/run/docker.sock:/var/run/docker.sock ubuntu:14.04 bash -c \
                 "apt-get install -y curl && \
-                 curl -sSL https://get.flocker.io/ | sh && \
+                 curl -sSL %(get_flocker)s | sh && \
                  cd /config && \
                  uft-flocker-get-nodes --%(configuration)s && \
                  uft-flocker-install cluster.yml && \
                  uft-flocker-config cluster.yml && \
                  uft-flocker-plugin-install cluster.yml"
-        """ % dict(testdir=test_dir.path, configuration=configuration))
+        """ % dict(testdir=test_dir.path, get_flocker=GET_FLOCKER, configuration=configuration))
         cluster_config = yaml.load(test_dir.child("config.yml").open())
         node1 = cluster_config['agent_nodes'][0]
         node2 = cluster_config['agent_nodes'][1]
@@ -49,12 +50,12 @@ class UnofficialFlockerInstallerTests(TestCase):
         os.system("""cd %(testdir)s && \
             docker run -v $PWD:/config -v /var/run/docker.sock:/var/run/docker.sock ubuntu:14.04 bash -c \
                 "apt-get install -y curl && \
-                 curl -sSL https://get.flocker.io/ | sh && \
+                 curl -sSL %(get_flocker)s | sh && \
                  cd /config && \
                  uft-flocker-volumes destroy --dataset=$(uft-flocker-volumes list | awk -F '-' '{print $0}) && \
                  while [ $(uft-flocker-volumes list |wc -l) != "1" ]; do echo waiting for volumes to be deleted; sleep 1; done && \
                  uft-flocker-destroy-nodes"
-        """ % dict(testdir=test_dir.path, configuration=configuration))
+        """ % dict(testdir=test_dir.path, configuration=configuration, get_flocker=GET_FLOCKER))
 
     def test_ubuntu_aws(self):
         return self._run_integration_test("ubuntu-aws")
