@@ -15,6 +15,7 @@ RUN         apt-get -qy update && \
             apt-get -qy update && \
             apt-get -qy upgrade && \
             apt-get -qy install python-pip python-dev libyaml-dev libffi-dev libssl-dev && \
+            apt-get -y --force-yes install python python-setuptools python-requests clusterhq-flocker-cli && \
             cd /app && /opt/flocker/bin/pip install --no-cache-dir . && \
             apt-get remove --purge -y $(apt-mark showauto) && \
             apt-get -y install apt-transport-https software-properties-common && \
