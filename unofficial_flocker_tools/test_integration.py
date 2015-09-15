@@ -52,7 +52,8 @@ class UnofficialFlockerInstallerTests(TestCase):
                  curl -sSL https://get.flocker.io/ | sh && \
                  cd /config && \
                  uft-flocker-volumes destroy --dataset=$(uft-flocker-volumes list | awk -F '-' '{print $0}) && \
-                 while [ $(uft-flocker-volumes list |wc -l) != "1" ]; do echo waiting for volumes to be deleted; sleep 1; done"
+                 while [ $(uft-flocker-volumes list |wc -l) != "1" ]; do echo waiting for volumes to be deleted; sleep 1; done && \
+                 uft-flocker-destroy-nodes"
         """ % dict(testdir=test_dir.path, configuration=configuration))
 
     def test_ubuntu_aws(self):
