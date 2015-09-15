@@ -64,9 +64,9 @@ def run(node, command, input=""):
     Synchronously run a command (list of bytes) on a node's address (bytes)
     with optional input (bytes).
     """
-    #print "Running", command, "on", node
+    print "Running", command, "on", node
     result = run_SSH(22, "root", node, command, input, key=KEY)
-    #print "Output from", node + ":", result, "(%s)" % (command,)
+    print "Output from", node + ":", result, "(%s)" % (command,)
     return result
 
 
