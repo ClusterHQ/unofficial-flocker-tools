@@ -12,6 +12,6 @@ resource "template_file" "cluster_yml" {
         master_dns_name = "${aws_instance.master.public_dns}"
     }
     provisioner "local-exec" {
-        command = "echo '${self.rendered}' > cluster.yml && flocker-install cluster.yml && flocker-config cluster.yml && flocker-install-plugin cluster.yml"
+        command = "echo '${self.rendered}' > cluster.yml"
     }
 }

@@ -42,7 +42,6 @@ resource "aws_security_group" "cluster_security_group" {
       cidr_blocks = ["0.0.0.0/0"]
   }
 }
-
 resource "aws_instance" "master" {
     ami = "${lookup(var.aws_ubuntu_amis, var.aws_region)}"
     instance_type = "${var.aws_instance_type}"
