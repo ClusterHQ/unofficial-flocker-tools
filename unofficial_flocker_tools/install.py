@@ -33,7 +33,7 @@ def main():
 
     # Install flocker node software on all the nodes
     nodes = c.config["agent_nodes"]
-    node_public_ips = [c["public"] for c in nodes]
+    node_public_ips = [n["public"] for n in nodes]
     node_public_ips.append(c.config["control_node"])
 
     for public_ip in node_public_ips:
