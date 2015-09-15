@@ -21,4 +21,5 @@ RUN         apt-get -qy update && \
             apt-get -y --force-yes install python python-setuptools python-requests clusterhq-flocker-cli && \
             rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /app
 
+ENV         PATH /opt/flocker/bin:$PATH
 WORKDIR     /pwd
