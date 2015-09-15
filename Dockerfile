@@ -14,8 +14,7 @@ RUN         apt-get -qy update && \
             add-apt-repository -y "deb https://clusterhq-archive.s3.amazonaws.com/ubuntu/$(lsb_release --release --short)/\$(ARCH) /" && \
             apt-get -qy update && \
             apt-get -qy upgrade && \
-            apt-get -qy install python-pip python-dev libyaml-dev libffi-dev libssl-dev && \
-            apt-get -y --force-yes install python python-setuptools python-requests clusterhq-flocker-cli && \
+            apt-get -y --force-yes install clusterhq-flocker-cli && \
             cd /app && /opt/flocker/bin/pip install --no-cache-dir . && \
             apt-get remove --purge -y $(apt-mark showauto) python3.4 && \
             apt-get -y install apt-transport-https software-properties-common && \
