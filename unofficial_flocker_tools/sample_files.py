@@ -10,7 +10,7 @@ def main():
         shutil.copyfile(resource, filename)
         print filename
 
-    target_dir = "terraform_templates"
+    target_dir = "terraform"
     terraform_templates = resource_filename("unofficial_flocker_tools", target_dir)
     print target_dir
     shutil.copytree(terraform_templates, target_dir)
