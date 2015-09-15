@@ -1,4 +1,4 @@
-import shutil
+import shutil, os
 from pkg_resources import resource_filename
 
 def main():
@@ -13,4 +13,5 @@ def main():
     target_dir = "terraform"
     terraform_templates = resource_filename("unofficial_flocker_tools", "terraform_templates")
     print target_dir
-    shutil.copytree(terraform_templates, target_dir)
+    print "copying", terraform_templates, "=>", os.getcwd(), "./" + target_dir
+    shutil.copytree(terraform_templates, "./" + target_dir)
