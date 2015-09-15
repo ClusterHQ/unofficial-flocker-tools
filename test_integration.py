@@ -46,6 +46,8 @@ class UnofficialFlockerInstallerTests(TestCase):
             SECRETS_FILE.copyTo(test_dir.child("terraform").child("terraform.tfvars.json"))
             os.system("""cd %(testdir)s && \
                          uft-flocker-get-nodes --%(configuration)s && \
+                         echo "sleeping 30 seconds to let VMs boot..." && \
+                         sleep 30 && \
                          uft-flocker-install cluster.yml && \
                          uft-flocker-config cluster.yml && \
                          uft-flocker-plugin-install cluster.yml""" % v)
