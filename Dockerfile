@@ -10,16 +10,15 @@ ADD         . /app
 RUN         apt-get -qy update && \
             apt-get -y install apt-transport-https software-properties-common wget zip && \
             wget -qO /tmp/terraform.zip https://dl.bintray.com/mitchellh/terraform/terraform_0.6.3_linux_amd64.zip && \
-            cd /tmp && unzip terraform.zip && rm terraform.zip && mv terraform{,provider-aws,provider-template,provisioner-local-exec} /usr/local/bin/ && rm * && \
+            cd /tmp && unzip terraform.zip && rm terraform.zip && mv terraform terraform-provider-aws terraform-provider-template terraform-provisioner-local-exec /usr/local/bin/ && rm * && \
             add-apt-repository -y "deb https://clusterhq-archive.s3.amazonaws.com/ubuntu/$(lsb_release --release --short)/\$(ARCH) /" && \
             apt-get -qy update && \
             apt-get -qy upgrade && \
             apt-get -qy install python-pip python-dev libyaml-dev libffi-dev libssl-dev && \
-            pip install twisted==14.0.0 treq==0.2.1 service_identity pycrypto pyrsistent pyyaml==3.10 && \
-            cd /app && pip install . && \
+            cd /app && /opt/flocker/bin/pip install --no-cache-dir . && \
             apt-get remove --purge -y $(apt-mark showauto) && \
             apt-get -y install apt-transport-https software-properties-common && \
             apt-get -y --force-yes install python python-setuptools python-requests clusterhq-flocker-cli && \
-            rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+            rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /app
 
 WORKDIR     /pwd
