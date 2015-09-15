@@ -1,7 +1,18 @@
 # Copyright ClusterHQ Inc. See LICENSE file for details.
 
 """
-Test supported configurations.
+Test supported configurations of the installer.
+
+To run these tests, you must place a `terraform.tfvars.json` file in your home
+directory thusly:
+
+luke@tiny:~$ cat ~/terraform.tfvars.json
+{"aws_access_key": "XXX",
+ "aws_secret_key": "YYY",
+ "aws_region": "us-west-1",
+ "aws_availability_zone": "us-west-1b",
+ "aws_key_name": "luke2",
+ "private_key_path": "/Users/luke/Downloads/luke2.pem"}
 """
 
 from twisted.trial.unittest import TestCase
@@ -9,9 +20,11 @@ import os
 from pipes import quote as shell_quote
 from subprocess import PIPE, Popen
 from twisted.python.filepath import FilePath
-import yaml
+import yaml, json
 
-KEY = FilePath(os.path.expanduser("~") + "/cloud-keys/key.pem")
+SECRETS_FILE = FilePath(os.path.expanduser("~") + "/terraform.tfvars.json")
+SECRETS = json.load(SECRETS_FILE.open())
+KEY = FilePath(SECRETS["private_key_path"])
 GET_FLOCKER = "https://get-dev.flocker.io/" # XXX remove "-dev" before merging to master
 
 class UnofficialFlockerInstallerTests(TestCase):
@@ -24,18 +37,18 @@ class UnofficialFlockerInstallerTests(TestCase):
     def _run_integration_test(self, configuration):
         test_dir = FilePath(self.mktemp())
         test_dir.makedirs()
+        v = dict(testdir=test_dir.path, get_flocker=GET_FLOCKER,
+                 configuration=configuration)
+        os.system("""curl -sSL %(get_flocker)s | sh && \
+                     cd %(testdir)s && \
+                     uft-flocker-sample-files""" % v)
+        SECRETS_FILE.copyTo(test_dir.child("terraform").child("terraform.tfvars.json"))
         os.system("""cd %(testdir)s && \
-            docker run -ti -v $PWD:/config -v /var/run/docker.sock:/var/run/docker.sock ubuntu:14.04 bash -c \
-                "apt-get -qq install -y curl && \
-                 curl -sSL https://get.docker.com/builds/Linux/x86_64/docker-latest > /usr/local/bin/docker && chmod +x /usr/local/bin/docker && \
-                 curl -sSL %(get_flocker)s | sh && \
-                 cd /config && \
-                 uft-flocker-sample-files && \
-                 uft-flocker-get-nodes --%(configuration)s && \
-                 uft-flocker-install cluster.yml && \
-                 uft-flocker-config cluster.yml && \
-                 uft-flocker-plugin-install cluster.yml"
-        """ % dict(testdir=test_dir.path, get_flocker=GET_FLOCKER, configuration=configuration))
+                     uft-flocker-get-nodes --%(configuration)s && \
+                     uft-flocker-install cluster.yml && \
+                     uft-flocker-config cluster.yml && \
+                     uft-flocker-plugin-install cluster.yml
+        """ % v)
         cluster_config = yaml.load(test_dir.child("cluster.yml").open())
         node1 = cluster_config['agent_nodes'][0]
         node2 = cluster_config['agent_nodes'][1]
@@ -50,15 +63,10 @@ class UnofficialFlockerInstallerTests(TestCase):
         """)
         self.assertEqual(output, "hello")
         os.system("""cd %(testdir)s && \
-            docker run -ti -v $PWD:/config -v /var/run/docker.sock:/var/run/docker.sock ubuntu:14.04 bash -c \
-                "apt-get -qq install -y curl && \
-                 curl -sSL https://get.docker.com/builds/Linux/x86_64/docker-latest > /usr/local/bin/docker && chmod +x /usr/local/bin/docker && \
-                 curl -sSL %(get_flocker)s | sh && \
-                 cd /config && \
-                 uft-flocker-volumes destroy --dataset=$(uft-flocker-volumes list | awk -F '-' '{print $0}) && \
-                 while [ $(uft-flocker-volumes list |wc -l) != "1" ]; do echo waiting for volumes to be deleted; sleep 1; done && \
-                 uft-flocker-destroy-nodes"
-        """ % dict(testdir=test_dir.path, configuration=configuration, get_flocker=GET_FLOCKER))
+                     uft-flocker-volumes destroy --dataset=$(uft-flocker-volumes list | awk -F '-' '{print $0}) && \
+                     while [ $(uft-flocker-volumes list |wc -l) != "1" ]; do echo waiting for volumes to be deleted; sleep 1; done && \
+                     uft-flocker-destroy-nodes
+        """ % v)
 
     def test_ubuntu_aws(self):
         return self._run_integration_test("ubuntu-aws")
