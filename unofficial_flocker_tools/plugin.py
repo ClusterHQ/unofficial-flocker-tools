@@ -98,11 +98,6 @@ def main():
             c.runSSHRaw(public_ip, "wget -O /usr/bin/docker %s"
                 % (settings['DOCKER_BINARY_URL'],))
 
-        if c.config["os"] == "ubuntu":
-            # newer versions of docker insist on AUFS on ubuntu, probably for good reason.
-            c.runSSHRaw(public_ip, "DEBIAN_FRONTEND=noninteractive "
-                "'apt-get install -y linux-image-extra-$(uname -r)'")
-
         # start the docker service
         print "Starting the docker service on %s" % (public_ip,)
         if c.config["os"] == "ubuntu":
