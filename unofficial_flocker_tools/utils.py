@@ -30,7 +30,7 @@ class Configurator(object):
                    self.config["private_key_path"], "%s@%s" % (
                        username if username is not None else self.config["remote_server_username"], ip),
                    " ".join(map(quote, ["sh", "-c", command]))]
-        return getProcessOutput(executable, command)
+        return getProcessOutput(executable, command, errortoo=True)
 
     def runSSHRaw(self, ip, command, username=None):
         command = 'ssh -o LogLevel=error -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i %s %s@%s %s' % (self.config["private_key_path"],
