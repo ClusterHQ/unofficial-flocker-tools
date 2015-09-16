@@ -66,9 +66,9 @@ class UnofficialFlockerInstallerTests(TestCase):
                 'cat /data/foo')
             self.assertTrue(output.strip().endswith("hello"))
             os.system("""cd %(testdir)s && \
-                         uft-flocker-volumes destroy --dataset=$(uft-flocker-volumes list | awk -F '-' '{print $0}) && \
-                         while [ $(uft-flocker-volumes list |wc -l) != "1" ]; do echo waiting for volumes to be deleted; sleep 1; done && \
-                         uft-flocker-destroy-nodes""" % v)
+uft-flocker-volumes destroy --dataset=$(uft-flocker-volumes list | tail -n 1 | awk -F ' ' '{print $1}') && \
+while [ $(uft-flocker-volumes list |wc -l) != "1" ]; do echo waiting for volumes to be deleted; sleep 1; done && \
+uft-flocker-destroy-nodes""" % v)
         finally:
             os.system("""cd %(testdir)s && \
                          uft-flocker-destroy-nodes""" % v)
