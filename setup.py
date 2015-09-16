@@ -11,7 +11,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "flocker-config = unofficial_flocker_tools.deploy:main",
+            "flocker-config = unofficial_flocker_tools.config:main",
             "flocker-install = unofficial_flocker_tools.install:main",
             "flocker-plugin-install = unofficial_flocker_tools.plugin:main",
             "flocker-sample-files = unofficial_flocker_tools.sample_files:main",
