@@ -50,14 +50,16 @@ class UnofficialFlockerInstallerTests(TestCase):
                          sleep 120 && \
                          uft-flocker-install cluster.yml && \
                          uft-flocker-config cluster.yml && \
-                         uft-flocker-plugin-install cluster.yml""" % v)
+                         uft-flocker-plugin-install cluster.yml && \
+                         echo "sleeping 120 seconds to let cluster settle..." && \
+                         sleep 120""" % v)
             cluster_config = yaml.load(test_dir.child("cluster.yml").open())
             node1 = cluster_config['agent_nodes'][0]
             node2 = cluster_config['agent_nodes'][1]
             self.assertNotEqual(node1, node2)
             node1public = node1['public']
             node2public = node2['public']
-            run(node1public, [
+            print run(node1public, [
                 'docker run -v foo:/data --volume-driver=flocker busybox '
                 'sh -c "echo hello > /data/foo"'])
             output = run(node2public, [
