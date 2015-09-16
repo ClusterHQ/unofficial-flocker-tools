@@ -61,11 +61,11 @@ class UnofficialFlockerInstallerTests(TestCase):
             node2public = node2['public']
             print run(node1public, [
                 'docker run -v foo:/data --volume-driver=flocker busybox '
-                'sh -c "echo hello > /data/foo"'])
+                'sh -c \\"echo hello \\> /data/foo\\"'])
             output = run(node2public, [
                 'docker run -v foo:/data --volume-driver=flocker busybox '
                 'cat /data/foo'])
-            self.assertEqual(output, "hello")
+            self.assertTrue(output.strip().endswith("hello"))
             os.system("""cd %(testdir)s && \
                          uft-flocker-volumes destroy --dataset=$(uft-flocker-volumes list | awk -F '-' '{print $0}) && \
                          while [ $(uft-flocker-volumes list |wc -l) != "1" ]; do echo waiting for volumes to be deleted; sleep 1; done && \
