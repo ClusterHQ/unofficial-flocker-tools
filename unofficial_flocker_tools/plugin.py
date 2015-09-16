@@ -142,24 +142,9 @@ def main():
         # perhaps the user has pre-compiled images with the plugin
         # downloaded and installed
         if not settings["SKIP_INSTALL_PLUGIN"]:
-
-            pip_install = False
-            if c.config["os"] == "ubuntu":
-                print c.runSSHRaw(public_ip,
-                    "apt-get install -y "
-                    "python-pip python-dev build-essential "
-                    "libssl-dev libffi-dev")
-                pip_install = True
-            elif c.config["os"] == "centos":
-                print c.runSSHRaw(public_ip,
-                    "yum install -y "
-                    "python-pip python-devel "
-                    "gcc libffi-devel python-devel openssl-devel")
-                pip_install = True
-
-            if pip_install:
+            if c.config["os"] in ("ubuntu", "centos"):
                 # pip install the plugin
-                print c.runSSHRaw(public_ip, "pip install git+%s@%s"
+                print c.runSSHRaw(public_ip, "/opt/flocker/bin/pip install git+%s@%s"
                     % (settings['PLUGIN_REPO'], settings['PLUGIN_BRANCH'],))
         else:
             print "Skipping installing plugin: %r" % (settings["SKIP_INSTALL_PLUGIN"],)
@@ -169,9 +154,7 @@ def main():
         print "Creating the /run/docker/plugins folder"
         c.runSSHRaw(public_ip, "mkdir -p /run/docker/plugins")
         # configure an upstart job that runs the bash script
-
         if c.config["os"] == "ubuntu":
-
             print "Writing flocker-docker-plugin upstart job to %s" % (public_ip,)
             c.runSSH(public_ip, """cat <<EOF > /etc/init/flocker-docker-plugin.conf
 # flocker-plugin - flocker-docker-plugin job file
@@ -182,7 +165,7 @@ author "ClusterHQ <support@clusterhq.com>"
 respawn
 env FLOCKER_CONTROL_SERVICE_BASE_URL=%s
 env MY_NETWORK_IDENTITY=%s
-exec /usr/local/bin/flocker-docker-plugin
+exec /opt/flocker/bin/flocker-docker-plugin
 EOF
 service flocker-docker-plugin restart
 """ % (controlservice, private_ip,))
@@ -197,7 +180,7 @@ Description=flocker-plugin - flocker-docker-plugin job file
 [Service]
 Environment=FLOCKER_CONTROL_SERVICE_BASE_URL=%s
 Environment=MY_NETWORK_IDENTITY=%s
-ExecStart=/usr/local/bin/flocker-docker-plugin
+ExecStart=/opt/flocker/bin/flocker-docker-plugin
 
 [Install]
 WantedBy=multi-user.target

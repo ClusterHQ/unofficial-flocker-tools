@@ -58,12 +58,12 @@ class UnofficialFlockerInstallerTests(TestCase):
             self.assertNotEqual(node1, node2)
             node1public = node1['public']
             node2public = node2['public']
-            print runSSHRaw(node1public, [
+            print runSSHRaw(node1public,
                 'docker run -v foo:/data --volume-driver=flocker busybox '
-                'sh -c \\"echo hello \\> /data/foo\\"'])
-            output = runSSHRaw(node2public, [
+                'sh -c \\"echo hello \\> /data/foo\\"')
+            output = runSSHRaw(node2public,
                 'docker run -v foo:/data --volume-driver=flocker busybox '
-                'cat /data/foo'])
+                'cat /data/foo')
             self.assertTrue(output.strip().endswith("hello"))
             os.system("""cd %(testdir)s && \
                          uft-flocker-volumes destroy --dataset=$(uft-flocker-volumes list | awk -F '-' '{print $0}) && \
