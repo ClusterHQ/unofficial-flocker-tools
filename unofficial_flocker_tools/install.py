@@ -10,7 +10,8 @@ from twisted.internet.task import react
 from twisted.internet.defer import gatherResults, inlineCallbacks
 
 @inlineCallbacks
-def main(args):
+def main(*args, **kwargs):
+    print "args =", args, "kwargs =", kwargs
     c = Configurator(configFile=sys.argv[1])
 
     # Permit root access
