@@ -15,7 +15,6 @@ setup(
             "flocker-install = unofficial_flocker_tools.install:main",
             "flocker-plugin-install = unofficial_flocker_tools.plugin:main",
             "flocker-sample-files = unofficial_flocker_tools.sample_files:main",
-            "flocker-tutorial = unofficial_flocker_tools.tutorial:main",
             "flocker-volumes = unofficial_flocker_tools.flocker_volumes:_main",
             "flocker-get-nodes= unofficial_flocker_tools.get_nodes:main",
             "flocker-destroy-nodes = unofficial_flocker_tools.destroy_nodes:main",
