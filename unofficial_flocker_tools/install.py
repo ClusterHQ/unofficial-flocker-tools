@@ -6,8 +6,11 @@ import sys
 
 # Usage: deploy.py cluster.yml
 from utils import Configurator
+from twisted.internet.task import react
+from twisted.internet.defer import gatherResults, inlineCallbacks
 
-def main():
+@inlineCallbacks
+def main(args):
     c = Configurator(configFile=sys.argv[1])
 
     # Permit root access
@@ -36,16 +39,18 @@ def main():
     node_public_ips = [n["public"] for n in nodes]
     node_public_ips.append(c.config["control_node"])
 
+    deferreds = []
     for public_ip in node_public_ips:
         if c.config["os"] == "ubuntu":
-            c.runSSH(public_ip, """apt-get -y install apt-transport-https software-properties-common
+            d = c.runSSHAsync(public_ip, """apt-get -y install apt-transport-https software-properties-common
 add-apt-repository -y 'deb https://clusterhq-archive.s3.amazonaws.com/ubuntu-testing/14.04/$(ARCH) /'
 apt-get update
 curl -sSL https://get.docker.com/ | sh
 apt-get -y --force-yes install clusterhq-flocker-node
 """)
+            deferreds.append(d)
         elif c.config["os"] == "centos":
-            c.runSSH(public_ip, """if selinuxenabled; then setenforce 0; fi
+            d = c.runSSHAsync(public_ip, """if selinuxenabled; then setenforce 0; fi
 yum update
 curl -sSL https://get.docker.com/ | sh
 service docker start
@@ -53,6 +58,8 @@ test -e /etc/selinux/config && sed --in-place='.preflocker' 's/^SELINUX=.*$/SELI
 yum install -y https://s3.amazonaws.com/clusterhq-archive/centos/clusterhq-release$(rpm -E %dist).noarch.rpm
 yum install -y clusterhq-flocker-node
 """)
+            deferreds.append(d)
+    yield gatherResults(deferreds)
 
     # if the dataset.backend is ZFS then install ZFS and mount a flocker pool
     # then create and distribute SSH keys amoungst the nodes
@@ -120,5 +127,8 @@ rm /tmp/uploadkey.sh
     print "To configure and deploy the cluster:"
     print "flocker-config cluster.yml"
 
+def _main():
+    react(main, sys.argv[1:])
+
 if __name__ == "__main__":
-    main()
+    _main()
