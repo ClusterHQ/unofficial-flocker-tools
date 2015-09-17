@@ -9,6 +9,8 @@
 
 import sys
 import os
+from twisted.internet.task import react
+from twisted.internet.defer import gatherResults, inlineCallbacks
 
 # Usage: plugin.py cluster.yml
 from utils import Configurator
@@ -43,8 +45,9 @@ for field in settings_defaults:
         value = settings_defaults[field]
     settings[field] = value
 
-def main():
-    c = Configurator(configFile=sys.argv[1])
+@inlineCallbacks
+def main(reactor, args):
+    c = Configurator(configFile=args[0])
     control_ip = c.config["control_node"]
 
     # download and replace the docker binary on each of the nodes
@@ -126,6 +129,12 @@ def main():
     print "Installing flocker plugin"
     # loop each agent and get the plugin installed/running
     # clone the plugin and configure an upstart/systemd unit for it to run
+
+    def report_completion(result, public_ip):
+        print "Completed plugin install for", public_ip
+        return result
+
+    deferreds = []
     for node in c.config["agent_nodes"]:
         public_ip = node["public"]
         private_ip = node["private"]
@@ -139,11 +148,16 @@ def main():
         if not settings["SKIP_INSTALL_PLUGIN"]:
             if c.config["os"] in ("ubuntu", "centos"):
                 # pip install the plugin
-                print c.runSSHRaw(public_ip, "/opt/flocker/bin/pip install git+%s@%s"
+                print "Installing plugin for", public_ip, "..."
+                d = c.runSSHAsync(public_ip, "/opt/flocker/bin/pip install git+%s@%s"
                     % (settings['PLUGIN_REPO'], settings['PLUGIN_BRANCH'],))
+                d.addCallback(report_completion, public_ip=public_ip)
+                deferreds.append(d)
         else:
             print "Skipping installing plugin: %r" % (settings["SKIP_INSTALL_PLUGIN"],)
+    yield gatherResults(deferreds)
 
+    for node in c.config["agent_nodes"]:
         # ensure that the /run/docker/plugins
         # folder exists
         print "Creating the /run/docker/plugins folder"
@@ -160,7 +174,7 @@ author "ClusterHQ <support@clusterhq.com>"
 respawn
 env FLOCKER_CONTROL_SERVICE_BASE_URL=%s
 env MY_NETWORK_IDENTITY=%s
-env PYTHONPATH=/opt/flocker/lib/python2.7/:$PYTHONPATH
+env PYTHONPATH=/opt/flocker/lib/python2.7/site-packages/:\\$PYTHONPATH
 exec /opt/flocker/bin/flocker-docker-plugin
 EOF
 service flocker-docker-plugin restart
@@ -197,5 +211,8 @@ systemctl start flocker-docker-plugin.service
 --name=flocker-docker-plugin \\
 clusterhq/flocker-docker-plugin""" % (controlservice, private_ip,))
 
+def _main():
+    react(main, sys.argv[1:])
+
 if __name__ == "__main__":
-    main()
+    _main()

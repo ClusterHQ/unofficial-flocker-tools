@@ -5,11 +5,12 @@
 
 import sys
 import yaml
+from twisted.internet.task import react
 
 # Usage: deploy.py cluster.yml
 from utils import Configurator
 
-def main():
+def main(reactor, args):
     c = Configurator(configFile=sys.argv[1])
     c.run("flocker-ca initialize %s" % (c.config["cluster_name"],))
     print "Initialized cluster CA."
@@ -59,8 +60,7 @@ def main():
 
     for node, uuid in node_mapping.iteritems():
         if c.config["os"] == "ubuntu":
-            c.runSSH(node, """apt-get -y install apt-transport-https software-properties-common
-service flocker-container-agent restart
+            c.runSSH(node, """service flocker-container-agent restart
 service flocker-dataset-agent restart
 """)
         elif c.config["os"] == "centos":
@@ -120,5 +120,8 @@ docker run --restart=always -d --net=host -v /etc/flocker:/etc/flocker --volumes
         print "This should give you a list of your nodes:"
         print prefix + " " + url + "/state/nodes | jq ."
 
+def _main():
+    react(main, sys.argv[1:])
+
 if __name__ == "__main__":
-    main()
+    _main()
