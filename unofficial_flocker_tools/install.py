@@ -10,8 +10,8 @@ from twisted.internet.task import react
 from twisted.internet.defer import gatherResults, inlineCallbacks
 
 @inlineCallbacks
-def main(reactor, args):
-    c = Configurator(configFile=args[0])
+def main(reactor, configFile):
+    c = Configurator(configFile=configFile)
 
     # Permit root access
     if c.config["os"] == "coreos":

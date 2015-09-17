@@ -46,8 +46,8 @@ for field in settings_defaults:
     settings[field] = value
 
 @inlineCallbacks
-def main(reactor, args):
-    c = Configurator(configFile=args[0])
+def main(reactor, configFile):
+    c = Configurator(configFile=configFile)
     control_ip = c.config["control_node"]
 
     # download and replace the docker binary on each of the nodes
