@@ -9,7 +9,7 @@ def main():
         print "Please run uft-flocker-sample-files in the current directory first."
         os._exit(1)
     os.system("cd terraform && terraform destroy"
-            + (" -force" if "FORCE_DESTROY" in os.environ else ""))
+            + (" -force" if os.environ.get("FORCE_DESTROY") else ""))
     pass
 
 if __name__ == "__main__":
