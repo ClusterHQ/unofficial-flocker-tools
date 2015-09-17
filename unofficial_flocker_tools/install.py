@@ -60,7 +60,8 @@ yum install -y https://s3.amazonaws.com/clusterhq-archive/centos/clusterhq-relea
 yum install -y clusterhq-flocker-node
 """)
             deferreds.append(d)
-    yield gatherResults(deferreds)
+    result = yield gatherResults(deferreds)
+    print result
 
     # if the dataset.backend is ZFS then install ZFS and mount a flocker pool
     # then create and distribute SSH keys amoungst the nodes
