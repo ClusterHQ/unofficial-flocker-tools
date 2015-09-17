@@ -160,6 +160,7 @@ author "ClusterHQ <support@clusterhq.com>"
 respawn
 env FLOCKER_CONTROL_SERVICE_BASE_URL=%s
 env MY_NETWORK_IDENTITY=%s
+env PYTHONPATH=/opt/flocker/lib/python2.7/:$PYTHONPATH
 exec /opt/flocker/bin/flocker-docker-plugin
 EOF
 service flocker-docker-plugin restart
@@ -175,6 +176,7 @@ Description=flocker-plugin - flocker-docker-plugin job file
 [Service]
 Environment=FLOCKER_CONTROL_SERVICE_BASE_URL=%s
 Environment=MY_NETWORK_IDENTITY=%s
+Environment=PYTHONPATH=/opt/flocker/lib/python2.7/:$PYTHONPATH
 ExecStart=/opt/flocker/bin/flocker-docker-plugin
 
 [Install]
