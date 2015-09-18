@@ -155,9 +155,12 @@ def main(reactor, configFile):
                 deferreds.append(d)
         else:
             print "Skipping installing plugin: %r" % (settings["SKIP_INSTALL_PLUGIN"],)
-    yield gatherResults(deferreds)
+    result = yield gatherResults(deferreds)
+    print result
 
     for node in c.config["agent_nodes"]:
+        public_ip = node["public"]
+        private_ip = node["private"]
         # ensure that the /run/docker/plugins
         # folder exists
         print "Creating the /run/docker/plugins folder"
