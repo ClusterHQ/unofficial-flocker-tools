@@ -6,6 +6,7 @@
 import sys
 import yaml
 from twisted.internet.task import react
+from twisted.internet.defer import succeed
 
 # Usage: deploy.py cluster.yml
 from utils import Configurator
@@ -119,6 +120,7 @@ docker run --restart=always -d --net=host -v /etc/flocker:/etc/flocker --volumes
         url = "https://%(control_node)s:4523/v1" % dict(control_node=c.config["control_node"],)
         print "This should give you a list of your nodes:"
         print prefix + " " + url + "/state/nodes | jq ."
+    return succeed(None)
 
 def _main():
     react(main, sys.argv[1:])
