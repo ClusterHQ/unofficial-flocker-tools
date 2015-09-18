@@ -14,4 +14,5 @@ def main():
     terraform_templates = resource_filename("unofficial_flocker_tools", "terraform_templates")
     print target_dir
     print "copying", terraform_templates, "=>", os.getcwd(), "./" + target_dir
-    shutil.copytree(terraform_templates, "./" + target_dir)
+    os.system("mkdir -p %(target_dir)s && cp %(terraform_templates)s/* %(target_dir)s/"
+            % dict(terraform_templates=terraform_templates, target_dir=target_dir))
