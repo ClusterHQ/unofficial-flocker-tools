@@ -155,8 +155,7 @@ def main(reactor, configFile):
                 deferreds.append(d)
         else:
             print "Skipping installing plugin: %r" % (settings["SKIP_INSTALL_PLUGIN"],)
-    result = yield gatherResults(deferreds)
-    print result
+    yield gatherResults(deferreds)
 
     for node in c.config["agent_nodes"]:
         public_ip = node["public"]
