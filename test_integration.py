@@ -68,7 +68,7 @@ class UnofficialFlockerInstallerTests(TestCase):
             os.system("""cd %(testdir)s && \
 uft-flocker-volumes destroy --dataset=$(uft-flocker-volumes list | tail -n 1 | awk -F ' ' '{print $1}') && \
 while [ $(uft-flocker-volumes list |wc -l) != "1" ]; do echo waiting for volumes to be deleted; sleep 1; done && \
-uft-flocker-destroy-nodes""" % v)
+FORCE_DESTROY=yes uft-flocker-destroy-nodes""" % v)
         finally:
             os.system("""cd %(testdir)s && \
                          FORCE_DESTROY= uft-flocker-destroy-nodes""" % v)
