@@ -38,6 +38,7 @@ class UnofficialFlockerInstallerTests(TestCase):
         test_dir.makedirs()
         v = dict(testdir=test_dir.path, get_flocker=GET_FLOCKER,
                  configuration=configuration)
+        cleaned_up = False
         try:
             os.system("""curl -sSL %(get_flocker)s | sh && \
                          cd %(testdir)s && \
@@ -65,13 +66,16 @@ class UnofficialFlockerInstallerTests(TestCase):
                 'docker run -v foo:/data --volume-driver=flocker busybox '
                 'cat /data/foo')
             self.assertTrue(output.strip().endswith("hello"))
-            os.system("""cd %(testdir)s && \
+            result = os.system("""cd %(testdir)s && \
 uft-flocker-volumes destroy --dataset=$(uft-flocker-volumes list|tail -n 2 |head -n 1|awk -F ' ' '{print $1}') && \
 while [ $(uft-flocker-volumes list |wc -l) != "2" ]; do echo waiting for volumes to be deleted; sleep 1; done && \
 FORCE_DESTROY=yes uft-flocker-destroy-nodes""" % v)
+            if result == 0:
+                cleaned_up = True
         finally:
-            os.system("""cd %(testdir)s && \
-                         FORCE_DESTROY= uft-flocker-destroy-nodes""" % v)
+            if not cleaned_up:
+                os.system("""cd %(testdir)s && \
+                             FORCE_DESTROY= uft-flocker-destroy-nodes""" % v)
 
     def test_ubuntu_aws(self):
         return self._run_integration_test("ubuntu-aws")
