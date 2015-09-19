@@ -71,7 +71,7 @@ while [ $(uft-flocker-volumes list |wc -l) != "1" ]; do echo waiting for volumes
 uft-flocker-destroy-nodes""" % v)
         finally:
             os.system("""cd %(testdir)s && \
-                         uft-flocker-destroy-nodes""" % v)
+                         FORCE_DESTROY= uft-flocker-destroy-nodes""" % v)
 
     def test_ubuntu_aws(self):
         return self._run_integration_test("ubuntu-aws")
