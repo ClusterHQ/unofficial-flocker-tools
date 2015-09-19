@@ -61,7 +61,9 @@ def main(reactor, args):
 
     for node, uuid in node_mapping.iteritems():
         if c.config["os"] == "ubuntu":
-            c.runSSH(node, """service flocker-container-agent restart
+            c.runSSH(node, """echo "starting flocker-container-agent..."
+service flocker-container-agent restart
+echo "starting flocker-dataset-agent..."
 service flocker-dataset-agent restart
 """)
         elif c.config["os"] == "centos":
