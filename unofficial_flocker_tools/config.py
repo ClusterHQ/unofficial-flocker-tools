@@ -11,7 +11,7 @@ from twisted.internet.defer import inlineCallbacks, gatherResults
 # Usage: deploy.py cluster.yml
 from utils import Configurator
 
-def report_completion(result, public_ip, message="Completed install for"):
+def report_completion(result, public_ip, message=""):
     print message, public_ip
     return result
 
@@ -44,12 +44,18 @@ def main(reactor, args):
     yaml.dump(node_mapping, f)
     f.close()
 
+    print "Making /etc/flocker directory on all nodes"
+    deferreds = []
+    for node, uuid in node_mapping.iteritems():
+        deferreds.append(c.runSSHAsync(node, "mkdir -p /etc/flocker"))
+    deferreds.append(c.runSSHAsync(c.config["control_node"], "mkdir -p /etc/flocker"))
+    yield gatherResults(deferreds)
+
     print "Uploading keys to respective nodes:"
     deferreds = []
 
     # Copy cluster cert, and control cert and key to control node.
-    d = c.runSSHAsync(c.config["control_node"], "mkdir -p /etc/flocker")
-    d.addCallback(lambda ignored: c.scp("cluster.crt", c.config["control_node"], "/etc/flocker/cluster.crt", async=True))
+    d = c.scp("cluster.crt", c.config["control_node"], "/etc/flocker/cluster.crt", async=True)
     d.addCallback(report_completion, public_ip=c.config["control_node"], message=" * Uploaded cluster cert to")
     deferreds.append(d)
 
@@ -61,9 +67,9 @@ def main(reactor, args):
     print " * Uploaded control cert & key to control node."
 
     # Copy cluster cert, and agent cert and key to agent nodes.
+    deferreds = []
     for node, uuid in node_mapping.iteritems():
-        d = c.runSSHAsync(node, "mkdir -p /etc/flocker")
-        d.addCallback(lambda ignored: c.scp("cluster.crt", node, "/etc/flocker/cluster.crt", async=True))
+        d = c.scp("cluster.crt", node, "/etc/flocker/cluster.crt", async=True)
         d.addCallback(report_completion, public_ip=node, message=" * Uploaded cluster cert to")
         deferreds.append(d)
 
@@ -91,7 +97,6 @@ service flocker-dataset-agent start
 systemctl enable docker.service
 systemctl start docker.service
 """)
-
         elif c.config["os"] == "coreos":
             d = c.runSSHAsync(node, """echo
 echo > /tmp/flocker-command-log
@@ -109,7 +114,6 @@ docker run --restart=always -d --net=host --privileged \\
     clusterhq/flocker-dataset-agent
 """)
         deferreds.append(d)
-    yield gatherResults(deferreds)
 
     if c.config["os"] == "ubuntu":
         d = c.runSSHAsync(c.config["control_node"], """cat <<EOF > /etc/init/flocker-control.override
@@ -135,7 +139,9 @@ firewall-cmd --add-service flocker-control-agent
 docker run --name=flocker-control-volume -v /var/lib/flocker clusterhq/flocker-control-service true
 docker run --restart=always -d --net=host -v /etc/flocker:/etc/flocker --volumes-from=flocker-control-volume --name=flocker-control-service clusterhq/flocker-control-service""")
 
-    yield d
+    deferreds.append(d)
+
+    yield gatherResults(deferreds)
 
 def _main():
     react(main, sys.argv[1:])
