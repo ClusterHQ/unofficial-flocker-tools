@@ -31,7 +31,7 @@ def main(reactor, configFile):
     node_public_ips.append(c.config["control_node"])
 
     # Wait for all nodes to boot
-    yield gatherResults([verify_socket(ip, 22, timeout=60) for ip in node_public_ips])
+    yield gatherResults([verify_socket(ip, 22, timeout=120) for ip in node_public_ips])
 
     # Enable root access
     cmd1 = "sudo mkdir -p /root/.ssh"

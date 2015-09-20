@@ -10,7 +10,7 @@ from twisted.internet import reactor
 from twisted.internet.defer import maybeDeferred
 from twisted.internet.task import deferLater
 
-def verify_socket(host, port, timeout=60, connect_timeout=5):
+def verify_socket(host, port, timeout=120, connect_timeout=5):
     """
     Wait until the destionation can be connected to.
 
