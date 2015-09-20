@@ -76,7 +76,7 @@ class Configurator(object):
     def runSSH(self, ip, command, username=None):
         command = 'ssh -o LogLevel=error -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i %s %s@%s %s' % (self.config["private_key_path"],
                 username if username is not None else self.config["remote_server_username"],
-                ip, quote(command))
+                ip, " ".join(map(quote, ["bash", "-c", "echo; " + command])))
         print "running command:"
         print command
         return subprocess.check_output(command, shell=True)
@@ -91,7 +91,7 @@ class Configurator(object):
                    'StrictHostKeyChecking=no', '-i',
                    self.config["private_key_path"], "%s@%s" % (
                        username if username is not None else self.config["remote_server_username"], ip),
-                   quote(command)]
+                   " ".join(map(quote, ["bash", "-c", "echo; " + command]))]
         return getProcessOutput(executable, command, errortoo=True)
 
     def runSSHRaw(self, ip, command, username=None):
@@ -103,7 +103,7 @@ class Configurator(object):
     def runSSHPassthru(self, ip, command, username=None):
         command = 'ssh -o LogLevel=error -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i %s %s@%s %s' % (self.config["private_key_path"],
                 username if username is not None else self.config["remote_server_username"],
-                ip, " ".join(map(quote, command)))
+                ip, " ".join(map(quote, "echo; " + command)))
         return os.system(command)
 
     def run(self, command):
