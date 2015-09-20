@@ -121,8 +121,8 @@ def main(reactor, configFile):
         c.run("flocker-ca create-api-certificate %s-plugin" % (public_ip,))
         print "Generated plugin certs for", public_ip
 
-    def report_completion(result, public_ip):
-        print "Completed plugin install for", public_ip
+    def report_completion(result, public_ip, message="Completed plugin install for"):
+        print message, public_ip
         return result
 
     deferreds = []
