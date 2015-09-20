@@ -120,19 +120,27 @@ def main(reactor, configFile):
         # so they do not overwrite each other
         c.run("flocker-ca create-api-certificate %s-plugin" % (public_ip,))
         print "Generated plugin certs for", public_ip
-        # upload the .crt and .key
-        for ext in ("crt", "key"):
-            c.scp("%s-plugin.%s" % (public_ip, ext,),
-                public_ip, "/etc/flocker/plugin.%s" % (ext,))
-        print "Uploaded plugin certs for", public_ip
-
-    print "Installing flocker plugin"
-    # loop each agent and get the plugin installed/running
-    # clone the plugin and configure an upstart/systemd unit for it to run
 
     def report_completion(result, public_ip):
         print "Completed plugin install for", public_ip
         return result
+
+    deferreds = []
+    print "Uploading plugin certs..."
+    for node in c.config["agent_nodes"]:
+        public_ip = node["public"]
+        # upload the .crt and .key
+        for ext in ("crt", "key"):
+            d = c.scp("%s-plugin.%s" % (public_ip, ext,),
+                public_ip, "/etc/flocker/plugin.%s" % (ext,), async=True)
+            d.addCallback(report_completion, public_ip=public_ip, message="Uploaded plugin cert for")
+            deferreds.append(d)
+    yield gatherResults(deferreds)
+    print "Uploaded plugin certs"
+
+    print "Installing flocker plugin"
+    # loop each agent and get the plugin installed/running
+    # clone the plugin and configure an upstart/systemd unit for it to run
 
     deferreds = []
     for node in c.config["agent_nodes"]:
