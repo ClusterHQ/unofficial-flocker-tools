@@ -78,7 +78,7 @@ def main(reactor, args):
         deferreds.append(d)
 
         for ext in ("crt", "key"):
-            d = c.scp("%s.%s" % (uuid, ext), node, "/etc/flocker/node.%s" % (ext,))
+            d = c.scp("%s.%s" % (uuid, ext), node, "/etc/flocker/node.%s" % (ext,), async=True)
             d.addCallback(report_completion, public_ip=node, message=" * Uploaded node %s to" % (ext,))
             deferreds.append(d)
 
