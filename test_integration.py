@@ -46,13 +46,11 @@ class UnofficialFlockerInstallerTests(TestCase):
             SECRETS_FILE.copyTo(test_dir.child("terraform").child("terraform.tfvars.json"))
             os.system("""cd %(testdir)s && \
                          uft-flocker-get-nodes --%(configuration)s && \
-                         echo "sleeping 60 seconds to let VMs boot..." && \
-                         sleep 60 && \
                          uft-flocker-install cluster.yml && \
                          uft-flocker-config cluster.yml && \
                          uft-flocker-plugin-install cluster.yml && \
-                         echo "sleeping 60 seconds to let cluster settle..." && \
-                         sleep 60""" % v)
+                         echo "sleeping 10 seconds to let cluster settle..." && \
+                         sleep 10""" % v)
             cluster_config = yaml.load(test_dir.child("cluster.yml").open())
             node1 = cluster_config['agent_nodes'][0]
             node2 = cluster_config['agent_nodes'][1]

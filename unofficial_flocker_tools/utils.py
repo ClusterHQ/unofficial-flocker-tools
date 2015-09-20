@@ -2,7 +2,67 @@ import subprocess
 from pipes import quote
 import yaml
 import os
+import time
 from twisted.internet.utils import getProcessOutput
+from contextlib import closing
+from socket import socket
+from twisted.internet import reactor
+from twisted.internet.defer import maybeDeferred
+from twisted.internet.task import deferLater
+
+def verify_socket(host, port, timeout=60, connect_timeout=5):
+    """
+    Wait until the destionation can be connected to.
+
+    :param bytes host: Host to connect to.
+    :param int port: Port to connect to.
+
+    :return Deferred: Firing when connection is possible.
+    """
+    def can_connect():
+        with closing(socket()) as s:
+            s.settimeout(connect_timeout)
+            conn = s.connect_ex((host, port))
+            return conn == 0
+
+    print "Attempting to connect to %s:%s..." % (host, port)
+    dl = loop_until(can_connect, timeout=timeout)
+    then = time.time()
+    def print_success(result, ip, port):
+        print "Connected to %s:%s after %.2f seconds!" % (ip, port, time.time() - then)
+    def print_failure(result, ip, port):
+        print "Failed to connect to %s:%s after %.2f seconds :(" % (ip, port, time.time() - then)
+    dl.addCallback(print_success, ip=host, port=port)
+    dl.addErrback(print_failure, ip=host, port=port)
+    return dl
+
+
+class TimeoutError(Exception):
+    pass
+
+
+def loop_until(predicate, timeout=None):
+    """Call predicate every 0.1 seconds, until it returns something ``Truthy``.
+
+    :param predicate: Callable returning termination condition.
+    :type predicate: 0-argument callable returning a Deferred.
+
+    :return: A ``Deferred`` firing with the first ``Truthy`` response from
+        ``predicate``.
+    """
+    d = maybeDeferred(predicate)
+    then = time.time()
+    def loop(result):
+        if timeout and time.time() - then > timeout:
+            raise TimeoutError()
+        if not result:
+            d = deferLater(reactor, 0.1, predicate)
+            d.addCallback(loop)
+            return d
+        return result
+    d.addCallback(loop)
+    return d
+
 
 class Configurator(object):
     def __init__(self, configFile):

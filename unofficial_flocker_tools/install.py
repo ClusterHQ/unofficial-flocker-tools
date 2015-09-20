@@ -5,9 +5,13 @@
 import sys
 
 # Usage: deploy.py cluster.yml
-from utils import Configurator
+from utils import Configurator, verify_socket
 from twisted.internet.task import react
 from twisted.internet.defer import gatherResults, inlineCallbacks
+
+def report_completion(result, public_ip, message="Completed install for"):
+    print message, public_ip
+    return result
 
 @inlineCallbacks
 def main(reactor, configFile):
@@ -20,29 +24,27 @@ def main(reactor, configFile):
         user = "ubuntu"
     elif c.config["os"] == "centos":
         user = "centos"
-    cmd1 = "sudo mkdir -p /root/.ssh"
-    cmd2 = "sudo cp /home/%s/.ssh/authorized_keys /root/.ssh/authorized_keys" % (user,)
-    ips = []
-    for node in c.config["agent_nodes"]:
-        ips.append(node["public"])
-    for public_ip in ips:
-        c.runSSHRaw(public_ip, cmd1, username=user)
-        c.runSSHRaw(public_ip, cmd2, username=user)
-        print "Enabled root access to %s" % (public_ip,)
-    if c.config["control_node"] not in ips:
-        c.runSSHRaw(c.config["control_node"], cmd1, username=user)
-        c.runSSHRaw(c.config["control_node"], cmd2, username=user)
-        print "Enabled root access to %s" % (c.config["control_node"],)
 
-    # Install flocker node software on all the nodes
+    # Gather IPs of all nodes
     nodes = c.config["agent_nodes"]
     node_public_ips = [n["public"] for n in nodes]
     node_public_ips.append(c.config["control_node"])
 
-    def report_completion(result, public_ip):
-        print "Completed install for", public_ip
-        return result
+    # Wait for all nodes to boot
+    yield gatherResults([verify_socket(ip, 22, timeout=60) for ip in node_public_ips])
 
+    # Enable root access
+    cmd1 = "sudo mkdir -p /root/.ssh"
+    cmd2 = "sudo cp /home/%s/.ssh/authorized_keys /root/.ssh/authorized_keys" % (user,)
+    deferreds = []
+    for public_ip in node_public_ips:
+        d = c.runSSHAsync(public_ip, cmd1 + " && " + cmd2, username=user)
+        d.addCallback(report_completion, public_ip=public_ip, message="Enabled root login for")
+        deferreds.append(d)
+        print "Enabled root access to %s" % (public_ip,)
+    yield gatherResults(deferreds)
+
+    # Install flocker node software on all the nodes
     deferreds = []
     for public_ip in node_public_ips:
         if c.config["os"] == "ubuntu":
