@@ -16,7 +16,7 @@ class Configurator(object):
     def runSSH(self, ip, command, username=None):
         command = 'ssh -o LogLevel=error -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i %s %s@%s %s' % (self.config["private_key_path"],
                 username if username is not None else self.config["remote_server_username"],
-                ip, " ".join(map(quote, ["sh", "-c", command])))
+                ip, " ".join(map(quote, ["bash", "-c", command])))
         return subprocess.check_output(command, shell=True)
 
     def runSSHAsync(self, ip, command, username=None):
@@ -29,7 +29,7 @@ class Configurator(object):
                    'StrictHostKeyChecking=no', '-i',
                    self.config["private_key_path"], "%s@%s" % (
                        username if username is not None else self.config["remote_server_username"], ip),
-                   " ".join(map(quote, ["sh", "-c", command]))]
+                   " ".join(map(quote, ["bash", "-c", command]))]
         return getProcessOutput(executable, command, errortoo=True)
 
     def runSSHRaw(self, ip, command, username=None):
@@ -74,8 +74,9 @@ class Configurator(object):
 
         print "Finished telling all nodes about the master."
 
+
     def scp(self, local_path, external_ip, remote_path,
-            private_key_path=None, remote_server_username=None):
+            private_key_path=None, remote_server_username=None, async=False):
         if private_key_path is not None:
             private_key_path = self.config["private_key_path"]
         if remote_server_username is not None:
@@ -86,4 +87,7 @@ class Configurator(object):
                     remote_server_username=self.config["remote_server_username"],
                     external_ip=external_ip, remote_path=remote_path,
                     local_path=local_path)
-        return subprocess.check_output(scp, shell=True)
+        if async:
+            return getProcessOutput("/bin/bash", ["-c", scp], errortoo=True)
+        else:
+            return subprocess.check_output(scp, shell=True)

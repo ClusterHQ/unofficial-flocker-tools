@@ -5,6 +5,7 @@ optimization tool. see which parts of the install are taking the longest.
 1. 'ts' is in moreutils package, install it.
 2. trial test_integration.py | ts -s '%.s, ' > ~/log.txt
 3. python ts.py ~/log.txt > ~/log.csv
+4. open ~/log.csv
 """
 import sys
 data = [s.split(",  ") for s in open(sys.argv[1]).read().strip().split("\n")]
