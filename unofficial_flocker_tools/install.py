@@ -41,7 +41,6 @@ def main(reactor, configFile):
         d = c.runSSHAsync(public_ip, cmd1 + " && " + cmd2, username=user)
         d.addCallback(report_completion, public_ip=public_ip, message="Enabled root login for")
         deferreds.append(d)
-        print "Enabled root access to %s" % (public_ip,)
     yield gatherResults(deferreds)
 
     # Install flocker node software on all the nodes

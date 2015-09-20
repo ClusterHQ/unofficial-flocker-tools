@@ -77,15 +77,13 @@ def combined_state(client, base_url, deleted):
         for (key, dataset) in configuration_map.iteritems():
             dataset = copy.copy(dataset)
             if dataset["deleted"]:
-                # the user has asked to see deleted datasets
-                if deleted:
-                    if key in state_map:
-                        status = "deleting"
-                    else:
-                        status = "deleted"
-                # we are hiding deleted datasets
+                if key in state_map:
+                    status = "deleting"
                 else:
-                    continue
+                    status = "deleted"
+                    if deleted:
+                        # we are hiding deleted datasets
+                        continue
             else:
                 if key in state_map:
                     if ("primary" in state_map[key] and
