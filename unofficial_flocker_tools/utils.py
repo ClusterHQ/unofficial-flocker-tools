@@ -77,6 +77,8 @@ class Configurator(object):
         command = 'ssh -o LogLevel=error -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i %s %s@%s %s' % (self.config["private_key_path"],
                 username if username is not None else self.config["remote_server_username"],
                 ip, " ".join(map(quote, ["bash", "-c", command])))
+        print "running command:"
+        print command
         return subprocess.check_output(command, shell=True)
 
     def runSSHAsync(self, ip, command, username=None):

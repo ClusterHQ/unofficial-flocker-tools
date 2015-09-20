@@ -81,7 +81,7 @@ def combined_state(client, base_url, deleted):
                     status = "deleting"
                 else:
                     status = "deleted"
-                    if deleted:
+                    if not deleted:
                         # we are hiding deleted datasets
                         continue
             else:

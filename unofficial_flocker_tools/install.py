@@ -133,7 +133,7 @@ rm /tmp/uploadkey.sh
 
     print "Installed clusterhq-flocker-node on all nodes"
     print "To configure and deploy the cluster:"
-    print "flocker-config cluster.yml"
+    print "uft-flocker-config cluster.yml"
 
 def _main():
     react(main, sys.argv[1:])
