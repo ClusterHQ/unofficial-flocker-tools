@@ -13,7 +13,7 @@ from twisted.internet.task import react
 from twisted.internet.defer import gatherResults, inlineCallbacks
 
 # Usage: plugin.py cluster.yml
-from utils import Configurator
+from utils import Configurator, log
 
 # a dict that holds the default values for each of the env vars
 # that can be overriden
@@ -54,9 +54,9 @@ def main(reactor, configFile):
     for node in c.config["agent_nodes"]:
 
         if c.config["os"] != "coreos":
-            print "Skipping installing new docker binary because we're on",
-            print "ubuntu/centos, assuming we installed a sufficiently recent one",
-            print "already."
+            log("Skipping installing new docker binary because we're on",
+                "ubuntu/centos, assuming we installed a sufficiently recent one",
+                "already.")
             break
 
         # don't download a new docker for reasons only the user knows.
@@ -64,10 +64,10 @@ def main(reactor, configFile):
             break
 
         public_ip = node["public"]
-        print "Replacing docker binary on %s" % (public_ip,)
+        log("Replacing docker binary on %s" % (public_ip,))
 
         # stop the docker service
-        print "Stopping the docker service on %s" % (public_ip,)
+        log("Stopping the docker service on %s" % (public_ip,))
 
         if c.config["os"] == "ubuntu":
             c.runSSHRaw(public_ip, "stop %s || true"
@@ -80,8 +80,8 @@ def main(reactor, configFile):
 
         # download the latest docker binary
         if c.config["os"] == "coreos":
-            print "Downloading the latest docker binary on %s - %s" \
-                % (public_ip, settings['DOCKER_BINARY_URL'],)
+            log("Downloading the latest docker binary on %s - %s" \
+                % (public_ip, settings['DOCKER_BINARY_URL'],))
             c.runSSHRaw(public_ip, "mkdir -p /root/bin")
             c.runSSHRaw(public_ip, "wget -qO /root/bin/docker %s"
                 % (settings['DOCKER_BINARY_URL'],))
@@ -96,13 +96,13 @@ def main(reactor, configFile):
                     "sed -i \\'s@exec docker@exec /root/bin/docker@g\\' /root/bin/dockerd")
             c.runSSHRaw(public_ip, "systemctl daemon-reload")
         else:
-            print "Downloading the latest docker binary on %s - %s" \
-                % (public_ip, settings['DOCKER_BINARY_URL'],)
+            log("Downloading the latest docker binary on %s - %s" \
+                % (public_ip, settings['DOCKER_BINARY_URL'],))
             c.runSSHRaw(public_ip, "wget -O /usr/bin/docker %s"
                 % (settings['DOCKER_BINARY_URL'],))
 
         # start the docker service
-        print "Starting the docker service on %s" % (public_ip,)
+        log("Starting the docker service on %s" % (public_ip,))
         if c.config["os"] == "ubuntu":
             c.runSSHRaw(public_ip, "start %s"
                 % (settings['DOCKER_SERVICE_NAME'],))
@@ -112,21 +112,21 @@ def main(reactor, configFile):
         elif c.config["os"] == "coreos":
             c.runSSHRaw(public_ip, "systemctl start docker.service")
 
-    print "Generating plugin certs"
+    log("Generating plugin certs")
     # generate and upload plugin.crt and plugin.key for each node
     for node in c.config["agent_nodes"]:
         public_ip = node["public"]
         # use the node IP to name the local files
         # so they do not overwrite each other
         c.run("flocker-ca create-api-certificate %s-plugin" % (public_ip,))
-        print "Generated plugin certs for", public_ip
+        log("Generated plugin certs for", public_ip)
 
     def report_completion(result, public_ip, message="Completed plugin install for"):
-        print message, public_ip
+        log(message, public_ip)
         return result
 
     deferreds = []
-    print "Uploading plugin certs..."
+    log("Uploading plugin certs...")
     for node in c.config["agent_nodes"]:
         public_ip = node["public"]
         # upload the .crt and .key
@@ -136,9 +136,9 @@ def main(reactor, configFile):
             d.addCallback(report_completion, public_ip=public_ip, message="Uploaded plugin cert for")
             deferreds.append(d)
     yield gatherResults(deferreds)
-    print "Uploaded plugin certs"
+    log("Uploaded plugin certs")
 
-    print "Installing flocker plugin"
+    log("Installing flocker plugin")
     # loop each agent and get the plugin installed/running
     # clone the plugin and configure an upstart/systemd unit for it to run
 
@@ -146,7 +146,7 @@ def main(reactor, configFile):
     for node in c.config["agent_nodes"]:
         public_ip = node["public"]
         private_ip = node["private"]
-        print "Using %s => %s" % (public_ip, private_ip)
+        log("Using %s => %s" % (public_ip, private_ip))
 
         # the full api path to the control service
         controlservice = 'https://%s:4523/v1' % (control_ip,)
@@ -156,13 +156,13 @@ def main(reactor, configFile):
         if not settings["SKIP_INSTALL_PLUGIN"]:
             if c.config["os"] in ("ubuntu", "centos"):
                 # pip install the plugin
-                print "Installing plugin for", public_ip, "..."
+                log("Installing plugin for", public_ip, "...")
                 d = c.runSSHAsync(public_ip, "/opt/flocker/bin/pip install git+%s@%s"
                     % (settings['PLUGIN_REPO'], settings['PLUGIN_BRANCH'],))
                 d.addCallback(report_completion, public_ip=public_ip)
                 deferreds.append(d)
         else:
-            print "Skipping installing plugin: %r" % (settings["SKIP_INSTALL_PLUGIN"],)
+            log("Skipping installing plugin: %r" % (settings["SKIP_INSTALL_PLUGIN"],))
     yield gatherResults(deferreds)
 
     for node in c.config["agent_nodes"]:
@@ -170,11 +170,11 @@ def main(reactor, configFile):
         private_ip = node["private"]
         # ensure that the /run/docker/plugins
         # folder exists
-        print "Creating the /run/docker/plugins folder"
+        log("Creating the /run/docker/plugins folder")
         c.runSSHRaw(public_ip, "mkdir -p /run/docker/plugins")
         # configure an upstart job that runs the bash script
         if c.config["os"] == "ubuntu":
-            print "Writing flocker-docker-plugin upstart job to %s" % (public_ip,)
+            log("Writing flocker-docker-plugin upstart job to %s" % (public_ip,))
             c.runSSH(public_ip, """cat <<EOF > /etc/init/flocker-docker-plugin.conf
 # flocker-plugin - flocker-docker-plugin job file
 
@@ -191,7 +191,7 @@ service flocker-docker-plugin restart
 """ % (controlservice, private_ip,))
         # configure a systemd job that runs the bash script
         elif c.config["os"] == "centos":
-            print "Writing flocker-docker-plugin systemd job to %s" % (public_ip,)
+            log("Writing flocker-docker-plugin systemd job to %s" % (public_ip,))
             c.runSSH(public_ip, """# writing flocker-docker-plugin systemd
 cat <<EOF > /etc/systemd/system/flocker-docker-plugin.service
 [Unit]
@@ -211,7 +211,7 @@ systemctl start flocker-docker-plugin.service
 """ % (controlservice, private_ip,))
         # DOCKER DOCKER DOCKER DOCKER
         elif c.config["os"] == "coreos":
-            print "Starting flocker-docker-plugin as docker container on CoreOS on %s" % (public_ip,)
+            log("Starting flocker-docker-plugin as docker container on CoreOS on %s" % (public_ip,))
             c.runSSH(public_ip, """echo
 /root/bin/docker run --restart=always -d --net=host --privileged \\
 -e FLOCKER_CONTROL_SERVICE_BASE_URL=%s \\

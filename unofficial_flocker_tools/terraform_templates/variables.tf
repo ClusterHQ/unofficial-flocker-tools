@@ -2,6 +2,9 @@ variable "private_key_path" {}
 variable "aws_key_name" {}
 variable "aws_access_key" {}
 variable "aws_secret_key" {}
+variable "agent_nodes" {
+    default = "2"
+}
 variable "cloud_provider" {
     default = "aws"
 }

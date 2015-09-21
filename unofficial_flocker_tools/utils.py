@@ -10,6 +10,25 @@ from twisted.internet import reactor
 from twisted.internet.defer import maybeDeferred
 from twisted.internet.task import deferLater
 
+def append_to_install_log(s):
+    fp = open('install-log.txt', 'a')
+    fp.write(str(int(time.time())) + ", " + s + "\n")
+    fp.close()
+
+def format_log_args(args):
+    return " ".join([str(a) for a in args])
+
+def log(*args):
+    print format_log_args(args)
+    append_to_install_log(format_log_args(args))
+
+def verbose_log(*args):
+    append_to_install_log(format_log_args(args))
+
+def verbose_log_callback(result, message):
+    verbose_log(message, result)
+    return result
+
 def verify_socket(host, port, timeout=120, connect_timeout=5):
     """
     Wait until the destionation can be connected to.
@@ -25,15 +44,15 @@ def verify_socket(host, port, timeout=120, connect_timeout=5):
             conn = s.connect_ex((host, port))
             return conn == 0
 
-    print "Attempting to connect to %s:%s..." % (host, port)
+    log("Attempting to connect to %s:%s..." % (host, port))
     dl = loop_until(can_connect, timeout=timeout)
     then = time.time()
-    def print_success(result, ip, port):
-        print "Connected to %s:%s after %.2f seconds!" % (ip, port, time.time() - then)
-    def print_failure(result, ip, port):
-        print "Failed to connect to %s:%s after %.2f seconds :(" % (ip, port, time.time() - then)
-    dl.addCallback(print_success, ip=host, port=port)
-    dl.addErrback(print_failure, ip=host, port=port)
+    def success(result, ip, port):
+        log("Connected to %s:%s after %.2f seconds!" % (ip, port, time.time() - then))
+    def failure(result, ip, port):
+        log("Failed to connect to %s:%s after %.2f seconds :(" % (ip, port, time.time() - then))
+    dl.addCallback(success, ip=host, port=port)
+    dl.addErrback(failure, ip=host, port=port)
     return dl
 
 
@@ -77,9 +96,10 @@ class Configurator(object):
         command = 'ssh -o LogLevel=error -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i %s %s@%s %s' % (self.config["private_key_path"],
                 username if username is not None else self.config["remote_server_username"],
                 ip, " ".join(map(quote, ["bash", "-c", "echo; " + command])))
-        print "running command:"
-        print command
-        return subprocess.check_output(command, shell=True)
+        verbose_log("runSSH:", command)
+        result = subprocess.check_output(command, shell=True)
+        verbose_log("runSSH result of", command, " - ", result)
+        return result
 
     def runSSHAsync(self, ip, command, username=None):
         """
@@ -92,50 +112,25 @@ class Configurator(object):
                    self.config["private_key_path"], "%s@%s" % (
                        username if username is not None else self.config["remote_server_username"], ip),
                    " ".join(map(quote, ["bash", "-c", "echo; " + command]))]
-        return getProcessOutput(executable, command, errortoo=True)
+        verbose_log("runSSHAsync:", command)
+        d = getProcessOutput(executable, command, errortoo=True)
+        d.addBoth(verbose_log_callback, message="runSSHAsync result of %s - " % (command,))
+        return d
 
     def runSSHRaw(self, ip, command, username=None):
         command = 'ssh -o LogLevel=error -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i %s %s@%s %s' % (self.config["private_key_path"],
                 username if username is not None else self.config["remote_server_username"],
                 ip, command)
-        return subprocess.check_output(command, shell=True)
-
-    def runSSHPassthru(self, ip, command, username=None):
-        command = 'ssh -o LogLevel=error -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i %s %s@%s %s' % (self.config["private_key_path"],
-                username if username is not None else self.config["remote_server_username"],
-                ip, " ".join(map(quote, "echo; " + command)))
-        return os.system(command)
+        verbose_log("runSSHRaw:", command)
+        result = subprocess.check_output(command, shell=True)
+        verbose_log("runSSHRaw result of", command, " - ", result)
+        return result
 
     def run(self, command):
-        return subprocess.check_output(command, shell=True)
-
-    def pushConfig(self, text, instances):
-        f = open("master_address", "w")
-        f.write(text)
-        f.close()
-
-        print "Written master address"
-        for (externalIP, internalIP) in instances:
-            self.runSSH(externalIP, ['sudo', 'mkdir', '-p', '/etc/flocker'])
-
-            f = open("my_address", "w")
-            f.write(externalIP)
-            f.close()
-
-            # push the list of minions to the master (for later firewalling of control
-            # port and minion port) [might as well push list of minions to all
-            # nodes at this point...]
-            f = open("minions", "w")
-            f.write("\n".join([e for (e, i) in instances]))
-            f.close()
-
-            for f in ('master_address', 'my_address', 'minions'):
-                self.scp(f, externalIP, "/tmp/%s" % (f,))
-                self.runSSH(externalIP, ['sudo', 'mv', '/tmp/%s' % (f,), '/etc/flocker/%s' % (f,)])
-                print "Pushed", f, "to", externalIP
-
-        print "Finished telling all nodes about the master."
-
+        verbose_log("run:", command)
+        result = subprocess.check_output(command, shell=True)
+        verbose_log("run result of", command, " - ", result)
+        return result
 
     def scp(self, local_path, external_ip, remote_path,
             private_key_path=None, remote_server_username=None, async=False):
@@ -150,6 +145,12 @@ class Configurator(object):
                     external_ip=external_ip, remote_path=remote_path,
                     local_path=local_path)
         if async:
-            return getProcessOutput("/bin/bash", ["-c", scp], errortoo=True)
+            verbose_log("scp async:", scp)
+            d = getProcessOutput("/bin/bash", ["-c", scp], errortoo=True)
+            d.addBoth(verbose_log_callback, message="scp async result of %s - " % (scp,))
+            return d
         else:
-            return subprocess.check_output(scp, shell=True)
+            verbose_log("scp sync:", scp)
+            result = subprocess.check_output(scp, shell=True)
+            verbose_log("scp sync result of", scp, " - ", result)
+            return result

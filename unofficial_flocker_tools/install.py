@@ -5,12 +5,12 @@
 import sys
 
 # Usage: deploy.py cluster.yml
-from utils import Configurator, verify_socket
+from utils import Configurator, verify_socket, log
 from twisted.internet.task import react
 from twisted.internet.defer import gatherResults, inlineCallbacks
 
 def report_completion(result, public_ip, message="Completed install for"):
-    print message, public_ip
+    log(message, public_ip)
     return result
 
 @inlineCallbacks
@@ -47,7 +47,7 @@ def main(reactor, configFile):
     deferreds = []
     for public_ip in node_public_ips:
         if c.config["os"] == "ubuntu":
-            print "Running install for", public_ip, "..."
+            log("Running install for", public_ip, "...")
             d = c.runSSHAsync(public_ip, """apt-get -y install apt-transport-https software-properties-common
 add-apt-repository -y 'deb https://clusterhq-archive.s3.amazonaws.com/ubuntu-testing/14.04/$(ARCH) /'
 apt-get update
@@ -75,14 +75,10 @@ yum install -y clusterhq-flocker-node
         # CentOS ZFS installation requires a restart
         # XXX todo - find out a way to handle a restart mid-script
         if c.config["os"] == "centos":
-            print >> sys.stderr, (
-                "Auto-install of ZFS on CentOS is "
-                "not currently supported")
+            log("Auto-install of ZFS on CentOS is not currently supported")
             sys.exit(1)
         if c.config["os"] == "coreos":
-            print >> sys.stderr, (
-                "Auto-install of ZFS on CoreOS is "
-                "not currently supported")
+            log("Auto-install of ZFS on CoreOS is not currently supported")
             sys.exit(1)
 
         for node in c.config["agent_nodes"]:
@@ -103,7 +99,7 @@ zpool create flocker /var/opt/flocker/pool-vdev
         """
         for node in c.config["agent_nodes"]:
             node_public_ip = node["public"]
-            print "Generating SSH Keys for %s" % (node_public_ip,)
+            log("Generating SSH Keys for %s" % (node_public_ip,))
             publicKey = c.runSSH(node_public_ip, """cat <<EOF > /tmp/genkeys.sh
 #!/bin/bash
 ssh-keygen -q -f /root/.ssh/id_rsa -N ""
@@ -121,8 +117,7 @@ rm /tmp/genkeys.sh
             for othernode in c.config["agent_nodes"]:
                 othernode_public_ip = othernode["public"]
                 if othernode_public_ip != node_public_ip:
-                    print "Copying %s key -> %s" % (
-                        node_public_ip, othernode_public_ip,)
+                    log("Copying %s key -> %s" % (node_public_ip, othernode_public_ip,))
                     c.runSSH(othernode_public_ip, """cat <<EOF > /tmp/uploadkey.sh
 #!/bin/bash
 echo "%s" >> /root/.ssh/authorized_keys
@@ -131,9 +126,7 @@ bash /tmp/uploadkey.sh
 rm /tmp/uploadkey.sh
 """ % (publicKey,))
 
-    print "Installed clusterhq-flocker-node on all nodes"
-    print "To configure and deploy the cluster:"
-    print "uft-flocker-config cluster.yml"
+    log("Installed clusterhq-flocker-node on all nodes")
 
 def _main():
     react(main, sys.argv[1:])

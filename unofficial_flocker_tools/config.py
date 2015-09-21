@@ -9,29 +9,29 @@ from twisted.internet.task import react
 from twisted.internet.defer import inlineCallbacks, gatherResults
 
 # Usage: deploy.py cluster.yml
-from utils import Configurator
+from utils import Configurator, log
 
 def report_completion(result, public_ip, message=""):
-    print message, public_ip
+    log(message, public_ip)
     return result
 
 @inlineCallbacks
 def main(reactor, args):
     c = Configurator(configFile=sys.argv[1])
     c.run("flocker-ca initialize %s" % (c.config["cluster_name"],))
-    print "Initialized cluster CA."
+    log("Initialized cluster CA.")
     c.run("flocker-ca create-control-certificate %s" % (c.config["control_node"],))
-    print "Created control cert."
+    log("Created control cert.")
     node_mapping = {}
     for node in c.config["agent_nodes"]:
         public_ip = node["public"]
         # Created 8eab4b8d-c0a2-4ce2-80aa-0709277a9a7a.crt. Copy ...
         uuid = c.run("flocker-ca create-node-certificate").split(".")[0].split(" ")[1]
         node_mapping[public_ip] = uuid
-        print "Generated", uuid, "for", public_ip
+        log("Generated", uuid, "for", public_ip)
     for user in c.config["users"]:
         c.run("flocker-ca create-api-certificate %s" % (user,))
-        print "Created user key for", user
+        log("Created user key for", user)
 
     # Dump agent_config into a file and scp it to /etc/flocker/agent.yml on the
     # nodes.
@@ -44,14 +44,14 @@ def main(reactor, args):
     yaml.dump(node_mapping, f)
     f.close()
 
-    print "Making /etc/flocker directory on all nodes"
+    log("Making /etc/flocker directory on all nodes")
     deferreds = []
     for node, uuid in node_mapping.iteritems():
         deferreds.append(c.runSSHAsync(node, "mkdir -p /etc/flocker"))
     deferreds.append(c.runSSHAsync(c.config["control_node"], "mkdir -p /etc/flocker"))
     yield gatherResults(deferreds)
 
-    print "Uploading keys to respective nodes:"
+    log("Uploading keys to respective nodes:")
     deferreds = []
 
     # Copy cluster cert, and control cert and key to control node.
@@ -64,7 +64,7 @@ def main(reactor, args):
                 c.config["control_node"], "/etc/flocker/control-service.%s" % (ext,), async=True)
         d.addCallback(report_completion, public_ip=c.config["control_node"], message=" * Uploaded control %s to" % (ext,))
         deferreds.append(d)
-    print " * Uploaded control cert & key to control node."
+    log(" * Uploaded control cert & key to control node.")
 
     # Copy cluster cert, and agent cert and key to agent nodes.
     deferreds = []
