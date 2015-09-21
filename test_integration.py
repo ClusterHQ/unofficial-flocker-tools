@@ -24,9 +24,10 @@ import yaml, json
 SECRETS_FILE = FilePath(os.path.expanduser("~") + "/terraform.tfvars.json")
 SECRETS = json.load(SECRETS_FILE.open())
 KEY = FilePath(SECRETS["private_key_path"])
-GET_FLOCKER = "https://get-dev.flocker.io/" # XXX remove "-dev" before merging to master
-#UFT = "uft-"
-UFT = ""
+GET_FLOCKER = "https://get.flocker.io/"
+# set to empty string if you want to test against local install of tools
+# (faster RTT than building docker image every time)
+UFT = "uft-"
 
 class UnofficialFlockerInstallerTests(TestCase):
     """
