@@ -24,3 +24,13 @@ $ uft-flocker-ca --help
 
 Please refer to the individual projects above for instructions on how to use this repo.
 You may want to start with the installer docs.
+
+## Running tests
+
+Run an integration test for the installer thus:
+
+```
+$ trial test_integration.py
+```
+
+Note the comment at the top of the `test_integration.py` file before running the test.
