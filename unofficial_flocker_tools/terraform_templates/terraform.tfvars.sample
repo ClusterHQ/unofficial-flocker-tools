@@ -1,0 +1,15 @@
+# AWS keys
+aws_access_key = "your AWS access key"
+aws_secret_key = "your AWS secret key"
+
+# AWS region and zone
+aws_region = "region you want nodes deployed in e.g. us-east-1"
+aws_availability_zone = "zone you want nodes deployed in e.g. us-east-1a"
+
+# Key to authenticate to nodes via SSH
+aws_key_name = "name of EC2 keypair"
+private_key_path = "absolute path to EC2 key (.pem file) on your local machine"
+
+# Instance types and number of nodes (total launched = agent_nodes + 1, for master)
+aws_instance_type = "m3.large"
+agent_nodes = "2"

@@ -8,17 +8,10 @@ This repository contains several ClusterHQ Labs projects.
 
 ## Running dockerized
 
-You can run any UFT command dockerized by:
-
 ### 1. Write out some wrapper scripts
 
 ```
-$ for CMD in flocker-{ca,deploy,config,install,plugin-install,sample-files,tutorial,volumes}; do
-    cat <<EOF |sudo tee /usr/local/bin/uft-$CMD >/dev/null
-#!/bin/sh
-docker run -ti -v \$PWD:/pwd clusterhq/uft $CMD \$@
-EOF
-sudo chmod +x /usr/local/bin/uft-$CMD; done
+$ curl https://get.flocker.io | sudo sh
 ```
 
 ### 2. You now have access to all the unofficial flocker tools in your path with `uft-` prefixes
@@ -31,3 +24,13 @@ $ uft-flocker-ca --help
 
 Please refer to the individual projects above for instructions on how to use this repo.
 You may want to start with the installer docs.
+
+## Running tests
+
+Run an integration test for the installer thus:
+
+```
+$ trial test_integration.py
+```
+
+Note the comment at the top of the `test_integration.py` file before running the test.
