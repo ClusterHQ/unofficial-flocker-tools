@@ -39,11 +39,12 @@ class UnofficialFlockerInstallerTests(TestCase):
         test_dir = FilePath(self.mktemp())
         test_dir.makedirs()
         v = dict(testdir=test_dir.path, get_flocker=GET_FLOCKER,
-                 configuration=configuration, uft=UFT)
+                 configuration=configuration, uft=UFT, key=KEY.path)
         cleaned_up = False
         try:
             os.system("""curl -sSL %(get_flocker)s | sh && \
                          cd %(testdir)s && \
+                         chmod 0600 %(key)s && \
                          %(uft)sflocker-sample-files""" % v)
             SECRETS_FILE.copyTo(test_dir.child("terraform").child("terraform.tfvars.json"))
             os.system("""cd %(testdir)s && \

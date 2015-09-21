@@ -3,12 +3,46 @@ from pipes import quote
 import yaml
 import os
 import time
-from twisted.internet.utils import getProcessOutput
 from contextlib import closing
 from socket import socket
 from twisted.internet import reactor
 from twisted.internet.defer import maybeDeferred
 from twisted.internet.task import deferLater
+from twisted.internet.utils import _callProtocolWithDeferred
+from twisted.internet import protocol
+from io import BytesIO as StringIO
+from twisted.python import failure
+
+class SensibleProcessProtocol(protocol.ProcessProtocol):
+    def __init__(self, deferred):
+        self.deferred = deferred
+        self.outBuf = StringIO()
+        self.outReceived = self.outBuf.write
+        self.errReceived = self.outBuf.write
+
+    def processEnded(self, reason):
+        out = self.outBuf.getvalue()
+        e = reason.value
+        code = e.exitCode
+        if e.signal:
+            self.deferred.errback(
+                Exception("Process exited on signal %s: %s" % (e.signal, out)))
+        elif code != 0:
+            self.deferred.errback(
+                Exception("Process exited with error code %s: %s" % (code, out)))
+        else:
+            self.deferred.callback(out)
+
+def getSensibleProcessOutput(executable, args=(), env={}, path=None,
+                             reactor=None):
+    """
+    Do what you would expect getProcessOutput to do:
+    * if process emits stderr, capture it along with stdout
+    * if process ends with exit code != 0 or signal, errback with combined process output
+    * otherwise, callback with combined process output
+    """
+    return _callProtocolWithDeferred(SensibleProcessProtocol, executable, args, env, path,
+                                     reactor)
 
 def append_to_install_log(s):
     fp = open('install-log.txt', 'a')
@@ -113,7 +147,7 @@ class Configurator(object):
                        username if username is not None else self.config["remote_server_username"], ip),
                    " ".join(map(quote, ["bash", "-c", "echo; " + command]))]
         verbose_log("runSSHAsync:", command)
-        d = getProcessOutput(executable, command, errortoo=True)
+        d = getSensibleProcessOutput(executable, command)
         d.addBoth(verbose_log_callback, message="runSSHAsync result of %s - " % (command,))
         return d
 
@@ -146,7 +180,7 @@ class Configurator(object):
                     local_path=local_path)
         if async:
             verbose_log("scp async:", scp)
-            d = getProcessOutput("/bin/bash", ["-c", scp], errortoo=True)
+            d = getSensibleProcessOutput("/bin/bash", ["-c", scp])
             d.addBoth(verbose_log_callback, message="scp async result of %s - " % (scp,))
             return d
         else:
