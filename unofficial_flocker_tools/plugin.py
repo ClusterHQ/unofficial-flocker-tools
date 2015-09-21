@@ -133,7 +133,7 @@ def main(reactor, configFile):
         for ext in ("crt", "key"):
             d = c.scp("%s-plugin.%s" % (public_ip, ext,),
                 public_ip, "/etc/flocker/plugin.%s" % (ext,), async=True)
-            d.addCallback(report_completion, public_ip=public_ip, message="Uploaded plugin cert for")
+            d.addCallback(report_completion, public_ip=public_ip, message=" * Uploaded plugin cert for")
             deferreds.append(d)
     yield gatherResults(deferreds)
     log("Uploaded plugin certs")
@@ -187,7 +187,7 @@ env MY_NETWORK_IDENTITY=%s
 env PYTHONPATH=/opt/flocker/lib/python2.7/site-packages/:\\$PYTHONPATH
 exec /opt/flocker/bin/flocker-docker-plugin
 EOF
-service flocker-docker-plugin restart
+service flocker-docker-plugin start
 """ % (controlservice, private_ip,))
         # configure a systemd job that runs the bash script
         elif c.config["os"] == "centos":
@@ -220,6 +220,8 @@ systemctl start flocker-docker-plugin.service
 -v /run/docker:/run/docker \\
 --name=flocker-docker-plugin \\
 clusterhq/flocker-docker-plugin""" % (controlservice, private_ip,))
+
+    log("Done!")
 
 def _main():
     react(main, sys.argv[1:])
