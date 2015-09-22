@@ -11,7 +11,6 @@ from twisted.internet.task import deferLater
 from twisted.internet.utils import _callProtocolWithDeferred
 from twisted.internet import protocol
 from io import BytesIO as StringIO
-from twisted.python import failure
 
 class SensibleProcessProtocol(protocol.ProcessProtocol):
     def __init__(self, deferred):
@@ -119,12 +118,21 @@ def loop_until(predicate, timeout=None):
 
 class Configurator(object):
     def __init__(self, configFile):
-        self.config = yaml.load(open(configFile))
+        self.configFile = configFile
+        self.config = yaml.load(open(self.configFile))
         # set some defaults
-        self.config["private_key_path"] = self.config.get("private_key_path", "~/.ssh/id_rsa")
-        if "CONTAINERIZED" in os.environ:
-            self.config["private_key_path"] = "/host" + self.config["private_key_path"]
+        self.config["private_key_path"] = self.get_container_facing_key_path()
         self.config["remote_server_username"] = self.config.get("remote_server_username", "root")
+
+    def get_user_facing_key_path(self):
+        config = yaml.load(open(self.configFile))
+        return config["private_key_path"]
+
+    def get_container_facing_key_path(self):
+        private_key_path = self.get_user_facing_key_path()
+        if "CONTAINERIZED" in os.environ:
+            private_key_path = "/host" + private_key_path
+        return private_key_path
 
     def runSSH(self, ip, command, username=None):
         command = 'ssh -o LogLevel=error -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i %s %s@%s %s' % (self.config["private_key_path"],
