@@ -8,14 +8,26 @@ import sys
 from utils import Configurator, verify_socket, log
 from twisted.internet.task import react
 from twisted.internet.defer import gatherResults, inlineCallbacks
+from twisted.python.filepath import FilePath
 
 def report_completion(result, public_ip, message="Completed install for"):
     log(message, public_ip)
     return result
 
+class UsageError(Exception):
+    pass
+
 @inlineCallbacks
 def main(reactor, configFile):
     c = Configurator(configFile=configFile)
+
+    # Check that key file is accessible. If it isn't, give an error that
+    # doesn't include the container-wrapping `/host/` to avoid confusing the
+    # user.
+    if not FilePath(c.get_container_facing_key_path()).exists():
+        raise UsageError(
+            "Private key specified in private_key_path in config does not exist at: %s" %
+                (c.get_user_facing_key_path(),))
 
     # Permit root access
     if c.config["os"] == "coreos":
