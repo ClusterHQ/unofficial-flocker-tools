@@ -2,7 +2,7 @@
 
 # This script will use the correct repo to install packages for clusterhq-flocker-node
 
-import sys
+import sys, os
 
 # Usage: deploy.py cluster.yml
 from utils import Configurator, verify_socket, log
@@ -61,11 +61,11 @@ def main(reactor, configFile):
         if c.config["os"] == "ubuntu":
             log("Running install for", public_ip, "...")
             d = c.runSSHAsync(public_ip, """apt-get -y install apt-transport-https software-properties-common
-add-apt-repository -y 'deb https://clusterhq-archive.s3.amazonaws.com/ubuntu-testing/14.04/$(ARCH) /'
+add-apt-repository -y 'deb %s /'
 apt-get update
 curl -sSL https://get.docker.com/ | sh
 apt-get -y --force-yes install clusterhq-flocker-node
-""")
+""" % (os.environ.get("CUSTOM_REPO", "https://clusterhq-archive.s3.amazonaws.com/ubuntu/$(lsb_release --release --short)/\$(ARCH)"),))
             d.addCallback(report_completion, public_ip=public_ip)
             deferreds.append(d)
         elif c.config["os"] == "centos":
@@ -74,9 +74,9 @@ yum update
 curl -sSL https://get.docker.com/ | sh
 service docker start
 test -e /etc/selinux/config && sed --in-place='.preflocker' 's/^SELINUX=.*$/SELINUX=disabled/g' /etc/selinux/config
-yum install -y https://s3.amazonaws.com/clusterhq-archive/centos/clusterhq-release$(rpm -E %dist).noarch.rpm
+yum install -y %s
 yum install -y clusterhq-flocker-node
-""")
+""" % (os.environ.get("CUSTOM_REPO", "https://clusterhq-archive.s3.amazonaws.com/centos/clusterhq-release$(rpm -E %dist).noarch.rpm"),))
             d.addCallback(report_completion, public_ip=public_ip)
             deferreds.append(d)
     yield gatherResults(deferreds)
