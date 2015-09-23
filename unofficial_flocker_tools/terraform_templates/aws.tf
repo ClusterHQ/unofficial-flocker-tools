@@ -89,6 +89,9 @@ resource "aws_instance" "master" {
     vpc_security_group_ids = ["${aws_security_group.cluster_security_group.id}"]
     subnet_id = "${aws_subnet.cluster_subnet.id}"
     key_name = "${var.aws_key_name}"
+    tags {
+        Name = "Flocker master node"
+    }
 }
 resource "aws_instance" "nodes" {
     ami = "${lookup(var.aws_ubuntu_amis, var.aws_region)}"
@@ -98,4 +101,7 @@ resource "aws_instance" "nodes" {
     subnet_id = "${aws_subnet.cluster_subnet.id}"
     key_name = "${var.aws_key_name}"
     count = "${var.agent_nodes}"
+    tags {
+        Name = "Flocker agent node"
+    }
 }
