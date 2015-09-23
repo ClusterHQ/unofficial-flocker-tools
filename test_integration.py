@@ -77,7 +77,7 @@ FORCE_DESTROY=yes %(uft)sflocker-destroy-nodes""" % v)
         finally:
             if not cleaned_up:
                 os.system("""cd %(testdir)s && \
-                             FORCE_DESTROY= %(uft)sflocker-destroy-nodes""" % v)
+                             FORCE_DESTROY=yes %(uft)sflocker-destroy-nodes""" % v)
 
     def test_ubuntu_aws(self):
         return self._run_integration_test("ubuntu-aws")
