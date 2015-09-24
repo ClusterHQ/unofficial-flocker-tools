@@ -7,7 +7,7 @@ from contextlib import closing
 from socket import socket
 from twisted.internet import reactor
 from twisted.internet.defer import maybeDeferred
-from twisted.internet.python.failure import Failure
+from twisted.python.failure import Failure
 from twisted.internet.task import deferLater
 from twisted.internet.utils import _callProtocolWithDeferred
 from twisted.internet import protocol
