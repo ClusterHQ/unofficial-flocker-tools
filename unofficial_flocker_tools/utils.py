@@ -7,6 +7,7 @@ from contextlib import closing
 from socket import socket
 from twisted.internet import reactor
 from twisted.internet.defer import maybeDeferred
+from twisted.internet.python.failure import Failure
 from twisted.internet.task import deferLater
 from twisted.internet.utils import _callProtocolWithDeferred
 from twisted.internet import protocol
@@ -94,26 +95,34 @@ class TimeoutError(Exception):
 
 
 def loop_until(predicate, timeout=None, message=""):
-    """Call predicate every 0.1 seconds, until it returns something ``Truthy``.
+    """
+    Call predicate every 0.1 seconds, until it returns something ``Truthy``
+    and not-``Failure``-y.
 
     :param predicate: Callable returning termination condition.
     :type predicate: 0-argument callable returning a Deferred.
 
     :return: A ``Deferred`` firing with the first ``Truthy`` response from
-        ``predicate``.
+        ``predicate``, or, if predicate didn't fire with non-``Failure``-y
+        thing within the timeout, returns the ``Failure``, or if it was
+        ``Falsey``, raise TimeoutError().
     """
     d = maybeDeferred(predicate)
     then = time.time()
     def loop(result):
         if timeout and time.time() - then > timeout:
+            if isinstance(result, Failure):
+                # propogate the failure, rather than hiding the information
+                # in it
+                return result
             raise TimeoutError()
-        if not result:
-            print "Retrying %s..." % (message,)
+        if not result or isinstance(result, Failure):
+            print "Retrying %s given %s..." % (message, result)
             d = deferLater(reactor, 1.0, predicate)
-            d.addCallback(loop)
+            d.addBoth(loop)
             return d
         return result
-    d.addCallback(loop)
+    d.addBoth(loop)
     return d
 
 class UsageError(Exception):
