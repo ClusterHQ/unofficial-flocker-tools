@@ -146,7 +146,7 @@ class Configurator(object):
         verbose_log("runSSH result of", command, " - ", result)
         return result
 
-    def runSSHAsync(self, ip, command, username=None, retry_with_timeout=None):
+    def runSSHAsync(self, ip, command, username=None, retry_with_timeout=600):
         """
         Use Twisted APIs, assuming a reactor is running, to return a deferred
         which fires with the result.
@@ -184,7 +184,7 @@ class Configurator(object):
 
     def scp(self, local_path, external_ip, remote_path,
             private_key_path=None, remote_server_username=None, async=False,
-            retry_with_timeout=None):
+            retry_with_timeout=600):
         if retry_with_timeout and not async:
             raise UsageError("Can't retry_with_timeout if not async")
         if private_key_path is not None:
