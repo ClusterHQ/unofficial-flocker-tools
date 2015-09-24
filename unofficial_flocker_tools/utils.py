@@ -62,7 +62,7 @@ def verbose_log_callback(result, message):
     verbose_log(message, result)
     return result
 
-def verify_socket(host, port, timeout=120, connect_timeout=5):
+def verify_socket(host, port, timeout=None, connect_timeout=5):
     """
     Wait until the destionation can be connected to.
 
@@ -93,7 +93,7 @@ class TimeoutError(Exception):
     pass
 
 
-def loop_until(predicate, timeout=None):
+def loop_until(predicate, timeout=None, message=""):
     """Call predicate every 0.1 seconds, until it returns something ``Truthy``.
 
     :param predicate: Callable returning termination condition.
@@ -108,13 +108,16 @@ def loop_until(predicate, timeout=None):
         if timeout and time.time() - then > timeout:
             raise TimeoutError()
         if not result:
-            d = deferLater(reactor, 0.1, predicate)
+            print "Retrying %s..." % (message,)
+            d = deferLater(reactor, 1.0, predicate)
             d.addCallback(loop)
             return d
         return result
     d.addCallback(loop)
     return d
 
+class UsageError(Exception):
+    pass
 
 class Configurator(object):
     def __init__(self, configFile):
@@ -143,7 +146,7 @@ class Configurator(object):
         verbose_log("runSSH result of", command, " - ", result)
         return result
 
-    def runSSHAsync(self, ip, command, username=None):
+    def runSSHAsync(self, ip, command, username=None, retry_with_timeout=None):
         """
         Use Twisted APIs, assuming a reactor is running, to return a deferred
         which fires with the result.
@@ -155,7 +158,12 @@ class Configurator(object):
                        username if username is not None else self.config["remote_server_username"], ip),
                    " ".join(map(quote, ["bash", "-c", "echo; " + command]))]
         verbose_log("runSSHAsync:", command)
-        d = getSensibleProcessOutput(executable, command)
+        if retry_with_timeout is not None:
+            d = loop_until(getSensibleProcessOutput, executable, command,
+                    timeout=retry_with_timeout,
+                    message="running %s on %s" % (command, ip))
+        else:
+            d = getSensibleProcessOutput(executable, command)
         d.addBoth(verbose_log_callback, message="runSSHAsync result of %s - " % (command,))
         return d
 
@@ -175,7 +183,10 @@ class Configurator(object):
         return result
 
     def scp(self, local_path, external_ip, remote_path,
-            private_key_path=None, remote_server_username=None, async=False):
+            private_key_path=None, remote_server_username=None, async=False,
+            retry_with_timeout=None):
+        if retry_with_timeout and not async:
+            raise UsageError("Can't retry_with_timeout if not async")
         if private_key_path is not None:
             private_key_path = self.config["private_key_path"]
         if remote_server_username is not None:
@@ -188,7 +199,13 @@ class Configurator(object):
                     local_path=local_path)
         if async:
             verbose_log("scp async:", scp)
-            d = getSensibleProcessOutput("/bin/bash", ["-c", scp])
+            if retry_with_timeout is not None:
+                d = loop_until(getSensibleProcessOutput,
+                        "/bin/bash", ["-c", scp],
+                        timeout=retry_with_timeout,
+                        message="uploading %s to %s" % (local_path, external_ip))
+            else:
+                d = getSensibleProcessOutput("/bin/bash", ["-c", scp])
             d.addBoth(verbose_log_callback, message="scp async result of %s - " % (scp,))
             return d
         else:
