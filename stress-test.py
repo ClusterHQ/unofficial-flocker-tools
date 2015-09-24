@@ -16,21 +16,96 @@ from common import get_client, get_base_url, FlockerCommands
 import random
 import time
 
+def print_timing(result, start_time):
+    print "API request completed in %.2f" % (time.time() - start_time)
+    return result
+
 def get_json(parent, url):
+    # TODO optional timeout
     client = get_client(parent)
+    start_time = time.time()
     d = client.get(get_base_url(parent) + url)
     d.addCallback(treq.json_content)
+    d.addBoth(print_timing, start_time=start_time)
     return d
 
 def post_json(parent, url, data):
+    # TODO optional timeout
     client = get_client(parent)
+    start_time = time.time()
     d = client.post(get_base_url(parent) + url,
             json.dumps(data),
             headers={'Content-Type': ['application/json']})
     d.addCallback(treq.json_content)
+    d.addBoth(print_timing, start_time=start_time)
     return d
 
 EVENT_TIMEOUT = 300
+
+class CreateContainers(Options):
+    """
+    create a configurable number of stateful containers spread evenly across
+    all nodes.
+    fail if any flocker API request takes longer than configurable timeout.
+    """
+    optParameters = [
+        ("number", "n", 800, "Number of containers"),
+        ("timeout", "t", 20, "Timeout in seconds"),
+    ]
+    @defer.inlineCallbacks
+    def run(self):
+        self.number = int(self["number"])
+        self.timeout = int(self["timeout"])
+
+        nodes = sorted((yield get_json(self.parent, "/state/nodes")))
+
+        for run in range(self.number):
+            port = 10000 + run
+            target_node = nodes[run % len(nodes)]
+            # Create a dataset and wait for it to show up in the
+            # configuration
+            dataset_name = "run_%d" % (run,)
+            print "STARTING RUN %d" % (run,)
+            print "Creating volume on %s" % (target_node,)
+            response = yield post_json(self.parent,
+                    "/configuration/datasets",
+                    dict(
+                        primary=target_node["uuid"],
+                        metadata=dict(name=dataset_name)))
+            print response
+            dataset_id = response["dataset_id"].encode("ascii")
+            # Create a container with a realistic amount of configuration
+            # and wait for it to show up in the configuration
+            print "Creating container on %s" % (target_node,)
+            response = yield post_json(self.parent,
+                    "/configuration/containers",
+                    {"node_uuid":target_node["uuid"],
+                        "name":"xxxxxxxxxxxxxxxx", "image":"mongodb",
+                        "ports":[{"external":str(port), "internal":27017}],
+                        "environment":{"ADMIN_PASS":"xxxxxxxxxxxxxxxx",
+                            "ADMIN_USER":"xxxxxxxxxxxxxxxx",
+                            "CONSUL_ACL_TOKEN":"xxxxxxxxxxxxxxxxxxxxxxxxxx"
+                                               "xxxxxxxxxx",
+                            "CONSUL_PASS":"xxxxxxxxxxxxxxxxxxxxxxxx",
+                            "CONSUL_PREFIX":"xxxxxxxxxx",
+                            "CONSUL_USER":"xxxxxxxxx",
+                            "CONTAINERNAME":"xxxxxxxxxxxxxxxx",
+                            "MAX_CONNECTIONS":"10",
+                            "MGD_HOST":"xxxxxxxxxxxxxxxx",
+                            "MGD_PORT":"10000",
+                            "MGMT_PASS":"xxxxxxxxxxxxxxxx",
+                            "MGMT_USER":"xxxxxxxxxxxxxxxx",
+                            "MONGODB_ROLE":"xxxxxxxxxx",
+                            "MONITORING_PASS":"xxxxxxxxxxxxxxxx",
+                            "MONITORING_USER":"xxxxxxxxxxxxxxxx",
+                            "SDM_ADAPTER":"xxxxxx",
+                            "SDM_HOST":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                                       "xxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                            "SERVICE_PERSISTENCY":"true"},
+                            "volumes":[{"dataset_id":dataset_id,
+                            "mountpoint":"/data/db"}]})
+            print response
+
 
 class MoveVolumes(Options):
     """
@@ -115,6 +190,7 @@ class MoveVolumes(Options):
 
 commands = {
     "move-volumes": MoveVolumes,
+    "create-containers": CreateContainers,
 }
 
 def main(reactor, *argv):
