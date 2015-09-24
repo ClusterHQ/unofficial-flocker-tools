@@ -159,7 +159,7 @@ class Configurator(object):
                    " ".join(map(quote, ["bash", "-c", "echo; " + command]))]
         verbose_log("runSSHAsync:", command)
         if retry_with_timeout is not None:
-            d = loop_until(getSensibleProcessOutput, executable, command,
+            d = loop_until(lambda: getSensibleProcessOutput(executable, command),
                     timeout=retry_with_timeout,
                     message="running %s on %s" % (command, ip))
         else:
@@ -200,8 +200,7 @@ class Configurator(object):
         if async:
             verbose_log("scp async:", scp)
             if retry_with_timeout is not None:
-                d = loop_until(getSensibleProcessOutput,
-                        "/bin/bash", ["-c", scp],
+                d = loop_until(lambda: getSensibleProcessOutput("/bin/bash", ["-c", scp]),
                         timeout=retry_with_timeout,
                         message="uploading %s to %s" % (local_path, external_ip))
             else:
