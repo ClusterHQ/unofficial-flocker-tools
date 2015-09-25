@@ -81,7 +81,7 @@ class CreateContainers(Options):
                     "/configuration/containers",
                     {"node_uuid": target_node["uuid"],
                         "name": "mongo_%d" % (run,), "image": "mongodb",
-                        "ports": [{"external": str(port), "internal": 27017}],
+                        "ports": [{"external": port, "internal": 27017}],
                         "environment": {"ADMIN_PASS": "xxxxxxxxxxxxxxxx",
                             "ADMIN_USER": "xxxxxxxxxxxxxxxx",
                             "CONSUL_ACL_TOKEN": "xxxxxxxxxxxxxxxxxxxxxxxxxx"
