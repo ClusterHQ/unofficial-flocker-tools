@@ -7,7 +7,6 @@ from contextlib import closing
 from socket import socket
 from twisted.internet import reactor
 from twisted.internet.defer import maybeDeferred
-from twisted.python.failure import Failure
 from twisted.internet.task import deferLater
 from twisted.internet.utils import _callProtocolWithDeferred
 from twisted.internet import protocol
@@ -108,11 +107,11 @@ def loop_until_success(predicate, timeout=None, message=""):
     """
     d = maybeDeferred(predicate)
     then = time.time()
-    def loop(result):
+    def loop(failure):
         if timeout and time.time() - then > timeout:
             # propogate the failure
-            return result
-        print "Retrying %s given %r..." % (message, result)
+            return failure
+        print "Retrying %s given %r..." % (message, failure.getErrorMessage())
         d = deferLater(reactor, 1.0, predicate)
         d.addBoth(loop)
         return d
