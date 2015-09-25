@@ -79,31 +79,31 @@ class CreateContainers(Options):
             print "Creating container on %s" % (target_node,)
             response = yield post_json(self.parent,
                     "/configuration/containers",
-                    {"node_uuid":target_node["uuid"],
-                        "name":"xxxxxxxxxxxxxxxx", "image":"mongodb",
-                        "ports":[{"external":str(port), "internal":27017}],
-                        "environment":{"ADMIN_PASS":"xxxxxxxxxxxxxxxx",
-                            "ADMIN_USER":"xxxxxxxxxxxxxxxx",
-                            "CONSUL_ACL_TOKEN":"xxxxxxxxxxxxxxxxxxxxxxxxxx"
+                    {"node_uuid": target_node["uuid"],
+                        "name": "mongo_%d" % (run,), "image": "mongodb",
+                        "ports": [{"external": str(port), "internal": 27017}],
+                        "environment": {"ADMIN_PASS": "xxxxxxxxxxxxxxxx",
+                            "ADMIN_USER": "xxxxxxxxxxxxxxxx",
+                            "CONSUL_ACL_TOKEN": "xxxxxxxxxxxxxxxxxxxxxxxxxx"
                                                "xxxxxxxxxx",
-                            "CONSUL_PASS":"xxxxxxxxxxxxxxxxxxxxxxxx",
-                            "CONSUL_PREFIX":"xxxxxxxxxx",
-                            "CONSUL_USER":"xxxxxxxxx",
-                            "CONTAINERNAME":"xxxxxxxxxxxxxxxx",
-                            "MAX_CONNECTIONS":"10",
-                            "MGD_HOST":"xxxxxxxxxxxxxxxx",
-                            "MGD_PORT":"10000",
-                            "MGMT_PASS":"xxxxxxxxxxxxxxxx",
-                            "MGMT_USER":"xxxxxxxxxxxxxxxx",
-                            "MONGODB_ROLE":"xxxxxxxxxx",
-                            "MONITORING_PASS":"xxxxxxxxxxxxxxxx",
-                            "MONITORING_USER":"xxxxxxxxxxxxxxxx",
-                            "SDM_ADAPTER":"xxxxxx",
-                            "SDM_HOST":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                            "CONSUL_PASS": "xxxxxxxxxxxxxxxxxxxxxxxx",
+                            "CONSUL_PREFIX": "xxxxxxxxxx",
+                            "CONSUL_USER": "xxxxxxxxx",
+                            "CONTAINERNAME": "xxxxxxxxxxxxxxxx",
+                            "MAX_CONNECTIONS": "10",
+                            "MGD_HOST": "xxxxxxxxxxxxxxxx",
+                            "MGD_PORT": "10000",
+                            "MGMT_PASS": "xxxxxxxxxxxxxxxx",
+                            "MGMT_USER": "xxxxxxxxxxxxxxxx",
+                            "MONGODB_ROLE": "xxxxxxxxxx",
+                            "MONITORING_PASS": "xxxxxxxxxxxxxxxx",
+                            "MONITORING_USER": "xxxxxxxxxxxxxxxx",
+                            "SDM_ADAPTER": "xxxxxx",
+                            "SDM_HOST": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
                                        "xxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-                            "SERVICE_PERSISTENCY":"true"},
-                            "volumes":[{"dataset_id":dataset_id,
-                            "mountpoint":"/data/db"}]})
+                            "SERVICE_PERSISTENCY": "true"},
+                        "volumes": [{"dataset_id": dataset_id,
+                            "mountpoint": "/data/db"}]})
             print response
 
 
