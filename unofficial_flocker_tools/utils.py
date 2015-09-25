@@ -94,35 +94,54 @@ class TimeoutError(Exception):
     pass
 
 
-def loop_until(predicate, timeout=None, message=""):
+def loop_until_success(predicate, timeout=None, message=""):
     """
-    Call predicate every 0.1 seconds, until it returns something ``Truthy``
-    and not-``Failure``-y.
+    Call predicate every second, until it fires a non-failed Deferred, or hits
+    the timeout.
 
     :param predicate: Callable returning termination condition.
     :type predicate: 0-argument callable returning a Deferred.
 
-    :return: A ``Deferred`` firing with the first ``Truthy`` response from
+    :return: A ``Deferred`` firing with the first non-failed Deferred from
         ``predicate``, or, if predicate didn't fire with non-``Failure``-y
-        thing within the timeout, returns the ``Failure``, or if it was
-        ``Falsey``, raise TimeoutError().
+        thing within the timeout, returns the ``Failure``.
     """
     d = maybeDeferred(predicate)
     then = time.time()
     def loop(result):
         if timeout and time.time() - then > timeout:
-            if isinstance(result, Failure):
-                # propogate the failure, rather than hiding the information
-                # in it
-                return result
+            # propogate the failure
+            return result
+        print "Retrying %s given %r..." % (message, result)
+        d = deferLater(reactor, 1.0, predicate)
+        d.addBoth(loop)
+        return d
+    d.addErrback(loop)
+    return d
+
+def loop_until(predicate, timeout=None, message=""):
+    """
+    Call predicate every second, until it returns something ``Truthy``.
+
+    :param predicate: Callable returning termination condition.
+    :type predicate: 0-argument callable returning a Deferred.
+
+    :return: A ``Deferred`` firing with the first ``Truthy`` response from
+        ``predicate``, or, if predicate didn't fire truthfully within the
+        timeout, raise TimeoutError().
+    """
+    d = maybeDeferred(predicate)
+    then = time.time()
+    def loop(result):
+        if timeout and time.time() - then > timeout:
             raise TimeoutError()
-        if not result or isinstance(result, Failure):
-            print "Retrying %s given %s..." % (message, result)
+        if not result:
+            print "Retrying %s given %r..." % (message, result)
             d = deferLater(reactor, 1.0, predicate)
             d.addBoth(loop)
             return d
         return result
-    d.addBoth(loop)
+    d.addCallback(loop)
     return d
 
 class UsageError(Exception):
@@ -168,7 +187,7 @@ class Configurator(object):
                    " ".join(map(quote, ["bash", "-c", "echo; " + command]))]
         verbose_log("runSSHAsync:", command)
         if retry_with_timeout is not None:
-            d = loop_until(lambda: getSensibleProcessOutput(executable, command),
+            d = loop_until_success(lambda: getSensibleProcessOutput(executable, command),
                     timeout=retry_with_timeout,
                     message="running %s on %s" % (command, ip))
         else:
@@ -209,7 +228,7 @@ class Configurator(object):
         if async:
             verbose_log("scp async:", scp)
             if retry_with_timeout is not None:
-                d = loop_until(lambda: getSensibleProcessOutput("/bin/bash", ["-c", scp]),
+                d = loop_until_success(lambda: getSensibleProcessOutput("/bin/bash", ["-c", scp]),
                         timeout=retry_with_timeout,
                         message="uploading %s to %s" % (local_path, external_ip))
             else:
