@@ -65,7 +65,7 @@ def main(reactor, configFile):
             if not repo:
                 repo = default
             d = c.runSSHAsync(public_ip, """apt-get -y install apt-transport-https software-properties-common
-add-apt-repository -y 'deb %s /'
+add-apt-repository -y "deb %s /"
 apt-get update
 curl -sSL https://get.docker.com/ | sh
 apt-get -y --force-yes install clusterhq-flocker-node
