@@ -80,7 +80,7 @@ class CreateContainers(Options):
             response = yield post_json(self.parent,
                     "/configuration/containers",
                     {"node_uuid": target_node["uuid"],
-                        "name": "mongo_%d" % (run,), "image": "mongodb",
+                        "name": "mongo_%d" % (run,), "image": "mongo",
                         "ports": [{"external": port, "internal": 27017}],
                         "environment": {"ADMIN_PASS": "xxxxxxxxxxxxxxxx",
                             "ADMIN_USER": "xxxxxxxxxxxxxxxx",
