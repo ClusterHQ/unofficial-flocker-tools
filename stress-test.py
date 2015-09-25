@@ -44,22 +44,24 @@ EVENT_TIMEOUT = 300
 
 class CreateContainers(Options):
     """
-    create a configurable number of stateful containers spread evenly across
+    Create a configurable number of stateful containers spread evenly across
     all nodes.
-    fail if any flocker API request takes longer than configurable timeout.
+    Fail if any flocker API request takes longer than configurable timeout.
     """
     optParameters = [
         ("number", "n", 800, "Number of containers"),
         ("timeout", "t", 20, "Timeout in seconds"),
+        ("start", "s", 0, "Starting offset for naming things"),
     ]
     @defer.inlineCallbacks
     def run(self):
         self.number = int(self["number"])
         self.timeout = int(self["timeout"])
+        self.start = int(self["start"])
 
         nodes = sorted((yield get_json(self.parent, "/state/nodes")))
 
-        for run in range(self.number):
+        for run in range(self.start, self.start + self.number):
             port = 10000 + run
             target_node = nodes[run % len(nodes)]
             # Create a dataset and wait for it to show up in the
