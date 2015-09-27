@@ -93,7 +93,7 @@ class TimeoutError(Exception):
     pass
 
 
-def loop_until_success(predicate, timeout=None, message=""):
+def loop_until_success(predicate, timeout=None, message="connection"):
     """
     Call predicate every second, until it fires a non-failed Deferred, or hits
     the timeout.
@@ -111,14 +111,14 @@ def loop_until_success(predicate, timeout=None, message=""):
         if timeout and time.time() - then > timeout:
             # propogate the failure
             return failure
-        print "Retrying %s given %r..." % (message, failure.getErrorMessage())
+        print "Retrying %s given result %r..." % (message, failure.getErrorMessage())
         d = deferLater(reactor, 1.0, predicate)
         d.addErrback(loop)
         return d
     d.addErrback(loop)
     return d
 
-def loop_until(predicate, timeout=None, message=""):
+def loop_until(predicate, timeout=None, message="task"):
     """
     Call predicate every second, until it returns something ``Truthy``.
 
@@ -135,7 +135,7 @@ def loop_until(predicate, timeout=None, message=""):
         if timeout and time.time() - then > timeout:
             raise TimeoutError()
         if not result:
-            print "Retrying %s given %r..." % (message, result)
+            print "Retrying %s given result %r..." % (message, result)
             d = deferLater(reactor, 1.0, predicate)
             d.addCallback(loop)
             return d
