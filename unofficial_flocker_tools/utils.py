@@ -93,7 +93,7 @@ class TimeoutError(Exception):
     pass
 
 
-def loop_until_success(predicate, timeout=None, message="connection"):
+def loop_until_success(predicate, timeout=None, message="task"):
     """
     Call predicate every second, until it fires a non-failed Deferred, or hits
     the timeout.
