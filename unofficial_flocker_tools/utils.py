@@ -113,7 +113,7 @@ def loop_until_success(predicate, timeout=None, message=""):
             return failure
         print "Retrying %s given %r..." % (message, failure.getErrorMessage())
         d = deferLater(reactor, 1.0, predicate)
-        d.addBoth(loop)
+        d.addErrback(loop)
         return d
     d.addErrback(loop)
     return d
@@ -137,7 +137,7 @@ def loop_until(predicate, timeout=None, message=""):
         if not result:
             print "Retrying %s given %r..." % (message, result)
             d = deferLater(reactor, 1.0, predicate)
-            d.addBoth(loop)
+            d.addCallback(loop)
             return d
         return result
     d.addCallback(loop)
