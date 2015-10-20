@@ -181,45 +181,7 @@ def main(reactor, configFile):
         # folder exists
         log("Creating the /run/docker/plugins folder")
         c.runSSHRaw(public_ip, "mkdir -p /run/docker/plugins")
-        # configure an upstart job that runs the bash script
-        if c.config["os"] == "ubuntu":
-            log("Writing flocker-docker-plugin upstart job to %s" % (public_ip,))
-            c.runSSH(public_ip, """cat <<EOF > /etc/init/flocker-docker-plugin.conf
-# flocker-plugin - flocker-docker-plugin job file
-
-description "Flocker Plugin service"
-author "ClusterHQ <support@clusterhq.com>"
-
-respawn
-env FLOCKER_CONTROL_SERVICE_BASE_URL=%s
-env MY_NETWORK_IDENTITY=%s
-env PYTHONPATH=/opt/flocker/lib/python2.7/site-packages/:\\$PYTHONPATH
-exec /opt/flocker/bin/flocker-docker-plugin
-EOF
-service flocker-docker-plugin start
-""" % (controlservice, private_ip,))
-        # configure a systemd job that runs the bash script
-        elif c.config["os"] == "centos":
-            log("Writing flocker-docker-plugin systemd job to %s" % (public_ip,))
-            c.runSSH(public_ip, """# writing flocker-docker-plugin systemd
-cat <<EOF > /etc/systemd/system/flocker-docker-plugin.service
-[Unit]
-Description=flocker-plugin - flocker-docker-plugin job file
-
-[Service]
-Environment=FLOCKER_CONTROL_SERVICE_BASE_URL=%s
-Environment=MY_NETWORK_IDENTITY=%s
-Environment=PYTHONPATH=/opt/flocker/lib/python2.7/:$PYTHONPATH
-ExecStart=/opt/flocker/bin/flocker-docker-plugin
-
-[Install]
-WantedBy=multi-user.target
-EOF
-systemctl enable flocker-docker-plugin.service
-systemctl start flocker-docker-plugin.service
-""" % (controlservice, private_ip,))
-        # DOCKER DOCKER DOCKER DOCKER
-        elif c.config["os"] == "coreos":
+        if c.config["os"] == "coreos":
             log("Starting flocker-docker-plugin as docker container on CoreOS on %s" % (public_ip,))
             c.runSSH(public_ip, """echo
 /root/bin/docker run --restart=always -d --net=host --privileged \\
