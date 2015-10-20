@@ -59,7 +59,8 @@ def main(reactor, configFile):
                 "already.")
             break
 
-        # don't download a new docker for reasons only the user knows.
+        # only install new docker binary on coreos. XXX TODO coreos > 801.0.0
+        # doesn't need newer docker.
         if settings["SKIP_DOCKER_BINARY"] or c.config["os"] != "coreos":
             break
 
@@ -154,11 +155,19 @@ def main(reactor, configFile):
         # perhaps the user has pre-compiled images with the plugin
         # downloaded and installed
         if not settings["SKIP_INSTALL_PLUGIN"]:
-            if c.config["os"] in ("ubuntu", "centos"):
-                # pip install the plugin
+            if c.config["os"] == "ubuntu":
                 log("Installing plugin for", public_ip, "...")
-                d = c.runSSHAsync(public_ip, "/opt/flocker/bin/pip install git+%s@%s"
-                    % (settings['PLUGIN_REPO'], settings['PLUGIN_BRANCH'],))
+                d = c.runSSHAsync(public_ip,
+                        "apt-get install -y --force-yes clusterhq-flocker-docker-plugin && "
+                        "service flocker-docker-plugin restart")
+                d.addCallback(report_completion, public_ip=public_ip)
+                deferreds.append(d)
+            elif c.config["os"] == "centos":
+                log("Installing plugin for", public_ip, "...")
+                d = c.runSSHAsync(public_ip,
+                        "yum install -y clusterhq-flocker-docker-plugin && "
+                        "systemctl enable flocker-docker-plugin && "
+                        "systemctl start flocker-docker-plugin")
                 d.addCallback(report_completion, public_ip=public_ip)
                 deferreds.append(d)
         else:
