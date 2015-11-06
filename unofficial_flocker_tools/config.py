@@ -5,7 +5,6 @@
 
 import sys
 import yaml
-import subprocess
 import time
 from twisted.internet.task import react
 from twisted.internet.defer import inlineCallbacks, gatherResults
