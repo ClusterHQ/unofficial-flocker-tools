@@ -16,6 +16,7 @@ setup(
             "flocker-install = unofficial_flocker_tools.install:_main", # async
             "flocker-plugin-install = unofficial_flocker_tools.plugin:_main", # async
             "flocker-volumes = unofficial_flocker_tools.flocker_volumes:_main", # async
+            "flockerctl = unofficial_flocker_tools.flocker_volumes:_main", # async
             "flocker-get-nodes = unofficial_flocker_tools.get_nodes:main",
             "flocker-destroy-nodes = unofficial_flocker_tools.destroy_nodes:main",
         ],
