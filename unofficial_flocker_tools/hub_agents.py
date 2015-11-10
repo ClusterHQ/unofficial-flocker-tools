@@ -4,7 +4,6 @@
 # Install catalog agents.
 
 import sys
-import os
 from twisted.internet.task import react
 from twisted.internet.defer import gatherResults, inlineCallbacks
 
@@ -22,7 +21,8 @@ def main(reactor, configFile):
     control_ip = c.config["control_node"]
 
     install_command = ("TOKEN=%s "
-        "$(curl -ssL https://get.volumehub.clusterhq.com/ |sh)" % (os.environ["TOKEN"],))
+        "$(curl -ssL https://get.volumehub.clusterhq.com/ |sh)" %
+            (c.config["volume_hub_token"],))
     
     deferreds = [c.runSSHAsync(control_ip, install_command)]
 
