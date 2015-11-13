@@ -24,10 +24,12 @@ def main(reactor, configFile):
         "$(curl -ssL https://get.volumehub.clusterhq.com/ |sh)" %
             (c.config["volume_hub_token"],))
     
-    deferreds = [c.runSSHAsync(control_ip, install_command)]
+    deferreds = [c.runSSHAsync(control_ip,
+        "TARGET=control-service " + install_command)]
 
     for node in c.config["agent_nodes"]:
-        deferreds.append(c.runSSHAsync(node["public"], install_command))
+        deferreds.append(c.runSSHAsync(node["public"],
+            "TARGET=agent-node " + install_command))
 
     log("Installing volume hub catalog agents...")
     yield gatherResults(deferreds)
