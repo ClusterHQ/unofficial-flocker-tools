@@ -22,7 +22,7 @@ def main(reactor, configFile):
     control_ip = c.config["control_node"]
 
     install_command = ('TOKEN="%s" '
-        "$(curl -ssL https://get-volumehub.clusterhq.com/ |sh)" %
+        "sh -c 'curl -ssL https://get-volumehub.clusterhq.com/ |sh'" %
             (environ["TOKEN"],))
 
     deferreds = [c.runSSHAsync(control_ip,
