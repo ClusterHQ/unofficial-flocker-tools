@@ -34,4 +34,3 @@ variable "aws_ubuntu_amis" {
 variable "aws_instance_type" {
     default = "m3.medium"
 }
-variable "volume_hub_token" {}

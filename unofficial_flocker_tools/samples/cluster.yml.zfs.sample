@@ -14,5 +14,3 @@ agent_config:
     port: 4524
   dataset:
     backend: "zfs"
-# ClusterHQ Volume Hub token: see https://volumehub.clusterhq.com/ (optional)
-volume_hub_token: ""

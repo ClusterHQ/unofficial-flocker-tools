@@ -18,5 +18,3 @@ agent_config:
     zone: "us-west-1a"
     access_key_id: "foo"
     secret_access_key: "bar"
-# ClusterHQ Volume Hub token: see https://volumehub.clusterhq.com/ (optional)
-volume_hub_token: ""

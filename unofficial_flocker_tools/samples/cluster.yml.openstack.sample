@@ -19,5 +19,3 @@ agent_config:
     username: "joe.bloggs.rackspace"
     api_key: "aaa-bbb-ccc-ddd"
     auth_url: "https://lon.identity.api.rackspacecloud.com/v2.0"
-# ClusterHQ Volume Hub token: see https://volumehub.clusterhq.com/ (optional)
-volume_hub_token: ""

@@ -6,6 +6,7 @@
 import sys
 from twisted.internet.task import react
 from twisted.internet.defer import gatherResults, inlineCallbacks
+from os import environ
 
 # Usage: plugin.py cluster.yml
 from utils import Configurator, log
@@ -20,10 +21,10 @@ def main(reactor, configFile):
     c = Configurator(configFile=configFile)
     control_ip = c.config["control_node"]
 
-    install_command = ("TOKEN=%s "
+    install_command = ('TOKEN="%s" '
         "$(curl -ssL https://get.volumehub.clusterhq.com/ |sh)" %
-            (c.config["volume_hub_token"],))
-    
+            (environ["TOKEN"],))
+
     deferreds = [c.runSSHAsync(control_ip,
         "TARGET=control-service " + install_command)]
 

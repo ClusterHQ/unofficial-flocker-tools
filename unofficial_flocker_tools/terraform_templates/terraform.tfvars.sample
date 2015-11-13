@@ -13,6 +13,3 @@ private_key_path = "absolute path to EC2 key (.pem file) on your local machine"
 # Instance types and number of nodes (total launched = agent_nodes + 1, for master)
 aws_instance_type = "m3.large"
 agent_nodes = "2"
-
-# ClusterHQ Volume Hub token: see https://volumehub.clusterhq.com/ (optional)
-volume_hub_token = ""
