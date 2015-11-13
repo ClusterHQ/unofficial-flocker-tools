@@ -28,9 +28,15 @@ def main(reactor, configFile):
     deferreds = [c.runSSHAsync(control_ip,
         "TARGET=control-service " + install_command)]
 
+    first = True
     for node in c.config["agent_nodes"]:
+        if first:
+            run_flocker_agent_here = "RUN_FLOCKER_AGENT_HERE=1 "
+        else:
+            run_flocker_agent_here = ""
         deferreds.append(c.runSSHAsync(node["public"],
-            "TARGET=agent-node " + install_command))
+            run_flocker_agent_here + "TARGET=agent-node " + install_command))
+        first = False
 
     log("Installing volume hub catalog agents...")
     yield gatherResults(deferreds)
