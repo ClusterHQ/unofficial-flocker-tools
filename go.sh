@@ -1,7 +1,7 @@
 #!/bin/sh
 IMAGE="clusterhq/uft:latest"
-for CMD in flockerctl flocker-ca flocker-deploy flocker-config flocker-install flocker-plugin-install flocker-sample-files flocker-tutorial flocker-volumes flocker-get-nodes flocker-destroy-nodes; do
-    if [ "$CMD" = "flockerctl" ]; then
+for CMD in flockerctl flocker-ca flocker-deploy flocker-config flocker-install flocker-plugin-install flocker-sample-files flocker-tutorial flocker-volumes flocker-get-nodes flocker-destroy-nodes volume-hub-agents-install; do
+    if [ "$CMD" = "flockerctl" ] || [ "$CMD" = "volume-hub-agents-install" ]; then
         PREFIX=""
     else
         PREFIX="uft-"
