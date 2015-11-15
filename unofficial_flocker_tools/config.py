@@ -145,34 +145,34 @@ docker run --restart=always -d --net=host -v /etc/flocker:/etc/flocker --volumes
     yield gatherResults(deferreds)
 
     if c.config["os"] == "ubuntu":
-        if len(sys.argv) > 2:
-            if sys.argv[2] == "--swarm":
-                clusterid = c.runSSH(c.config["control_node"], """
+        # XXX INSECURE, UNSUPPORTED, UNDOCUMENTED EXPERIMENTAL OPTION
+        # Usage: `uft-flocker-config --ubuntu-aws --swarm`, I guess
+        if len(sys.argv) > 2 and sys.argv[2] == "--swarm":
+            # Install swarm
+            deferreds = []
+            clusterid = c.runSSH(c.config["control_node"], """
 docker run swarm create""").strip()
-                log("Created Swarm ID")
-                for node in c.config["agent_nodes"]:
-                    d = c.runSSHAsync(node['public'], """
+            log("Created Swarm ID")
+            for node in c.config["agent_nodes"]:
+                d = c.runSSHAsync(node['public'], """
 service docker stop
 docker daemon -H unix:///var/run/docker.sock -H tcp://0.0.0.0:2375 >> /tmp/dockerlogs 2>&1 &
 """)
-                    # Let daemon come up
-                    time.sleep(3)
-                    d = c.runSSHAsync(node['public'], """
+                # Let daemon come up
+                time.sleep(3)
+                d = c.runSSHAsync(node['public'], """
 docker run -d swarm join --addr=%s:2375 token://%s
 """ % (node['private'], clusterid))
-                    log("Started Swarm Agent for %s" % node['public'])
+                log("Started Swarm Agent for %s" % node['public'])
+                deferreds.append(d)
 
-                    deferreds.append(d)
-
-                d = c.runSSHAsync(c.config["control_node"], """
+            d = c.runSSHAsync(c.config["control_node"], """
 docker run -d -p 2357:2375 swarm manage token://%s
 """ % clusterid)
-                log("Started Swarm Master")
-
+            log("Starting Swarm Master")
             deferreds.append(d)
-
-        yield gatherResults(deferreds)
-        log("Swarm Master is at tcp://%s:2357" % c.config["control_node"])
+            yield gatherResults(deferreds)
+            log("Swarm Master is at tcp://%s:2357" % c.config["control_node"])
 
 def _main():
     react(main, sys.argv[1:])

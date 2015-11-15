@@ -85,14 +85,14 @@ resource "aws_security_group" "cluster_security_group" {
       from_port = 2375
       to_port = 2375
       protocol = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
+      self = true
   }
   # swarm
   ingress {
       from_port = 2357
       to_port = 2357
       protocol = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
+      self = true
   }
   # allow outbound traffic
   egress {
