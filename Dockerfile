@@ -1,4 +1,4 @@
-FROM        ubuntu:14.04
+FROM        ubuntu:14.04.3
 
 # Last build date - this can be updated whenever there are security updates so
 # that everything is rebuilt

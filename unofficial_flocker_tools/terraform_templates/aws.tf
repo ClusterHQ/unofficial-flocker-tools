@@ -80,6 +80,20 @@ resource "aws_security_group" "cluster_security_group" {
       protocol = "tcp"
       self = true
   }
+  # swarm
+  ingress {
+      from_port = 2375
+      to_port = 2375
+      protocol = "tcp"
+      self = true
+  }
+  # swarm
+  ingress {
+      from_port = 2357
+      to_port = 2357
+      protocol = "tcp"
+      self = true
+  }
   # allow outbound traffic
   egress {
       from_port = 0

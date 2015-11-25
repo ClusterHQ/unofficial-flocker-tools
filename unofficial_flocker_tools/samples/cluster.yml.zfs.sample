@@ -10,7 +10,7 @@ private_key_path: XXX # the key used to SSH as root onto the nodes
 agent_config:
   version: 1
   control-service:
-     hostname: XXX # control_node should get substituted in here
-     port: 4524
+    hostname: XXX # control_node should get substituted in here
+    port: 4524
   dataset:
-     backend: "zfs"
+    backend: "zfs"

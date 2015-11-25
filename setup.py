@@ -16,12 +16,14 @@ setup(
             "flocker-install = unofficial_flocker_tools.install:_main", # async
             "flocker-plugin-install = unofficial_flocker_tools.plugin:_main", # async
             "flocker-volumes = unofficial_flocker_tools.flocker_volumes:_main", # async
+            "flockerctl = unofficial_flocker_tools.flocker_volumes:_main", # async
             "flocker-get-nodes = unofficial_flocker_tools.get_nodes:main",
             "flocker-destroy-nodes = unofficial_flocker_tools.destroy_nodes:main",
             "flocker-get-diagnostics = unofficial_flocker_tools.diagnostics:_main", #async
+            "volume-hub-agents-install = unofficial_flocker_tools.hub_agents:_main", # async
         ],
     },
-    version="0.5",
+    version="0.6",
     description="Unofficial tools to make installing and using Flocker easier and more fun.",
     author="Luke Marsden",
     author_email="luke@clusterhq.com",

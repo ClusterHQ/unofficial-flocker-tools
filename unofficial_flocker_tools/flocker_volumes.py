@@ -306,6 +306,8 @@ commands = {
     "version": Version,
     "list-nodes": ListNodes,
     "list": List,
+    "status": ListNodes,
+    "ls": List,
     "create": Create,
     "destroy": Destroy,
     "move": Move,
