@@ -18,10 +18,10 @@ def main(reactor, *args):
     deferreds = []
     log("Running Flocker-diagnostics on agent nodes.")
     for node in c.config["agent_nodes"]:
-        d = c.runSSHAsync(node["public"], "rm -rf /tmp/diagnoistics; mkdir /tmp/diagnoistics; cd /tmp/diagnoistics; flocker-diagnostics")
+        d = c.runSSHAsync(node["public"], "rm -rf /tmp/diagnostics; mkdir /tmp/diagnostics; cd /tmp/diagnostics; flocker-diagnostics")
         d.addCallback(report_completion, public_ip=node["public"], message=" * Ran diagnostics on agent node.")
         deferreds.append(d)
-    d = c.runSSHAsync(c.config["control_node"], "rm -rf /tmp/diagnoistics; mkdir /tmp/diagnoistics; cd /tmp/diagnoistics; flocker-diagnostics")
+    d = c.runSSHAsync(c.config["control_node"], "rm -rf /tmp/diagnostics; mkdir /tmp/diagnostics; cd /tmp/diagnostics; flocker-diagnostics")
     d.addCallback(report_completion, public_ip=c.config["control_node"], message=" * Ran diagnostics on control node.")
     deferreds.append(d)
     yield gatherResults(deferreds)
@@ -33,10 +33,10 @@ def main(reactor, *args):
     deferreds = []
     log("Gathering Flocker-diagnostics on agent nodes.")
     for node in c.config["agent_nodes"]:
-        d = c.scp("./", node["public"], "/tmp/diagnoistics/clusterhq_flocker_logs_*.tar", async=True, reverse=True)
+        d = c.scp("./", node["public"], "/tmp/diagnostics/clusterhq_flocker_logs_*.tar", async=True, reverse=True)
         d.addCallback(report_completion, public_ip=node["public"], message=" * Gathering diagnostics on agent node.")
         deferreds.append(d)
-    d =  c.scp("./", c.config["control_node"], "/tmp/diagnoistics/clusterhq_flocker_logs_*.tar", async=True, reverse=True)
+    d =  c.scp("./", c.config["control_node"], "/tmp/diagnostics/clusterhq_flocker_logs_*.tar", async=True, reverse=True)
     d.addCallback(report_completion, public_ip=c.config["control_node"], message=" * Gathering diagnostics on control node.")
     deferreds.append(d)
     yield gatherResults(deferreds)
