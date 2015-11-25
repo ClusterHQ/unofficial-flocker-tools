@@ -211,19 +211,27 @@ class Configurator(object):
 
     def scp(self, local_path, external_ip, remote_path,
             private_key_path=None, remote_server_username=None, async=False,
-            retry_with_timeout=600):
+            retry_with_timeout=600, reverse=False):
         if retry_with_timeout and not async:
             raise UsageError("Can't retry_with_timeout if not async")
         if private_key_path is not None:
             private_key_path = self.config["private_key_path"]
         if remote_server_username is not None:
             remote_server_username = self.config["remote_server_username"]
-        scp = ("scp -o LogLevel=error -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i %(private_key_path)s %(local_path)s "
-               "%(remote_server_username)s@%(external_ip)s:%(remote_path)s") % dict(
-                    private_key_path=self.config["private_key_path"],
-                    remote_server_username=self.config["remote_server_username"],
-                    external_ip=external_ip, remote_path=remote_path,
-                    local_path=local_path)
+        if reverse:
+            scp = ("scp -o LogLevel=error -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i %(private_key_path)s "
+                   "%(remote_server_username)s@%(external_ip)s:%(remote_path)s %(local_path)s") % dict(
+                        private_key_path=self.config["private_key_path"],
+                        remote_server_username=self.config["remote_server_username"],
+                        external_ip=external_ip, remote_path=remote_path,
+                        local_path=local_path)
+        else:
+            scp = ("scp -o LogLevel=error -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i %(private_key_path)s %(local_path)s "
+                   "%(remote_server_username)s@%(external_ip)s:%(remote_path)s") % dict(
+                        private_key_path=self.config["private_key_path"],
+                        remote_server_username=self.config["remote_server_username"],
+                        external_ip=external_ip, remote_path=remote_path,
+                        local_path=local_path)
         if async:
             verbose_log("scp async:", scp)
             if retry_with_timeout is not None:
