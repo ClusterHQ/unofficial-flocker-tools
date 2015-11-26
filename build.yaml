@@ -1,0 +1,341 @@
+# vim: ai ts=4 sts=4 et sw=4 ft=yaml fdm=indent et
+#
+# build.yaml
+#
+# This file contains the Jenkins job defintions for the UFT project.
+#
+# We add new or reconfigure existing jobs in Jenkins using the Job DSL plugin.
+# https://github.com/jenkinsci/job-dsl-plugin
+#
+# That plugin consumes 'groovy Job DSL' code through FreeStyle Jenkins job
+# types which contain a 'Process Job DSLs' step.
+#
+# As part of the provisioning process for the Jenkins Master, we configure a
+# job called 'setup_ClusterHQ_UFT' which is responsible for querying the
+# github clusterhq/unnoficial-flocker-tools respository and retrieving this
+# build.yaml file, as well as the jobs.groovy.j2 jinja file.
+#
+# As part of the provisioning process for the Jenkins Master, we also deploy
+# a small python script '/usr/local/bin/render.py', this script simply contains
+# code to read a YAML file into a dictionary and expand a Jinja2 template using
+# the k,v in that dict.
+#
+# Our job 'setup_ClusterHQ_UFT' when running, will run the 'render.py' with
+# this build.yaml file and produce a jobs.groovy file.
+# We do this, because we'd rather configure our jobs with YAML than with Groovy
+#
+# The next step in the job is a 'Process JOB DSL's' step which consumes the
+# jobs.groovy file, and generates all the jenkins folders and jobs.
+#
+#
+# We pass the branch name as a parameter to the setup_clusterhq_uft job,
+# the parameter is shown as 'RECONFIGURE_BRANCH'.
+# The setup job only produces jobs for a single branch . We don't produce jobs
+# for every branch due to the large number of branches in the repository, which
+# would generate over 16000 jobs and take over an hour to run.
+#
+# The workflow is that, when a developer is working on a feature branch and is
+# happy to start testing some of his code they will execute the job
+# setup_clusterhq_uft passing his branch as the parameter.
+#
+# Their jobs will then be available under the path:
+# /ClusterHQ-UFT<branch>/
+#
+# Inside that folder there will be a large number of jobs, where at the top
+# she/he can see a job called '_main_multijob'. This job is responsible for
+# executing all other jobs in parallel and collecting the produced artifacts
+# from each job after its execution.
+# The artifacts in this case are trial logs, coverage xml reports, subunit
+# reports.
+# Those artifacts are consumed by the _main_multijob to produce an overall
+# coverage report, and an aggregated summary of all the executed tests and
+# their failures/skips/successes.
+#
+
+# The project contains the github owner and repository to build
+project: 'ClusterHQ/unofficial-flocker-tools'
+
+# git_url, contains the full HTTPS url for the repository to build
+git_url: 'https://github.com/ClusterHQ/unofficial-flocker-tools.git'
+
+
+# We use a set of YAML aliases and anchors to define the different steps
+# in our jobs.
+# This helps us to keep some of the code DRY, we are not forced to use YAML
+# operators, a different approach could be used:
+#  - bash functions
+#  - python functions
+#  - Rust or D code
+#
+common_cli:
+  hashbang: &hashbang |
+    #!/bin/bash -l
+    set -x
+    set -e
+
+
+  # add_shell_functions, contains our the bash functions consumed by the
+  # the build script.
+  # We set the shebang to /bin/bash. Jenkins 'should' respect this.
+  # Note:
+  # We noticed that our Ubuntu /bin/bash call were being executed as /bin/sh.
+  # So we as part of the slave image build process symlinked
+  # /bin/sh -> /bin/bash.
+  # TODO: https://clusterhq.atlassian.net/browse/FLOC-2986
+  add_shell_functions: &add_shell_functions |
+
+    # The long directory names where we build our code cause pip to fail.
+    # https://gitlab.com/gitlab-org/gitlab-ci-multi-runner/issues/20
+    # http://stackoverflow.com/questions/10813538/shebang-line-limit-in-bash-and-linux-kernel
+    # https://github.com/spotify/dh-virtualenv/issues/10
+    # so we set our virtualenv dir to live in /tmp/<random number>
+    #
+    export venv=/tmp/\${RANDOM}
+    # make sure the virtualenv doesn't already exist
+    while [ -e \${venv} ]
+    do
+      export venv=/tmp/\${RANDOM}
+    done
+
+    function os {
+      # Let's figure out if this is OSX or Linux
+      # and return the OS type (or the distribution for a Linux OS)
+      _nix_flavour=\$(uname)
+      if [ 'Darwin' == "\${_nix_flavour}" ]; then
+        echo "OSX"
+      else
+        # Determine OS platform
+        source /etc/os-release
+        echo \${ID}
+      fi
+    }
+    function is_ubuntu {
+      if [ 'ubuntu' == "\$(os)" ]; then
+        return 0
+      else
+        return 1
+      fi
+    }
+    function is_centos {
+      if [ 'centos' == "\$(os)" ]; then
+        return 0
+      else
+        return 1
+      fi
+    }
+    function is_osx {
+      if [ 'OSX' == "\$(os)" ]; then
+        return 0
+      else
+        return 1
+      fi
+    }
+
+    # add a function that we can consume to colorise output
+    # This could be better, for now it is a simple parser based on keywords
+    # which will highlight 'errors, warnings' or other type of messages we
+    # choose to configured.
+    # The list of ASCII codes it uses can be found here.
+    # https://wiki.archlinux.org/index.php/Color_Bash_Prompt
+    function parse_logs {
+      # ubuntu defaults to mawk, which causes some things to break
+      # it seems to be related to buffering, -W interactive seems to fix it.
+      if is_ubuntu; then
+        alias awk='mawk -W interactive'
+      fi
+
+      # The 'awk' parse_logs function consumes the standard output from a piped
+      # command, and returns PIPESTATUS of that command (return code).
+      #
+      # we configure 4 groups for parsing our logs.
+      # Exceptions at the top, which are always printed black.
+      # Errors, which are printed in Red
+      # Warnings, which are printed in Yellow
+      # Successes or other messages that we print in Green
+      # Everything else that doesn't match is printed in Black.
+      #
+      "\$@" | awk '
+        # exceptions to rules below, these are always printed black
+        /.*reading.sources.*error_pages.404.*/ {print "\\033[0;30m" \$0 "\\033[0;30m";  next }
+        /.*writing.output.*error_pages.404.*/ {print "\\033[0;30m" \$0 "\\033[0;30m";  next }
+        /.*errors.py.*/ {print "\\033[0;30m" \$0 "\\033[0;30m";  next }
+
+        # red lines
+        /.*exception.*/ {print "\\033[0;31m" \$0 "\\033[0;30m";  next }
+        /.*Exception.*/ {print "\\033[0;31m" \$0 "\\033[0;30m";  next }
+        /.*fail.*/      {print "\\033[0;31m" \$0 "\\033[0;30m";  next }
+        /.* ERROR.*/     {print "\\033[0;31m" \$0 "\\033[0;30m";  next }
+        /.* error.*/     {print "\\033[0;31m" \$0 "\\033[0;30m";  next }
+        /build finished with problems./     {print "\\033[0;31m" \$0 "\\033[0;30m";  next }
+        /return 1/     {print "\\033[0;31m" \$0 "\\033[0;30m";  next }
+        /Could not find valid repo at/     {print "\\033[0;31m" \$0 "\\033[0;30m";  next }
+
+        # yellow lines
+        /.*Warning.*/   {print "\\033[0;33m" \$0 "\\033[0;30m";  next }
+        /.*warning.*/   {print "\\033[0;33m" \$0 "\\033[0;30m";  next }
+        /.*skip.*/      {print "\\033[0;33m" \$0 "\\033[0;30m";  next }
+
+        # green lines
+        /.*succeeded.*/  {print "\\033[0;32m" \$0 "\\033[0;30m";  next }
+        /.*Succeeded.*/  {print "\\033[0;32m" \$0 "\\033[0;30m";  next }
+        /PASSED.*/  {print "\\033[0;32m" \$0 "\\033[0;30m";  next }
+        /.*[OK]/  {print "\\033[0;32m" \$0 "\\033[0;30m";  next }
+
+        # everything else, print in black
+        /.*/            {print "\\033[0;30m" \$0 "\\033[0;30m" ; }
+      '
+      return \${PIPESTATUS[0]}
+    }
+    # fix the docker permission issue, the base image doesn't have the correct
+    # permissions/owners.
+    # This is to be tackled as part of:
+    # https://clusterhq.atlassian.net/browse/FLOC-2689
+    test -e /var/run/docker.sock && sudo chmod 777 /var/run/docker.sock
+
+    # Returns the ip address for eth0
+    # We consume this as part or the vagrant build tests.
+    # Those tests run on our Mesos Cluster, the job connects to a local nginx
+    # instance running on the Mesos Slave where the job is running.
+    export eth0_ip=\$( ip -o -4 addr show eth0 |awk '{ print \$4 '} | cut -f 1 -d "/")
+
+    # pass the exit code from the previous and return the the aggregated
+    # exit status for the whole job.
+    function updateExitStatus {
+      # if we had previous failures, we just fail here.
+      if [ "\${JOB_EXIT_STATUS}" != "0" ] && [ "\${JOB_EXIT_STATUS}" != "" ]; then
+        echo 1
+      else
+         if [ "\$1" !=  "0" ]; then
+         # first failure on the job, lets return 1, which will set
+         # JOB_EXIT_STATUS to 1 and mark the job as failed.
+             echo 1
+         fi
+      fi
+    }
+
+
+  # TODO: do we need to clean up old files on ubuntu and centos or
+  # does the pre-scm plugin does this correctly for us ?
+  # https://clusterhq.atlassian.net/browse/FLOC-3139
+  cleanup: &cleanup |
+    export PATH=/usr/local/bin:\${PATH}
+    # clean up the stuff from previous runs
+    # due to the length of the jobname workspace, we are hitting limits in
+    # our sheebang path name in pip.
+    # https://github.com/spotify/dh-virtualenv/issues/10
+    # http://stackoverflow.com/questions/10813538/shebang-line-limit-in-bash-and-linux-kernel
+    # https://gitlab.com/gitlab-org/gitlab-ci-multi-runner/issues/20
+    # So we will place the virtualenv in /tmp/v instead
+    #
+    if is_centos || is_ubuntu; then
+      # some of our tests (which run as root), leave some files behind when
+      # they abort or fail to complete.
+      # We use 'sudo' so that we can remove those files before a next job run.
+      sudo rm -rf \${venv}
+    fi
+
+  setup_venv: &setup_venv |
+    # setup the new venv
+    virtualenv -p python2.7 --clear \${venv}
+    . \${venv}/bin/activate
+
+  setup_pip_cache: &setup_pip_cache |
+    # exports the PIP_INDEX_URL, TRUSTED_HOST variables to the environment.
+    # The /tmp/pip.sh file is copied to the Jenkins Slave by the Jenkins Master
+    # during the bootstrapping of the slave.
+    # This file is located in /etc/jenkins_slave on the Master box.
+    # These variables contain the PIP URL and IP address of our caching server.
+    if [ -e /tmp/pip.sh ]; then
+      . /tmp/pip.sh
+    fi
+
+  setup_uft_modules: &setup_uft_modules |
+    # installs all the required python modules .
+    # But first, we need to upgrade pip to 7.1.
+    # We have a devpi cache in AWS which we will consume instead of going
+    # upstream to the PyPi servers.
+    # We specify that devpi caching server using -i \$PIP_INDEX_URL
+    # which requires as to include --trusted-host as we are not (yet) using
+    # SSL on our caching box.
+    # The --trusted-host option is only available with pip 7.
+    #
+    if [ \${PIP_INDEX_URL} ]; then
+        PIP_ADDITIONAL_OPTIONS="\${PIP_ADDITIONAL_OPTIONS} -i \${PIP_INDEX_URL} "
+    fi
+    if [ \${TRUSTED_HOST} ]; then
+        PIP_ADDITIONAL_OPTIONS="\${PIP_ADDITIONAL_OPTIONS} \
+                                --trusted-host \${TRUSTED_HOST} "
+    fi
+
+    # parse_logs() currently only works on Ubuntu or Centos builds
+    # due to a different awk implementation on OSX cloudbees servers
+    if is_ubuntu || is_centos; then
+        PARSE_LOGS="parse_logs "
+    fi
+
+    # using the caching-layer, install all the dependencies
+    \${PARSE_LOGS} pip install --upgrade pip
+    \${PARSE_LOGS} pip install . \${PIP_ADDITIONAL_OPTIONS}
+
+
+  run_test_integration_py: &run_test_integration_py |
+    # We gather the return code but make sure we come out of these tests with 0
+    # we store that code and pass it to the end of the job execution,
+    # as part of the JOB_EXIT_STATUS variable.
+    #
+    # TODO: what does this job do?
+    #
+    parse_logs \${venv}/bin/trial test_integration.py
+    JOB_EXIT_STATUS="\$( updateExitStatus \$? )"
+
+
+  exit_with_return_code_from_test: &exit_with_return_code_from_test |
+    # this is where we make sure we exit with the correct return code
+    # from the tests we executed above.
+    exit \${JOB_EXIT_STATUS}
+
+
+  do_not_abort_on_errors: &do_not_abort_on_errors |
+    # make sure we don't abort the job on the first error we find.
+    #
+    # jenkins will execute our shellscript with -e, which will cause the
+    # script to terminate at the first error and mark the job as failed.
+    # This is fine for the majority of the build cases, but in some situations
+    # we don't want to terminate the job straight away. For example, a job
+    # which generates a new Virtual Machine where the tests are executed.
+    # With '-e' defined, jenkins would abort the job and leave an orphan VM
+    # behind.
+    # To avoid it, we set '+e' on this shell.
+    set +e
+
+
+  create_terraform_config_file: &create_terraform_config_file |
+    # collects the AWS credentials that allows us to create our test instances
+    # the file with the credentials are deployed by the jenkins master to the
+    # /tmp of the slave when the slave is instantiated.
+    /tmp/get_aws_credentials_uft.sh > terraform.tfvars.json
+
+
+#-----------------------------------------------------------------------------#
+# Job Definitions below this point
+#-----------------------------------------------------------------------------#
+
+job_type:
+  cronly_jobs:
+    run_acceptance_uft_installer:
+      at: '0 0 * * *'
+      on_nodes_with_labels: 'aws-ubuntu-trusty-T2Small'
+      with_steps:
+        - { type: 'shell',
+            cli: [ *hashbang, *add_shell_functions,
+                   *setup_venv,
+                   *setup_pip_cache,
+                   *setup_uft_modules,
+                   *do_not_abort_on_errors,
+                   *create_terraform_config_file,
+                   *run_test_integration_py,
+                   *cleanup,
+                   *exit_with_return_code_from_test
+            ]
+          }
+      timeout: 30

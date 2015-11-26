@@ -24,4 +24,4 @@ node_modules
 venv
 build
 dist
-*.egg-info
+*.egg-infojobs.groovy
