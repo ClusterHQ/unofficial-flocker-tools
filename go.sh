@@ -19,7 +19,7 @@ else
     echo "If you use docker-machine (e.g. as part of docker toolbox) then"
     echo "'eval \\\$(docker-machine env default)' or similar may help."
     echo "In that case, also make sure your docker machine is running, using"
-    echo "e.g. echo "'docker-machine start default'."
+    echo "e.g. echo 'docker-machine start default'."
     exit 1
 fi
 
