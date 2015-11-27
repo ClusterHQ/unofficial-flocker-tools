@@ -17,7 +17,7 @@ else
     echo "docker is running and that DOCKER_HOST is set correctly."
     echo
     echo "If you use docker-machine (e.g. as part of docker toolbox) then"
-    echo "'eval \$(docker-machine env default)' or similar may help."
+    echo "'eval \\\$(docker-machine env default)' or similar may help."
     echo "In that case, also make sure your docker machine is running, using"
     echo "e.g. echo "'docker-machine start default'."
     exit 1
@@ -32,8 +32,8 @@ if ! \$IGNORE_NETWORK_CHECK; then
             echo "you have changed network (and/or DNS servers) since starting the VM."
             echo "If you are using docker-machine (e.g. as part of docker toolbox), you can"
             echo "run the following command (or similar) to do that:"
-            echo "    docker-machine restart default && eval \$(docker-machine env default)"
-            echo "To ignore this check, and proceed anyway (e.g. if you know you are offline) "
+            echo "    docker-machine restart default && eval \\\$(docker-machine env default)"
+            echo "To ignore this check, and proceed anyway (e.g. if you know you are offline)"
             echo "set IGNORE_NETWORK_CHECK=1"
             exit 1
         fi
