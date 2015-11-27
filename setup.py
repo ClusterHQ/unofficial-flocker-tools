@@ -19,6 +19,7 @@ setup(
             "flockerctl = unofficial_flocker_tools.flocker_volumes:_main", # async
             "flocker-get-nodes = unofficial_flocker_tools.get_nodes:main",
             "flocker-destroy-nodes = unofficial_flocker_tools.destroy_nodes:main",
+            "flocker-get-diagnostics = unofficial_flocker_tools.diagnostics:_main", #async
             "volume-hub-agents-install = unofficial_flocker_tools.hub_agents:_main", # async
         ],
     },
