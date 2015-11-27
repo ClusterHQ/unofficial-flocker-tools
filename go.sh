@@ -99,7 +99,7 @@ if [ ! "$IGNORE_NETWORK_CHECK" = "1" ]; then
 fi
 
 echo "Pulling Docker image for Flocker installer..."
-docker pull $IMAGE
+$SUDO_PREFIX docker pull $IMAGE
 }
 
 # wrapped up in a function so that we have some protection against only getting
