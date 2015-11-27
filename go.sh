@@ -23,7 +23,7 @@ else
     exit 1
 fi
 
-if ! \$IGNORE_NETWORK_CHECK; then
+if [ ! "\$IGNORE_NETWORK_CHECK" = "1" ]; then
     if ! \$SUDO_PREFIX docker run -ti gliderlabs/alpine wget -q -O /dev/null -T 5 http://check.clusterhq.com/?source=uft
         then
             echo "Unable to establish network connectivity from inside a container."
