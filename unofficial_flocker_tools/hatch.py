@@ -17,9 +17,9 @@ class HatchOptions(Options):
     """
     optFlags = [
         # Orchestration
-        ("kubernetes", None, "Orchestration: Kubernetes"),
         ("swarm", None, "Orchestration: Docker Swarm"),
-        ("mesos", None, "Orchestration: Mesos"),
+        ("mesos-marathon", None, "Orchestration: Mesos with Marathon"),
+        ("kubernetes", None, "Orchestration: Kubernetes"),
 
         # Volume Management
         ("flocker", None, "Volume Management: Flocker"),
