@@ -42,7 +42,7 @@ class HatchOptions(Options):
         ("ebs", None, "Flocker Storage Driver: Amazon EBS"),
         ("openstack", None, "Flocker Storage Driver: OpenStack Cinder"),
         ("gce-pd", None, "Flocker Storage Driver: GCE PD"),
-        ("ceph", None, "Flocker Storage Driver: Ceph"),
+        ("ceph", None, "Flocker Storage Driver: Ceph (installs Ceph cluster)"),
         ("zfs", None, "Flocker Storage Driver: ZFS (Alpha)"),
 
         # 3rd party storage drivers
