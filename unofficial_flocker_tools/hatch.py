@@ -9,11 +9,20 @@ class HatchOptions(Options):
     Deploy a one-off Swarm, Mesos or Kubernetes cluster, optionally with
     Flocker, on local VMs, cloud or managed infrastructure.
 
+    1. First, run `hatch init` with some arguments to create a hatch.yml file.
+    2. Optionally edit the file to tweak the settings.
+    3. Then run `hatch deploy` to create the infrastructure and install the
+       desired software.
+
     Examples:
 
-    hatch --kubernetes --flocker --coreos --aws
-    hatch --swarm --flocker --ubuntu --gce
-    hatch --mesos --flocker --centos --vagrant
+    hatch init --kubernetes --flocker --coreos --aws
+    hatch init --swarm --flocker --ubuntu --gce
+    hatch init --mesos --flocker --centos --vagrant
+
+    Creates hatch.yml file, prompting for required information (e.g. AWS keys).
+
+    hatch deploy
     """
     optFlags = [
         # Orchestration
@@ -38,24 +47,8 @@ class HatchOptions(Options):
         ("vagrant", None, "Infrastructure Provider: Local Vagrant"),
         ("managed", None, "Infrastructure Provider: Specify own IPs"),
         
-        # Flocker storage drivers
-        ("ebs", None, "Flocker Storage Driver: Amazon EBS"),
-        ("openstack", None, "Flocker Storage Driver: OpenStack Cinder"),
-        ("gce-pd", None, "Flocker Storage Driver: GCE PD"),
-        ("ceph", None, "Flocker Storage Driver: Ceph (installs Ceph cluster)"),
-        ("zfs", None, "Flocker Storage Driver: ZFS (Alpha)"),
-
-        # 3rd party storage drivers
-        ("emc-scaleio", None, "Flocker Storage Driver: EMC ScaleIO"),
-        ("emc-xtremio", None, "Flocker Storage Driver: EMC XtremIO"),
-        ("vsphere", None, "Flocker Storage Driver: VMware vSphere"),
-        ("netapp-ontap", None, "Flocker Storage Driver: NetApp OnTap"),
-        ("dell-sc", None, "Flocker Storage Driver: Dell Storage SC Series"),
-        ("huawei-oceanstor", None, "Flocker Storage Driver: Huawei OceanStor"),
-        ("hedvig", None, "Flocker Storage Driver: Hedvig"),
-        ("convergeio", None, "Flocker Storage Driver: ConvergeIO"),
-        ("nexentaedge", None, "Flocker Storage Driver: NexentaEdge"),
-        ("saratoga", None, "Flocker Storage Driver: Saratoga Speed"),
+        """
+        """
     ]
 
 

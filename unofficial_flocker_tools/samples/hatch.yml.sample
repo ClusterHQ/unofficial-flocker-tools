@@ -1,0 +1,52 @@
+orchestration: swarm # or kubernetes, mesos-marathon
+volume_manager: flocker # optional
+operating_system: ubuntu # centos, coreos (experimental)
+infrastructure_provider: aws # or gce, openstack, vsphere, vagrant, managed
+
+#private_key_path: # absolute path to key (.pem file) on your local machine,
+                   # optional if provider=vagrant
+
+# Instance types and number of nodes  total launched: agent_nodes + 1, for master)
+#agent_nodes: 2 # optional, defaults to 2
+
+#username: ubuntu # optional, defaults to autodetect based on OS
+
+aws_options:
+  # AWS keys
+  access_key: "your AWS access key"
+  secret_key: "your AWS secret key"
+
+  # AWS region and zone
+  region: "region you want nodes deployed in e.g. us-east-1"
+  availability_zone: "zone you want nodes deployed in e.g. us-east-1a"
+
+  # AWS key name to authenticate to nodes via SSH
+  key_name: "name of EC2 keypair"
+
+  # Instance type
+  #instance_type: "m3.large" # defaults to m3.large
+
+#flocker_options:
+#  storage_driver: ebs # default inferred from infrastructure_provider
+
+### Options to query for  obvious defaults for some clouds):
+## Flocker storage drivers
+# "ebs" "Flocker Storage Driver: Amazon EBS"
+# "openstack" "Flocker Storage Driver: OpenStack Cinder"
+# "gce-pd" "Flocker Storage Driver: GCE PD"
+# "zfs" "Flocker Storage Driver: ZFS (Alpha)"
+
+### Option to query for when using "managed":
+## 3rd party storage drivers
+# "ceph" "Flocker Storage Driver: Ceph (NB: installs Ceph cluster for you)"
+# "emc-scaleio" "Flocker Storage Driver: EMC ScaleIO"
+# "emc-xtremio" "Flocker Storage Driver: EMC XtremIO"
+# "vsphere" "Flocker Storage Driver: VMware vSphere"
+# "netapp-ontap" "Flocker Storage Driver: NetApp OnTap"
+# "dell-sc" "Flocker Storage Driver: Dell Storage SC Series"
+# "huawei-oceanstor" "Flocker Storage Driver: Huawei OceanStor"
+# "hedvig" "Flocker Storage Driver: Hedvig"
+# "convergeio" "Flocker Storage Driver: ConvergeIO"
+# "nexentaedge" "Flocker Storage Driver: NexentaEdge"
+# "saratoga" "Flocker Storage Driver: Saratoga Speed"
+
