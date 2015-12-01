@@ -206,7 +206,7 @@ class Deploy(Options):
         print "======================================"
         print "Running terraform to provision nodes"
         print "======================================"
-        get_nodes("cluster.yml")
+        get_nodes()
         d = succeed()
         if "flocker" in hatch["deploy"]:
             print "========================================================"
