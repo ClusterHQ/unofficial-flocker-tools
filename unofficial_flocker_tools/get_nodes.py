@@ -13,7 +13,8 @@ def main():
     cluster_yml = terraform.child("cluster.yml")
     if cluster_yml.exists():
         cluster_yml.moveTo(FilePath(".").child("cluster.yml"))
-    raise UsageError("Infrastructure failed to provision: cluster.yml was not created")
+    else:
+        raise UsageError("Infrastructure failed to provision: cluster.yml was not created")
 
 if __name__ == "__main__":
     main()
