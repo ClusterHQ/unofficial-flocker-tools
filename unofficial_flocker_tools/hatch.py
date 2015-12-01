@@ -1,4 +1,5 @@
 from twisted.internet import defer
+from twisted.internet.defer import succeed
 from twisted.internet.task import react
 from twisted.python import log
 from twisted.python.usage import Options, UsageError
@@ -6,13 +7,16 @@ from twisted.python.filepath import FilePath
 import sys
 import yaml
 import json
+
 from utils import container_facing_key_path
+
 from sample_files import main as sample_files
 from get_nodes import main as get_nodes
 from install import main as install_flocker
+from config import main as configure_flocker
 from plugin_install import main as install_flongle
 from hub_agents import main as install_hub_agents
-from twisted.internet.defer import succeed
+from swarm import install_swarm
 
 class Flocker(object):
     name = "flocker"
@@ -191,7 +195,9 @@ class Deploy(Options):
         if hatch["infrastructure"] != "aws":
             # TODO support more than just AWS
             raise UsageError("I don't know how to install on anything but AWS at the moment.")
-
+        if "swarm" in hatch["deploy"] and hatch["operating_system"] != "ubuntu":
+            # TODO support Swarm on all platforms
+            raise UsageError("Sorry, I can only install Swarm on Ubuntu")
         # OK, we're good.
         sample_files()
         terraform_template = FilePath(".").child("terraform").child("terraform.tfvars.json")
@@ -213,10 +219,13 @@ class Deploy(Options):
             print "Installing and configuring Flocker and its Docker plugin"
             print "========================================================"
             d.addCallback(lambda ignored: install_flocker("cluster.yml"))
+            d.addCallback(lambda ignored: configure_flocker("cluster.yml"))
             d.addCallback(lambda ignored: install_flongle("cluster.yml"))
             token = hatch["flocker_options"]["volume_hub_token"]
             if token is not None:
                 d.addCallback(lambda ignored: install_hub_agents("cluster.yml", token))
+        if "swarm" in hatch["deploy"]:
+            d.addCallback(lambda ignored: install_swarm("cluster.yml"))
         return d
 
 

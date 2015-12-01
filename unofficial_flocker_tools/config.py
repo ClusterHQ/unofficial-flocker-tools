@@ -5,7 +5,6 @@
 
 import sys
 import yaml
-import time
 from twisted.internet.task import react
 from twisted.internet.defer import inlineCallbacks, gatherResults
 
@@ -17,8 +16,8 @@ def report_completion(result, public_ip, message=""):
     return result
 
 @inlineCallbacks
-def main(reactor, *args):
-    c = Configurator(configFile=sys.argv[1])
+def main(reactor, configFile):
+    c = Configurator(configFile)
     c.run("flocker-ca initialize %s" % (c.config["cluster_name"],))
     log("Initialized cluster CA.")
     c.run("flocker-ca create-control-certificate %s" % (c.config["control_node"],))
@@ -141,38 +140,7 @@ docker run --name=flocker-control-volume -v /var/lib/flocker clusterhq/flocker-c
 docker run --restart=always -d --net=host -v /etc/flocker:/etc/flocker --volumes-from=flocker-control-volume --name=flocker-control-service clusterhq/flocker-control-service""")
 
     deferreds.append(d)
-
     yield gatherResults(deferreds)
-
-    if c.config["os"] == "ubuntu":
-        # XXX INSECURE, UNSUPPORTED, UNDOCUMENTED EXPERIMENTAL OPTION
-        # Usage: `uft-flocker-config --ubuntu-aws --swarm`, I guess
-        if len(sys.argv) > 2 and sys.argv[2] == "--swarm":
-            # Install swarm
-            deferreds = []
-            clusterid = c.runSSH(c.config["control_node"], """
-docker run swarm create""").strip()
-            log("Created Swarm ID")
-            for node in c.config["agent_nodes"]:
-                d = c.runSSHAsync(node['public'], """
-service docker stop
-docker daemon -H unix:///var/run/docker.sock -H tcp://0.0.0.0:2375 >> /tmp/dockerlogs 2>&1 &
-""")
-                # Let daemon come up
-                time.sleep(3)
-                d = c.runSSHAsync(node['public'], """
-docker run -d swarm join --addr=%s:2375 token://%s
-""" % (node['private'], clusterid))
-                log("Started Swarm Agent for %s" % node['public'])
-                deferreds.append(d)
-
-            d = c.runSSHAsync(c.config["control_node"], """
-docker run -d -p 2357:2375 swarm manage token://%s
-""" % clusterid)
-            log("Starting Swarm Master")
-            deferreds.append(d)
-            yield gatherResults(deferreds)
-            log("Swarm Master is at tcp://%s:2357" % c.config["control_node"])
 
 def _main():
     react(main, sys.argv[1:])
