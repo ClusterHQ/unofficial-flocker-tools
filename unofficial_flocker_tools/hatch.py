@@ -4,7 +4,7 @@ from twisted.python import log
 from twisted.python.usage import Options, UsageError
 import sys
 
-class HatchOptions(Options):
+class Init(Options):
     """
     Deploy a one-off Swarm, Mesos or Kubernetes cluster, optionally with
     Flocker, on local VMs, cloud or managed infrastructure.
@@ -16,45 +16,48 @@ class HatchOptions(Options):
 
     Examples:
 
-    hatch init --kubernetes --flocker --coreos --aws
-    hatch init --swarm --flocker --ubuntu --gce
-    hatch init --mesos --flocker --centos --vagrant
+    hatch init kubernetes --volmgr=flocker --os=coreos --infra=aws
+    hatch init swarm --volmgr=flocker --os=ubuntu --infra=gce
+    hatch init mesos-marathon --volmgr=flocker --os=centos --infra=vagrant
 
     Creates hatch.yml file, prompting for required information (e.g. AWS keys).
 
     hatch deploy
     """
-    optFlags = [
-        # Orchestration
-        ("swarm", None, "Orchestration: Docker Swarm"),
-        ("mesos-marathon", None, "Orchestration: Mesos with Marathon"),
-        ("kubernetes", None, "Orchestration: Kubernetes"),
-
-        # Volume Management
-        ("flocker", None, "Volume Management: Flocker"),
-
-        # Operating System
-        ("coreos", None, "Operating System: CoreOS"),
-        ("ubuntu", None, "Operating System: Ubuntu"),
-        ("centos", None, "Operating System: CentOS"),
-
-        # Infrastructure provider
-        ("aws", None, "Infrastructure Provider: Amazon Web Services"),
-        ("gce", None, "Infrastructure Provider: Google Compute Engine"),
-        ("openstack", None, "Infrastructure Provider: OpenStack"),
-        ("vsphere", None, "Infrastructure Provider: VMware vSphere"),
-        
-        ("vagrant", None, "Infrastructure Provider: Local Vagrant"),
-        ("managed", None, "Infrastructure Provider: Specify own IPs"),
-        
-        """
-        """
+    optParameters = [
+        ("orch", None, "Orchestration framework (kubernetes, swarm, mesos-marathon)"),
+        ("volmgr", None, "Volume manager (optional: flocker)"),
+        ("infra", None, "Infrastructure (aws, gce, openstack, vsphere, vagrant, managed)"),
+        ("os", None, "Operating system (ubuntu, centos, coreos) (default: ubuntu)"),
     ]
+
+
+class Version(Options):
+    """
+    show version information
+    """
+    def run(self):
+        print "hatch version 0.6" # TODO get this outta setup.py
+        print "see https://docs.clusterhq.com/en/latest/labs/hatch/"
+        print
+
+
+commands = {
+    "version": Version,
+    "move": Init,
+}
+
+
+class HatchCommands(Options):
+    subCommands = [
+        (cmd, None, cls, cls.__doc__)
+        for cmd, cls
+        in sorted(commands.iteritems())]
 
 
 def main(reactor, *argv):
     try:
-        base = HatchOptions()
+        base = HatchCommands()
         base.parseOptions(argv)
         if base.subCommand is not None:
             d = defer.maybeDeferred(base.subOptions.run)

@@ -1,10 +1,10 @@
-orchestration: swarm # or kubernetes, mesos-marathon
-volume_manager: flocker # optional
-operating_system: ubuntu # centos, coreos (experimental)
-infrastructure_provider: aws # or gce, openstack, vsphere, vagrant, managed
+orchestration: swarm          # or kubernetes, mesos-marathon
+volume_manager: flocker       # optional
+operating_system: ubuntu      # centos, coreos (experimental)
+infrastructure_provider: aws  # or gce, openstack, vsphere, vagrant, managed
 
-#private_key_path: # absolute path to key (.pem file) on your local machine,
-                   # optional if provider=vagrant
+#private_key_path:            # absolute path to key (.pem file) on your local
+                              # machine, optional if provider=vagrant
 
 # Instance types and number of nodes  total launched: agent_nodes + 1, for master)
 #agent_nodes: 2 # optional, defaults to 2
@@ -29,7 +29,7 @@ aws_options:
 #flocker_options:
 #  storage_driver: ebs # default inferred from infrastructure_provider
 
-### Options to query for  obvious defaults for some clouds):
+### Options to query for (obvious defaults for some clouds):
 ## Flocker storage drivers
 # "ebs" "Flocker Storage Driver: Amazon EBS"
 # "openstack" "Flocker Storage Driver: OpenStack Cinder"
@@ -49,4 +49,3 @@ aws_options:
 # "convergeio" "Flocker Storage Driver: ConvergeIO"
 # "nexentaedge" "Flocker Storage Driver: NexentaEdge"
 # "saratoga" "Flocker Storage Driver: Saratoga Speed"
-

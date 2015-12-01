@@ -71,7 +71,7 @@ class Version(Options):
     show version information
     """
     def run(self):
-        print "flocker-volumes.py prototype version 0.0.1"
+        print "flockerctl version 0.6" # TODO get this outta setup.py 
         print "see https://docs.clusterhq.com/en/latest/labs/"
         print
 
