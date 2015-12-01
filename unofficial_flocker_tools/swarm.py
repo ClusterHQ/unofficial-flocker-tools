@@ -6,7 +6,7 @@ def install_swarm(reactor, configFile):
     if c.config["os"] == "ubuntu":
         # Install swarm
         deferreds = []
-        clusterid = c.runSSH(c.config["control_node"], "docker run swarm create").strip()
+        clusterid = c.runSSHRaw(c.config["control_node"], "docker run swarm create").strip()
         log("Created Swarm ID")
         for node in c.config["agent_nodes"]:
             # TODO: sed /etc/default/docker, rather than transiently starting a docker daemon
@@ -16,7 +16,7 @@ docker daemon -H unix:///var/run/docker.sock -H tcp://0.0.0.0:2375 >> /tmp/docke
 """)
             d.addCallback(lambda ignored: c.runSSHAsync(
                 node['public'],
-                "docker run -d swarm join --addr=%s:2375 token://%s""" % (
+                "docker run -d swarm join --addr=%s:2375 token://%s" % (
                     node['private'], clusterid)
                 )
             )

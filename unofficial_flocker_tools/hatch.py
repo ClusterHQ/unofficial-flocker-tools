@@ -17,6 +17,7 @@ from config import main as configure_flocker
 from plugin_install import main as install_flongle
 from hub_agents import main as install_hub_agents
 from swarm import install_swarm
+from kubernetes import install_kubernetes
 
 class Flocker(object):
     name = "flocker"
@@ -198,6 +199,9 @@ class Deploy(Options):
         if "swarm" in hatch["deploy"] and hatch["operating_system"] != "ubuntu":
             # TODO support Swarm on all platforms
             raise UsageError("Sorry, I can only install Swarm on Ubuntu")
+        if "kubernetes" in hatch["deploy"] and hatch["operating_system"] != "ubuntu":
+            # TODO support Kubernetes on all platforms
+            raise UsageError("Sorry, I can only install Kubernetes on Ubuntu")
         # OK, we're good.
         sample_files()
         terraform_template = FilePath(".").child("terraform").child("terraform.tfvars.json")
@@ -226,6 +230,8 @@ class Deploy(Options):
                 d.addCallback(lambda ignored: install_hub_agents("cluster.yml", token))
         if "swarm" in hatch["deploy"]:
             d.addCallback(lambda ignored: install_swarm("cluster.yml"))
+        if "kubernetes" in hatch["deploy"]:
+            d.addCallback(lambda ignored: install_kubernetes("cluster.yml"))
         return d
 
 

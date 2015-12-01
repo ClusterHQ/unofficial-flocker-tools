@@ -94,6 +94,20 @@ resource "aws_security_group" "cluster_security_group" {
       protocol = "tcp"
       self = true
   }
+  # k8s control API, internal only
+  ingress {
+      from_port = 8080
+      to_port = 8080
+      protocol = "tcp"
+      self = true
+  }
+  # k8s etcd, internal only
+  ingress {
+      from_port = 8080
+      to_port = 8080
+      protocol = "tcp"
+      self = true
+  }
   # allow outbound traffic
   egress {
       from_port = 0

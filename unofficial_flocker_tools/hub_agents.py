@@ -25,7 +25,7 @@ def main(reactor, configFile, token=None):
         token = environ["TOKEN"]
 
     install_command = ('TOKEN="%s" '
-            """sh -c 'curl -H "cache-control: max-age=0" -ssL https://get-volumehub.clusterhq.com/ |sh'""" %
+            """sh -c 'curl -sSL https://get-volumehub.clusterhq.com/ |sh'""" %
             (token,))
 
     deferreds = [c.runSSHAsync(control_ip,
