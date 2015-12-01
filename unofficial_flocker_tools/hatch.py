@@ -14,7 +14,7 @@ from sample_files import main as sample_files
 from get_nodes import main as get_nodes
 from install import main as install_flocker
 from config import main as configure_flocker
-from plugin_install import main as install_flongle
+from plugin import main as install_flongle
 from hub_agents import main as install_hub_agents
 from swarm import install_swarm
 from kubernetes import install_kubernetes

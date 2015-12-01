@@ -1,8 +1,8 @@
 #!/bin/sh
 do_install() {
 IMAGE="clusterhq/uft:latest"
-for CMD in flockerctl flocker-ca flocker-deploy flocker-config flocker-install flocker-plugin-install flocker-sample-files flocker-tutorial flocker-volumes flocker-get-nodes flocker-destroy-nodes volume-hub-agents-install; do
-    if [ "$CMD" = "flockerctl" ] || [ "$CMD" = "volume-hub-agents-install" ]; then
+for CMD in flockerctl flocker-ca flocker-deploy flocker-config flocker-install flocker-plugin-install flocker-sample-files flocker-tutorial flocker-volumes flocker-get-nodes flocker-destroy-nodes volume-hub-agents-install hatch; do
+    if [ "$CMD" = "flockerctl" ] || [ "$CMD" = "volume-hub-agents-install" ] || [ "$CMD" = "hatch" ]; then
         PREFIX=""
     else
         PREFIX="uft-"
@@ -99,7 +99,9 @@ if [ ! "$IGNORE_NETWORK_CHECK" = "1" ]; then
 fi
 
 echo "Pulling Docker image for Flocker installer..."
-$SUDO_PREFIX docker pull $IMAGE
+if [ ! "$SKIP_PULL" = "1" ]; then
+    $SUDO_PREFIX docker pull $IMAGE
+fi
 }
 
 # wrapped up in a function so that we have some protection against only getting
