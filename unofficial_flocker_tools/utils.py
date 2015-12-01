@@ -146,6 +146,11 @@ def loop_until(predicate, timeout=None, message="task"):
 class UsageError(Exception):
     pass
 
+def container_facing_key_path(private_key_path):
+    if "CONTAINERIZED" in os.environ:
+        private_key_path = "/host" + private_key_path
+    return private_key_path
+
 class Configurator(object):
     def __init__(self, configFile):
         self.configFile = configFile
@@ -160,9 +165,7 @@ class Configurator(object):
 
     def get_container_facing_key_path(self):
         private_key_path = self.get_user_facing_key_path()
-        if "CONTAINERIZED" in os.environ:
-            private_key_path = "/host" + private_key_path
-        return private_key_path
+        return container_facing_key_path(private_key_path)
 
     def runSSH(self, ip, command, username=None):
         command = 'ssh -o LogLevel=error -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i %s %s@%s %s' % (self.config["private_key_path"],

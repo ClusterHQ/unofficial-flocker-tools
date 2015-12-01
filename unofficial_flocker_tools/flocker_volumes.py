@@ -152,7 +152,7 @@ class Create(Options):
         ("node", "n", None,
             "Initial primary node for dataset "
             "(any unique prefix of node uuid, see "
-            "flocker-volumes list-nodes)"),
+            "flockerctl list-nodes)"),
         ("metadata", "m", None,
             "Set volume metadata (\"a=b,c=d\")"),
         ("size", "s", None,
@@ -191,13 +191,11 @@ class Create(Options):
         d.addCallback(got_nodes)
         def created_dataset(result):
             print "created dataset in configuration, manually poll",
-            print "state with 'flocker-volumes list' to see it",
+            print "state with 'flockerctl list' to see it",
             print "show up."
             print
             # TODO: poll the API until it shows up, give the user a nice
             # progress bar.
-            # TODO: investigate bug where all datasets go to pending
-            # during waiting for a dataset to show up.
         d.addCallback(created_dataset)
         return d
 

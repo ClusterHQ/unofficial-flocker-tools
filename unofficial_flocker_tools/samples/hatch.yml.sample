@@ -6,9 +6,6 @@ infrastructure_provider: aws  # or gce, openstack, vsphere, vagrant, managed
 #private_key_path:            # absolute path to key (.pem file) on your local
                               # machine, optional if provider=vagrant
 
-# Instance types and number of nodes  total launched: agent_nodes + 1, for master)
-#agent_nodes: 2 # optional, defaults to 2
-
 #username: ubuntu # optional, defaults to autodetect based on OS
 
 aws_options:
