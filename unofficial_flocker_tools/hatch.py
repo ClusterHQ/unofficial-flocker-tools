@@ -10,7 +10,7 @@ from utils import container_facing_key_path
 from sample_files import main as sample_files
 from get_nodes import main as get_nodes
 from install import main as install_flocker
-from plugin_install import main as install_flongle
+from plugin import main as install_flongle
 from hub_agents import main as install_hub_agents
 from twisted.internet.defer import succeed
 
