@@ -9,13 +9,11 @@ from utils import Configurator, verify_socket, log
 from twisted.internet.task import react
 from twisted.internet.defer import gatherResults, inlineCallbacks
 from twisted.python.filepath import FilePath
+from twisted.python.usage import UsageError
 
 def report_completion(result, public_ip, message="Completed install for"):
     log(message, public_ip)
     return result
-
-class UsageError(Exception):
-    pass
 
 @inlineCallbacks
 def main(reactor, configFile):

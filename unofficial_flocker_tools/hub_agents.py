@@ -17,13 +17,16 @@ def report_completion(result, public_ip,
     return result
 
 @inlineCallbacks
-def main(reactor, configFile):
+def main(reactor, configFile, token=None):
     c = Configurator(configFile=configFile)
     control_ip = c.config["control_node"]
 
+    if token is None:
+        token = environ["TOKEN"]
+
     install_command = ('TOKEN="%s" '
             """sh -c 'curl -H "cache-control: max-age=0" -ssL https://get-volumehub.clusterhq.com/ |sh'""" %
-            (environ["TOKEN"],))
+            (token,))
 
     deferreds = [c.runSSHAsync(control_ip,
         "TARGET=control-service " + install_command)]

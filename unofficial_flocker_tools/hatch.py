@@ -5,7 +5,14 @@ from twisted.python.usage import Options, UsageError
 from twisted.python.filepath import FilePath
 import sys
 import yaml
+import json
 from utils import container_facing_key_path
+from sample_files import main as sample_files
+from get_nodes import main as get_nodes
+from install import main as install_flocker
+from plugin_install import main as install_flongle
+from hub_agents import main as install_hub_agents
+from twisted.internet.defer import succeed
 
 class Flocker(object):
     name = "flocker"
@@ -107,15 +114,6 @@ def _operating_system_list():
     return ", ".join(OS_LIST)
 
 FILENAME = "hatch.yml"
-class Deploy(Options):
-    synopsis = "hatch deploy [hatch.yml]"
-    def parseArgs(self, filename=None):
-        if filename is None:
-            filename = FILENAME
-        self.filename = filename
-
-    def run(self):
-        pass
 
 class Init(Options):
     optParameters = [
@@ -165,6 +163,61 @@ class Init(Options):
         configuration.gather_configuration()
         # Save the file
         configuration.persist_configuration()
+
+
+class Deploy(Options):
+    synopsis = "hatch deploy [hatch.yml]"
+    def parseArgs(self, filename=None):
+        if filename is None:
+            filename = FILENAME
+        self.filename = filename
+
+    def run(self):
+        # Put terraform files into pwd.
+        hatch_config = FilePath(".").child(self.filename)
+        if not hatch_config.exists():
+            raise UsageError("File %r does not exist. Please run `hatch init` if you "
+                             "haven't already, and check you're in the same directory "
+                             "you were when you did that.")
+        hatch = yaml.load(hatch_config.getContent())
+        if hatch["operating_system"] != "ubuntu":
+            # TODO support more OSes, in particular CoreOS
+            raise UsageError("Don't know how to install on anything but Ubuntu "
+                             "(those are all the AMIs I know about)")
+        if "flocker" not in hatch["deploy"]:
+            # TODO split docker installation out into its own bit ("common
+            # installation"?), maybe even make it optional
+            raise UsageError("Sorry, at the moment I don't know how to not install Flocker.")
+        if hatch["infrastructure"] != "aws":
+            # TODO support more than just AWS
+            raise UsageError("I don't know how to install on anything but AWS at the moment.")
+
+        # OK, we're good.
+        sample_files()
+        terraform_template = FilePath(".").child("terraform").child("terraform.tfvars.json")
+        # Write the terraform config; ok to clobber from previous run
+        terraform_template.setContent(json.dumps(
+            {"aws_access_key": hatch["aws_options"]["access_key"],
+             "aws_secret_key": hatch["aws_options"]["secret_key"],
+             "aws_region": hatch["aws_options"]["region"],
+             "aws_availability_zone": hatch["aws_options"]["availability_zone"],
+             "aws_key_name": hatch["aws_options"]["key_name"],
+             "private_key_path": hatch["aws_options"]["private_key_path"]}))
+        print "======================================"
+        print "Running terraform to provision nodes"
+        print "======================================"
+        get_nodes("cluster.yml")
+        d = succeed()
+        if "flocker" in hatch["deploy"]:
+            print "========================================================"
+            print "Installing and configuring Flocker and its Docker plugin"
+            print "========================================================"
+            d.addCallback(lambda ignored: install_flocker("cluster.yml"))
+            d.addCallback(lambda ignored: install_flongle("cluster.yml"))
+            token = hatch["flocker_options"]["volume_hub_token"]
+            if token is not None:
+                d.addCallback(lambda ignored: install_hub_agents("cluster.yml", token))
+        return d
 
 
 class Configuration(object):
