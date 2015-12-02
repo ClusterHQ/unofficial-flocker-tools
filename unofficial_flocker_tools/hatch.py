@@ -195,10 +195,14 @@ class Deploy(Options):
             # TODO support more OSes, in particular CoreOS
             raise UsageError("Don't know how to install on anything but Ubuntu "
                              "(those are all the AMIs I know about)")
+        # XXX at the moment installing non-flocker only works if you deploy
+        # flocker once and then deploy something else without flocker later.
+        """
         if "flocker" not in hatch["deploy"]:
             # TODO split docker installation out into its own bit ("common
             # installation"?), maybe even make it optional
             raise UsageError("Sorry, at the moment I don't know how to not install Flocker.")
+        """
         if hatch["infrastructure"] != "aws":
             # TODO support more than just AWS
             raise UsageError("I don't know how to install on anything but AWS at the moment.")
