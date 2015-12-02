@@ -13,7 +13,7 @@ def install_kubernetes(reactor, configFile):
                 # Install kubernetes
                 ("K8S_VERSION=1.1.2 MASTER_IP=%(master_ip)s sh -c '"
                      "curl -sSL https://raw.githubusercontent.com/kubernetes/kubernetes"
-                     "/master/docs/getting-started-guides/docker-multinode/master.sh |bash"
+                     "/v1.1.2/docs/getting-started-guides/docker-multinode/master.sh |bash"
                  "' "
                  # Install kubectl on the master for convenience for user
                  "&& curl -sSL https://storage.googleapis.com/kubernetes-release/"
@@ -29,7 +29,7 @@ def install_kubernetes(reactor, configFile):
                     node['public'],
                     ("K8S_VERSION=1.1.2 MASTER_IP=%(master_ip)s sh -c '"
                          "curl -sSL https://raw.githubusercontent.com/kubernetes/kubernetes"
-                         "/master/docs/getting-started-guides/docker-multinode/worker.sh |bash"
+                         "/v1.1.2/docs/getting-started-guides/docker-multinode/worker.sh |bash"
                      "' ") % dict(master_ip=c.config["control_node"],)
             )
             d.addCallback(lambda ignored: log("Installed worker on %s." % (node['public'],)))
