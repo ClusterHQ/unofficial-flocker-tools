@@ -55,7 +55,7 @@ Let's hatch a Swarm cluster on Ubuntu on AWS with Flocker!
 ```
 $ curl -sSL https://get.flocker.io |sh
 $ mkdir -p ~/clusters/test; cd ~/clusters/test
-$ hatch init --os ubuntu --on aws flocker swarm
+$ hatch init --os ubuntu --cloud aws flocker swarm
 $ hatch deploy
 $ flockerctl status
 $ hatch status

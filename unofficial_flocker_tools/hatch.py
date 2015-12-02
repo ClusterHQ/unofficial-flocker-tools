@@ -125,25 +125,25 @@ FILENAME = "hatch.yml"
 class Init(Options):
     optParameters = [
         # In future, aim to support:
-        #("on", None, "Infrastructure: aws, gce, openstack, vsphere, vagrant, managed"),
+        #("cloud", None, "Infrastructure: aws, gce, openstack, vsphere, vagrant, managed"),
         #("os", None, "Operating system: ubuntu, centos, coreos (default: ubuntu)"),
 
-        ("on", None, None, "Infrastructure: %s" % (_infrastructure_list(),)),
+        ("cloud", None, None, "Infrastructure: %s" % (_infrastructure_list(),)),
         ("os", None, None, "Operating system: %s" % (_operating_system_list(),)),
     ]
     def parseArgs(self, *args):
         self._deployables = args
 
     def run(self):
-        example = "hatch init --on aws --os ubuntu flocker swarm"
-        if not self.get("on"):
-            raise UsageError("must specify --on for infrastructure (one of: %s)\n\n%s" %
+        example = "hatch init --cloud aws --os ubuntu flocker swarm"
+        if not self.get("cloud"):
+            raise UsageError("must specify --cloud for infrastructure (one of: %s)\n\n%s" %
                     (_infrastructure_list(), example))
         if not self.get("os"):
             raise UsageError(
                 "must specify --os for operating system (one of: %s)\n\n%s" %
                     (_operating_system_list(), example))
-        self.infrastructure = self["on"]
+        self.infrastructure = self["cloud"]
         if self.infrastructure not in [
                 i.name for i in INFRASTRUCTURY_THINGS]:
             raise UsageError(
@@ -174,6 +174,9 @@ class Init(Options):
 
 class Deploy(Options):
     synopsis = "hatch deploy [hatch.yml]"
+    optFlags = [('skip-provisioning', None, 'Skip provisioning: use this to deploy '
+                                            'software on nodes which already exist '
+                                            '(requires cluster.yml file)')]
     def parseArgs(self, filename=None):
         if filename is None:
             filename = FILENAME
@@ -204,21 +207,26 @@ class Deploy(Options):
         if "kubernetes" in hatch["deploy"] and hatch["operating_system"] != "ubuntu":
             # TODO support Kubernetes on all platforms
             raise UsageError("Sorry, I can only install Kubernetes on Ubuntu")
+        if self["skip-provisioning"] and not FilePath("cluster.yml").exists():
+            raise UsageError("Can only skip provisioning if there is a cluster.yml left over from "
+                    "a previous deploy (or created manually: see https://github.com/ClusterHQ/"
+                    "unofficial-flocker-tools/tree/master/unofficial_flocker_tools/samples).")
         # OK, we're good.
-        sample_files()
-        terraform_template = FilePath(".").child("terraform").child("terraform.tfvars.json")
-        # Write the terraform config; ok to clobber from previous run
-        terraform_template.setContent(json.dumps(
-            {"aws_access_key": hatch["aws_options"]["access_key"],
-             "aws_secret_key": hatch["aws_options"]["secret_key"],
-             "aws_region": hatch["aws_options"]["region"],
-             "aws_availability_zone": hatch["aws_options"]["availability_zone"],
-             "aws_key_name": hatch["aws_options"]["key_name"],
-             "private_key_path": hatch["aws_options"]["private_key_path"]}))
-        print "======================================"
-        print "Running terraform to provision nodes"
-        print "======================================"
-        get_nodes()
+        if not self["skip-provisioning"]:
+            sample_files()
+            terraform_template = FilePath(".").child("terraform").child("terraform.tfvars.json")
+            # Write the terraform config; ok to clobber from previous run
+            terraform_template.setContent(json.dumps(
+                {"aws_access_key": hatch["aws_options"]["access_key"],
+                 "aws_secret_key": hatch["aws_options"]["secret_key"],
+                 "aws_region": hatch["aws_options"]["region"],
+                 "aws_availability_zone": hatch["aws_options"]["availability_zone"],
+                 "aws_key_name": hatch["aws_options"]["key_name"],
+                 "private_key_path": hatch["aws_options"]["private_key_path"]}))
+            print "======================================"
+            print "Running terraform to provision nodes"
+            print "======================================"
+            get_nodes()
         d = succeed(None)
         if "flocker" in hatch["deploy"]:
             print "========================================================"
@@ -388,10 +396,10 @@ commands = {
 Deploy a one-off Swarm, Mesos or Kubernetes cluster, optionally with
 Flocker, on local VMs, cloud or managed infrastructure.
 
-    hatch init --os ubuntu --on aws flocker
-    hatch init --os ubuntu --on gce swarm flocker
-    hatch init --os coreos --on openstack kubernetes flocker
-    hatch init --os centos --on vagrant mesos marathon flocker
+    hatch init --os ubuntu --cloud aws flocker
+    hatch init --os ubuntu --cloud gce swarm flocker
+    hatch init --os coreos --cloud openstack kubernetes flocker
+    hatch init --os centos --cloud vagrant mesos marathon flocker
 
 TODO
     hatch status
@@ -412,7 +420,7 @@ class HatchCommands(Options):
        desired software.
 
 Subcommands:
-    hatch init --os [operating-system] --on [infrastructure] deployable_1 [d_2 ...]
+    hatch init --os [operating-system] --cloud [infrastructure] deployable_1 [d_2 ...]
         Creates hatch.yml file, prompting for required information (e.g. AWS keys).
 
         Supported deployables: %(deployables)s
@@ -420,11 +428,11 @@ Subcommands:
         Supported infrastructures: %(infrastructures)s
 
         Examples:
-        hatch init --os ubuntu --on aws flocker
-        hatch init --os ubuntu --on aws swarm flocker
-        hatch init --os coreos --on aws kubernetes flocker
+        hatch init --os ubuntu --cloud aws flocker
+        hatch init --os ubuntu --cloud aws swarm flocker
+        hatch init --os coreos --cloud aws kubernetes flocker
 
-    hatch deploy
+    hatch deploy [--skip-provisioning]
         Provisions nodes, deploys and configure the deployables described in
         hatch.yml on the nodes.
 
