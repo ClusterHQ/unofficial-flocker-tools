@@ -53,8 +53,8 @@ class UnofficialFlockerInstallerTests(TestCase):
                          %(uft)sflocker-install cluster.yml && \
                          %(uft)sflocker-config cluster.yml && \
                          %(uft)sflocker-plugin-install cluster.yml && \
-                         echo "sleeping 130 seconds to let cluster settle..." && \
-                         sleep 130""" % v)
+                         echo "sleeping 10 seconds to let cluster settle..." && \
+                         sleep 10""" % v)
             cluster_config = yaml.load(test_dir.child("cluster.yml").open())
             node1 = cluster_config['agent_nodes'][0]
             node2 = cluster_config['agent_nodes'][1]

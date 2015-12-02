@@ -4,8 +4,6 @@ FROM        ubuntu:14.04.3
 # that everything is rebuilt
 ENV         security_updates_as_of 2015-08-14
 
-ADD         . /app
-
 # Install security updates and required packages
 RUN         apt-get -qy update && \
             apt-get -y install apt-transport-https software-properties-common wget zip && \
@@ -15,10 +13,13 @@ RUN         apt-get -qy update && \
             apt-get -qy update && \
             apt-get -qy upgrade && \
             apt-get -y --force-yes install clusterhq-flocker-cli && \
-            cd /app && /opt/flocker/bin/pip install --no-cache-dir . && \
             apt-get remove --purge -y $(apt-mark showauto) python3.4 && \
             apt-get -y install apt-transport-https software-properties-common && \
             apt-get -y --force-yes install clusterhq-flocker-cli && \
+            rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+ADD         . /app
+RUN         cd /app && /opt/flocker/bin/pip install --no-cache-dir . && \
             rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /app
 
 ENV         PATH /opt/flocker/bin:$PATH

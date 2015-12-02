@@ -222,7 +222,7 @@ class Deploy(Options):
         d = succeed(None)
         if "flocker" in hatch["deploy"]:
             print "========================================================"
-            print "Installing and configuring Flocker and its Docker plugin"
+            print "Installing and configuring Flocker and the Docker plugin"
             print "========================================================"
             d.addCallback(lambda ignored: install_flocker(reactor, "cluster.yml"))
             d.addCallback(lambda ignored: configure_flocker(reactor, "cluster.yml"))
@@ -231,8 +231,20 @@ class Deploy(Options):
             if token is not None:
                 d.addCallback(lambda ignored: install_hub_agents(reactor, "cluster.yml", token))
         if "swarm" in hatch["deploy"]:
+            def print_swarm(passthru):
+                print "========================================================"
+                print "Installing and configuring Docker Swarm"
+                print "========================================================"
+                return passthru
+            d.addCallback(print_swarm)
             d.addCallback(lambda ignored: install_swarm(reactor, "cluster.yml"))
         if "kubernetes" in hatch["deploy"]:
+            def print_kubernetes(passthru):
+                print "========================================================"
+                print "Installing and configuring Kubernetes"
+                print "========================================================"
+                return passthru
+            d.addCallback(print_kubernetes)
             d.addCallback(lambda ignored: install_kubernetes(reactor, "cluster.yml"))
         return d
 
@@ -358,6 +370,8 @@ class Status(Options):
 class Destroy(Options):
     optFlags = [('force', 'f', 'Force destruction')]
     def run(self):
+        # TODO clean up flocker volumes before destroying the VMs, see kludge
+        # in test_integration.py
         destroy_nodes(force=self["force"])
 
 
@@ -365,7 +379,7 @@ commands = {
     "version": Version,
     "init": Init,
     "deploy": Deploy,
-    "status": Status,
+#    "status": Status,
     "destroy": Destroy,
 }
 
@@ -378,6 +392,13 @@ Flocker, on local VMs, cloud or managed infrastructure.
     hatch init --os ubuntu --on gce swarm flocker
     hatch init --os coreos --on openstack kubernetes flocker
     hatch init --os centos --on vagrant mesos marathon flocker
+
+TODO
+    hatch status
+        Display a summary of the current cluster, what was deployed on it, how
+        to log into the master, and some links to some fun tutorials you can
+        try.
+
 """
 
 class HatchCommands(Options):
@@ -406,11 +427,6 @@ Subcommands:
     hatch deploy
         Provisions nodes, deploys and configure the deployables described in
         hatch.yml on the nodes.
-
-    hatch status
-        Display a summary of the current cluster, what was deployed on it, how
-        to log into the master, and some links to some fun tutorials you can
-        try.
 
     hatch destroy
         Destroys and cleans up nodes as deployed by a previous run of `hatch
