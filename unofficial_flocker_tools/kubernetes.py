@@ -27,10 +27,10 @@ def install_kubernetes(reactor, configFile):
             log("Installing Kubernetes worker on %s..." % (node['public'],))
             d = c.runSSHAsync(
                     node['public'],
-                    "K8S_VERSION=1.1.2 $("
+                    "K8S_VERSION=1.1.2 MASTER_IP=%(master_ip)s $("
                         "curl -sSL https://raw.githubusercontent.com/kubernetes/kubernetes"
-                        "/master/docs/getting-started-guides/docker-multinode/master.sh |sh"
-                    ") "
+                        "/master/docs/getting-started-guides/docker-multinode/worker.sh |sh"
+                    ") " % dict(master_ip=c.config["control_node"],)
             )
             d.addCallback(lambda ignored: log("Installed worker on %s." % (node['public'],)))
             deferreds.append(d)
