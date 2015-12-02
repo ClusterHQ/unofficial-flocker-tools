@@ -374,7 +374,6 @@ Flocker, on local VMs, cloud or managed infrastructure.
 
 class HatchCommands(Options):
     __doc__ = """Usage: hatch command [options]
-
     Deploy a one-off Swarm or Kubernetes cluster, optionally with Flocker, on cloud
     infrastructure.
 
@@ -385,42 +384,35 @@ class HatchCommands(Options):
        desired software.
 
 Subcommands:
-
     hatch init --os [operating-system] --on [infrastructure] deployable_1 [d_2 ...]
-
         Creates hatch.yml file, prompting for required information (e.g. AWS keys).
+
+        Supported deployables: %(deployables)s
+        Supported operating systems: %(operating_systems)s
+        Supported infrastructures: %(infrastructures)s
 
         Examples:
         hatch init --os ubuntu --on aws flocker
         hatch init --os ubuntu --on aws swarm flocker
         hatch init --os coreos --on aws kubernetes flocker
 
-        Supported deployables: %(deployables)s
-        Supported operating systems: %(operating_systems)s
-        Supported infrastructures: %(infrastructures)s
-
     hatch deploy
-
         Provisions nodes, deploys and configure the deployables described in
         hatch.yml on the nodes.
 
     hatch status
-
         Display a summary of the current cluster, what was deployed on it, how
         to log into the master, and some links to some fun tutorials you can
         try.
 
     hatch destroy
-
         Destroys and cleans up nodes as deployed by a previous run of `hatch
         deploy`.
 
     hatch version
-
-       Display version information.
+        Display version information.
 
 Options:
-
     hatch --help: display this help text
 """ % (dict(deployables=_deployables_list(),
           operating_systems=_operating_system_list(),
