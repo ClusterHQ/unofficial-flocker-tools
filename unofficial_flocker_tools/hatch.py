@@ -390,7 +390,7 @@ class Destroy(Options):
 class Cleanup(Options):
     def run(self):
         # XXX gross, also need to add a warning
-        os.system("rm -rf *.key *.crt {cluster,agent,node_mapping}.yml *.txt terraform/")
+        os.system("rm -rf *.key *.crt cluster.yml agent.yml node_mapping.yml *.txt terraform/")
 
 commands = {
     "version": Version,
