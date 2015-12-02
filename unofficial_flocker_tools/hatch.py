@@ -387,8 +387,7 @@ class HatchCommands(Options):
 
     1. First, run `hatch init` with some arguments to create a hatch.yml file
        in the current ("cluster") directory.
-    2. Optionally edit the file to tweak the settings.
-    3. Then run `hatch deploy` to create the infrastructure and install the
+    2. Then run `hatch deploy` to create the infrastructure and install the
        desired software.
 
 Subcommands:
