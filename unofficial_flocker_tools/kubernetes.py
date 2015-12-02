@@ -8,7 +8,7 @@ def install_kubernetes(reactor, configFile):
         deferreds = []
         log("Starting etcd...")
         c.runSSHRaw(c.config["control_node"],
-                "docker run --restart=always --net=host -d "
+                "docker run --restart=always --net=host --name=etcd -d "
                 "gcr.io/google_containers/etcd:2.0.9 "
                 "/usr/local/bin/etcd --addr=127.0.0.1:4001 --bind-addr=0.0.0.0:4001 "
                 "--data-dir=/var/etcd/data")
@@ -16,7 +16,7 @@ def install_kubernetes(reactor, configFile):
 
         log("Starting k8s master...")
         c.runSSHRaw(c.config["control_node"],
-                "docker run --restart=always --net=host -d "
+                "docker run --restart=always --net=host --name=hyperkube -d "
                 "-v /var/run/docker.sock:/var/run/docker.sock "
                 "gcr.io/google_containers/hyperkube:v1.1.1 /hyperkube kubelet "
                 "--api_servers=http://localhost:8080 --v=2 --address=0.0.0.0 "
@@ -26,8 +26,8 @@ def install_kubernetes(reactor, configFile):
 
         log("Starting k8s service proxy...")
         c.runSSHRaw(c.config["control_node"],
-                "docker run -d --restart=always --net=host --privileged "
-                "gcr.io/google_containers/hyperkube:v1.1.1 "
+                "docker run -d --restart=always --name=service-proxy "
+                "--net=host --privileged gcr.io/google_containers/hyperkube:v1.1.1 "
                 "/hyperkube proxy --master=http://localhost:8080 --v=2")
         log("Started k8s service proxy")
 
