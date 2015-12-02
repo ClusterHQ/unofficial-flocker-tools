@@ -204,6 +204,7 @@ class Deploy(Options):
             # TODO support Kubernetes on all platforms
             raise UsageError("Sorry, I can only install Kubernetes on Ubuntu")
         # OK, we're good.
+
         sample_files(reactor)
         terraform_template = FilePath(".").child("terraform").child("terraform.tfvars.json")
         # Write the terraform config; ok to clobber from previous run
