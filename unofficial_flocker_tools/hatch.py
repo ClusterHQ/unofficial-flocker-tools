@@ -1,4 +1,5 @@
 from twisted.internet import defer
+from twisted.internet import reactor
 from twisted.internet.defer import succeed
 from twisted.internet.task import react
 from twisted.python import log
@@ -203,7 +204,7 @@ class Deploy(Options):
             # TODO support Kubernetes on all platforms
             raise UsageError("Sorry, I can only install Kubernetes on Ubuntu")
         # OK, we're good.
-        sample_files()
+        sample_files(reactor)
         terraform_template = FilePath(".").child("terraform").child("terraform.tfvars.json")
         # Write the terraform config; ok to clobber from previous run
         terraform_template.setContent(json.dumps(
@@ -216,22 +217,22 @@ class Deploy(Options):
         print "======================================"
         print "Running terraform to provision nodes"
         print "======================================"
-        get_nodes()
+        get_nodes(reactor)
         d = succeed(None)
         if "flocker" in hatch["deploy"]:
             print "========================================================"
             print "Installing and configuring Flocker and its Docker plugin"
             print "========================================================"
-            d.addCallback(lambda ignored: install_flocker("cluster.yml"))
-            d.addCallback(lambda ignored: configure_flocker("cluster.yml"))
-            d.addCallback(lambda ignored: install_flongle("cluster.yml"))
+            d.addCallback(lambda ignored: install_flocker(reactor, "cluster.yml"))
+            d.addCallback(lambda ignored: configure_flocker(reactor, "cluster.yml"))
+            d.addCallback(lambda ignored: install_flongle(reactor, "cluster.yml"))
             token = hatch["flocker_options"]["volume_hub_token"]
             if token is not None:
-                d.addCallback(lambda ignored: install_hub_agents("cluster.yml", token))
+                d.addCallback(lambda ignored: install_hub_agents(reactor, "cluster.yml", token))
         if "swarm" in hatch["deploy"]:
-            d.addCallback(lambda ignored: install_swarm("cluster.yml"))
+            d.addCallback(lambda ignored: install_swarm(reactor, "cluster.yml"))
         if "kubernetes" in hatch["deploy"]:
-            d.addCallback(lambda ignored: install_kubernetes("cluster.yml"))
+            d.addCallback(lambda ignored: install_kubernetes(reactor, "cluster.yml"))
         return d
 
 
