@@ -204,8 +204,7 @@ class Deploy(Options):
             # TODO support Kubernetes on all platforms
             raise UsageError("Sorry, I can only install Kubernetes on Ubuntu")
         # OK, we're good.
-
-        sample_files(reactor)
+        sample_files()
         terraform_template = FilePath(".").child("terraform").child("terraform.tfvars.json")
         # Write the terraform config; ok to clobber from previous run
         terraform_template.setContent(json.dumps(
@@ -218,7 +217,7 @@ class Deploy(Options):
         print "======================================"
         print "Running terraform to provision nodes"
         print "======================================"
-        get_nodes(reactor)
+        get_nodes()
         d = succeed(None)
         if "flocker" in hatch["deploy"]:
             print "========================================================"
