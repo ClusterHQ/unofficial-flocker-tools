@@ -217,7 +217,7 @@ class Deploy(Options):
         print "Running terraform to provision nodes"
         print "======================================"
         get_nodes()
-        d = succeed()
+        d = succeed(None)
         if "flocker" in hatch["deploy"]:
             print "========================================================"
             print "Installing and configuring Flocker and its Docker plugin"
