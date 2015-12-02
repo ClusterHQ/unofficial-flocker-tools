@@ -8,6 +8,7 @@ from twisted.python.filepath import FilePath
 import sys
 import yaml
 import json
+import os
 
 from utils import container_facing_key_path
 
@@ -382,6 +383,10 @@ class Destroy(Options):
         # in test_integration.py
         destroy_nodes(force=self["force"])
 
+class Cleanup(Options):
+    def run(self):
+        # XXX gross, also need to add a warning
+        os.system("rm -rf *.key *.crt {cluster,agent,node_mapping}.yml *.txt terraform/")
 
 commands = {
     "version": Version,
@@ -389,6 +394,7 @@ commands = {
     "deploy": Deploy,
 #    "status": Status,
     "destroy": Destroy,
+    "cleanup": Cleanup,
 }
 
 
