@@ -13,6 +13,7 @@ from utils import container_facing_key_path
 
 from sample_files import main as sample_files
 from get_nodes import main as get_nodes
+from destroy_nodes import main as destroy_nodes
 from install import main as install_flocker
 from config import main as configure_flocker
 from plugin import main as install_flongle
@@ -354,11 +355,18 @@ class Status(Options):
         1/0
 
 
+class Destroy(Options):
+    optFlags = [('force', 'f', 'Force destruction')]
+    def run(self):
+        destroy_nodes(force=self["force"])
+
+
 commands = {
     "version": Version,
     "init": Init,
     "deploy": Deploy,
     "status": Status,
+    "destroy": Destroy,
 }
 
 
