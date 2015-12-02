@@ -11,7 +11,7 @@ def install_kubernetes(reactor, configFile):
         d = c.runSSHAsync(
                 c.config["control_node"],
                 # Install kubernetes
-                "K8S_VERSION=1.1.2 sh -c '"
+                "K8S_VERSION=1.1.2 bash -c '"
                     "curl -sSL https://raw.githubusercontent.com/kubernetes/kubernetes"
                     "/master/docs/getting-started-guides/docker-multinode/master.sh |sh"
                 "' "
@@ -27,7 +27,7 @@ def install_kubernetes(reactor, configFile):
             log("Installing Kubernetes worker on %s..." % (node['public'],))
             d = c.runSSHAsync(
                     node['public'],
-                    "K8S_VERSION=1.1.2 MASTER_IP=%(master_ip)s sh -c '"
+                    "K8S_VERSION=1.1.2 MASTER_IP=%(master_ip)s bash -c '"
                         "curl -sSL https://raw.githubusercontent.com/kubernetes/kubernetes"
                         "/master/docs/getting-started-guides/docker-multinode/worker.sh |sh"
                     "' " % dict(master_ip=c.config["control_node"],)
