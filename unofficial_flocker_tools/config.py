@@ -12,9 +12,9 @@ from twisted.internet.defer import inlineCallbacks, gatherResults
 from os import environ
 
 # when installing on k8s which has been set up with kube-aws, this is necc
-EARLY_DOCKER_PREFIX = "-H file:///run/early-docker.sock "
+EARLY_DOCKER_PREFIX = ""
 if environ.get("EARLY_DOCKER") == "1":
-    EARLY_DOCKER_PREFIX = "-H file:///run/early-docker.sock "
+    EARLY_DOCKER_PREFIX = "-H unix:///run/early-docker.sock "
 
 # Usage: deploy.py cluster.yml
 from utils import Configurator, log
