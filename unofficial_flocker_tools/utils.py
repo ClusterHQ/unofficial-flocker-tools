@@ -165,7 +165,7 @@ class Configurator(object):
         return private_key_path
 
     def runSSH(self, ip, command, username=None):
-        command = 'ssh -o LogLevel=error -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i %s %s@%s %s' % (self.config["private_key_path"],
+        command = 'ssh -o ServerAliveInterval=10 -o LogLevel=error -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i %s %s@%s %s' % (self.config["private_key_path"],
                 username if username is not None else self.config["remote_server_username"],
                 ip, " ".join(map(quote, ["bash", "-c", "echo; " + command])))
         verbose_log("runSSH:", command)
@@ -179,7 +179,7 @@ class Configurator(object):
         which fires with the result.
         """
         executable = "/usr/bin/ssh"
-        command = ['-o', 'LogLevel=error', '-o', 'UserKnownHostsFile=/dev/null', '-o',
+        command = ['-o', 'ServerAliveInterval=10', '-o', 'LogLevel=error', '-o', 'UserKnownHostsFile=/dev/null', '-o',
                    'StrictHostKeyChecking=no', '-i',
                    self.config["private_key_path"], "%s@%s" % (
                        username if username is not None else self.config["remote_server_username"], ip),
@@ -195,7 +195,7 @@ class Configurator(object):
         return d
 
     def runSSHRaw(self, ip, command, username=None):
-        command = 'ssh -o LogLevel=error -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i %s %s@%s %s' % (self.config["private_key_path"],
+        command = 'ssh -o ServerAliveInterval=10 -o LogLevel=error -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i %s %s@%s %s' % (self.config["private_key_path"],
                 username if username is not None else self.config["remote_server_username"],
                 ip, command)
         verbose_log("runSSHRaw:", command)
