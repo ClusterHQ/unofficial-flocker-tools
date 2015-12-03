@@ -109,7 +109,7 @@ def main(reactor, configFile):
         if c.config["os"] == "coreos":
             log("Starting flocker-docker-plugin as docker container on CoreOS on %s" % (public_ip,))
             c.runSSH(public_ip, """echo
-/root/bin/docker run --restart=always -d --net=host --privileged \\
+docker run --restart=always -d --net=host --privileged \\
 -e FLOCKER_CONTROL_SERVICE_BASE_URL=%s \\
 -e MY_NETWORK_IDENTITY=%s \\
 -v /etc/flocker:/etc/flocker \\
