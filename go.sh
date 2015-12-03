@@ -50,7 +50,7 @@ if [ ! "\$IGNORE_NETWORK_CHECK" = "1" ]; then
     fi
 fi
 
-\$SUDO_PREFIX docker run -ti --rm -e TOKEN="\${TOKEN}" -e CUSTOM_REPO=\${CUSTOM_REPO} -e FORCE_DESTROY=\${FORCE_DESTROY} -e CONTAINERIZED=1 -v /:/host -v \$PWD:/pwd:z $IMAGE $CMD "\$@"
+\$SUDO_PREFIX docker run -ti --rm -e EARLY_DOCKER="\${EARLY_DOCKER}" -e TOKEN="\${TOKEN}" -e CUSTOM_REPO=\${CUSTOM_REPO} -e FORCE_DESTROY=\${FORCE_DESTROY} -e CONTAINERIZED=1 -v /:/host -v \$PWD:/pwd:z $IMAGE $CMD "\$@"
 EOF
     sudo chmod +x /usr/local/bin/${PREFIX}${CMD}
     echo "Installed /usr/local/bin/${PREFIX}${CMD}"
