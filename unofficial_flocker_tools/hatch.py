@@ -172,6 +172,14 @@ class Init(Options):
         # Save the file
         configuration.persist_configuration()
 
+def resolve_dependencies(deployables):
+    """
+    Given a list of deployables, compute the transitive closure of the set of
+    dependencies therein.
+    """
+    # XXX hack, for now we happen to know that the only dep, and the dep for
+    # everything, is docker
+    return deployables + ["docker"]
 
 class Deploy(Options):
     synopsis = "hatch deploy [hatch.yml]"
@@ -232,8 +240,9 @@ class Deploy(Options):
             print "Running terraform to provision nodes"
             print "======================================"
             get_nodes()
+        deployables = resolve_dependencies(hatch["deploy"])
         d = succeed(None)
-        if "flocker" in hatch["deploy"]:
+        if "flocker" in deployables:
             print "========================================================"
             print "Installing and configuring Flocker and the Docker plugin"
             print "========================================================"
@@ -243,7 +252,7 @@ class Deploy(Options):
             token = hatch["flocker_options"]["volume_hub_token"]
             if token is not None:
                 d.addCallback(lambda ignored: install_hub_agents(reactor, "cluster.yml", token))
-        if "swarm" in hatch["deploy"]:
+        if "swarm" in deployables:
             def print_swarm(passthru):
                 print "========================================================"
                 print "Installing and configuring Docker Swarm"
@@ -251,7 +260,7 @@ class Deploy(Options):
                 return passthru
             d.addCallback(print_swarm)
             d.addCallback(lambda ignored: install_swarm(reactor, "cluster.yml"))
-        if "kubernetes" in hatch["deploy"]:
+        if "kubernetes" in deployables:
             def print_kubernetes(passthru):
                 print "========================================================"
                 print "Installing and configuring Kubernetes"
