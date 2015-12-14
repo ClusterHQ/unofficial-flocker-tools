@@ -98,7 +98,7 @@ if [ ! "$IGNORE_NETWORK_CHECK" = "1" ]; then
     fi
 fi
 
-echo "Pulling Docker image for Flocker installer..."
+echo "Pulling Docker image..."
 if [ ! "$SKIP_PULL" = "1" ]; then
     $SUDO_PREFIX docker pull $IMAGE
 fi
