@@ -1,6 +1,6 @@
 #!/bin/sh
 do_install() {
-IMAGE="clusterhq/uft:latest"
+IMAGE="clusterhq/uft:hatch"
 for CMD in flockerctl flocker-ca flocker-deploy flocker-config flocker-install flocker-plugin-install flocker-sample-files flocker-tutorial flocker-volumes flocker-get-nodes flocker-destroy-nodes volume-hub-agents-install hatch; do
     if [ "$CMD" = "flockerctl" ] || [ "$CMD" = "volume-hub-agents-install" ] || [ "$CMD" = "hatch" ]; then
         PREFIX=""
