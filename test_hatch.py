@@ -41,15 +41,28 @@ class HatchTests(TestCase):
         cleaned_up = False
         try:
             os.system("""curl -sSL %(get_hatch)s | sh && \
-                         cd %(testdir)s && \
-                         chmod 0600 %(key)s && \
-                         %(uft)sflocker-sample-files""" % v)
-            SECRETS_FILE.copyTo(test_dir.child("terraform").child("terraform.tfvars.json"))
+                         cd %(testdir)s""" % v)
+            secrets = json.load(SECRETS_FILE.open())
+            hatch_options = dict(
+                aws_options=dict(
+                  access_key=secrets["aws_access_key"],
+                  agent_nodes=2,
+                  availability_zone=secrets["aws_access_key"],
+                  instance_type="m3.large",
+                  key_name=secrets["aws_key_name"],
+                  private_key_path=secrets["private_key_path"],
+                  region=secrets["aws_region"],
+                  secret_key=secrets["aws_secret_key"],
+                ),
+                deployables=["swarm", "flocker"],
+                flocker_options=dict(volume_hub_token=None),
+                infrastructure="aws",
+                operating_system="ubuntu",
+                swarm_options=dict(),
+            )
+            yaml.dump(hatch_options)
             os.system("""cd %(testdir)s && \
-                         %(uft)sflocker-get-nodes --%(configuration)s && \
-                         %(uft)sflocker-install cluster.yml && \
-                         %(uft)sflocker-config cluster.yml && \
-                         %(uft)sflocker-plugin-install cluster.yml && \
+                         hatch deploy && \
                          echo "sleeping 10 seconds to let cluster settle..." && \
                          sleep 10""" % v)
             cluster_config = yaml.load(test_dir.child("cluster.yml").open())
@@ -83,4 +96,3 @@ def runSSHRaw(ip, command, username="root"):
     command = 'ssh -o LogLevel=error -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i %s %s@%s %s' % (
             KEY.path, username, ip, command)
     return check_output(command, shell=True)
-
