@@ -60,7 +60,7 @@ class HatchTests(TestCase):
                 operating_system="ubuntu",
                 swarm_options=dict(),
             )
-            yaml.dump(hatch_options)
+            test_dir.child("hatch.yml").setContent(yaml.dump(hatch_options))
             os.system("""cd %(testdir)s && \
                          hatch deploy && \
                          echo "sleeping 10 seconds to let cluster settle..." && \
