@@ -28,7 +28,7 @@ else
 fi
 
 if [ ! "\$IGNORE_NETWORK_CHECK" = "1" ]; then
-    if ! \$SUDO_PREFIX docker run gliderlabs/alpine wget -q -O /dev/null -T 5 http://check.clusterhq.com/uft.txt
+    if ! \$SUDO_PREFIX docker run --rm gliderlabs/alpine wget -q -O /dev/null -T 5 http://check.clusterhq.com/uft.txt
     then
         echo "==========================================================================="
         echo "Unable to establish network connectivity from inside a container."
@@ -76,7 +76,7 @@ fi
 
 echo "Verifying internet connectivity inside container..."
 if [ ! "$IGNORE_NETWORK_CHECK" = "1" ]; then
-    if ! $SUDO_PREFIX docker run gliderlabs/alpine wget -q -O /dev/null -T 5 http://check.clusterhq.com/uft-install.txt
+    if ! $SUDO_PREFIX docker run --rm gliderlabs/alpine wget -q -O /dev/null -T 5 http://check.clusterhq.com/uft-install.txt
     then
         echo "==========================================================================="
         echo "Unable to establish network connectivity from inside a container."
