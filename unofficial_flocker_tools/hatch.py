@@ -21,7 +21,9 @@ from plugin import main as install_flongle
 from hub_agents import main as install_hub_agents
 from swarm import install_swarm
 from kubernetes import install_kubernetes
+from ceph import install_ceph
 
+# TODO IGatherable
 class Flocker(object):
     name = "flocker"
     config_vars = [
@@ -48,16 +50,22 @@ class Swarm(object):
     config_key = "swarm_options"
     checks = []
 
+class Ceph(object):
+    name = "ceph"
+    config_vars = []
+    config_key = "ceph"
+    checks = []
+
 DEPLOYABLE_THINGS = [
     Flocker,
     Kubernetes,
     Swarm,
+    Ceph,
 #    Mesos,
 #    Marathon,
 ]
 
 MUTUALLY_EXCLUSIVE = [
-    # Everything except Flocker, basically
     Kubernetes,
     Swarm,
 ]
@@ -65,7 +73,6 @@ MUTUALLY_EXCLUSIVE = [
 def _deployables_list():
     return ", ".join(d.name for d in DEPLOYABLE_THINGS)
 
-# TODO IGatherable
 class AWSInfrastructure(object):
     name = "aws"
     config_key = "aws_options"
