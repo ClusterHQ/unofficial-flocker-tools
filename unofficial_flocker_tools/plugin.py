@@ -18,18 +18,6 @@ from utils import Configurator, log
 # a dict that holds the default values for each of the env vars
 # that can be overriden
 settings_defaults = {
-    # allow env override for where to download the experimental
-    # docker binary from
-    'DOCKER_BINARY_URL': 'https://get.docker.com/builds/Linux/x86_64/docker-latest',
-    # the name of the docker service running on the host
-    'DOCKER_SERVICE_NAME': 'docker-engine',
-    # what repo does the flocker plugin live in
-    'PLUGIN_REPO': 'https://github.com/clusterhq/flocker-docker-plugin',
-    # what branch to use for the flocker plugin
-    'PLUGIN_BRANCH': 'master',
-    # skip downloading the docker binary
-    # for scenarios where vm images have been pre-baked
-    'SKIP_DOCKER_BINARY': '',
     # skip installing the flocker plugin
     'SKIP_INSTALL_PLUGIN': ''
 }
@@ -49,69 +37,6 @@ for field in settings_defaults:
 def main(reactor, configFile):
     c = Configurator(configFile=configFile)
     control_ip = c.config["control_node"]
-
-    # download and replace the docker binary on each of the nodes
-    for node in c.config["agent_nodes"]:
-
-        if c.config["os"] != "coreos":
-            log("Skipping installing new docker binary because we're on",
-                "ubuntu/centos, assuming we installed a sufficiently recent one",
-                "already.")
-            break
-
-        # only install new docker binary on coreos. XXX TODO coreos > 801.0.0
-        # doesn't need newer docker.
-        if settings["SKIP_DOCKER_BINARY"] or c.config["os"] != "coreos":
-            break
-
-        public_ip = node["public"]
-        log("Replacing docker binary on %s" % (public_ip,))
-
-        # stop the docker service
-        log("Stopping the docker service on %s" % (public_ip,))
-
-        if c.config["os"] == "ubuntu":
-            c.runSSHRaw(public_ip, "stop %s || true"
-                % (settings['DOCKER_SERVICE_NAME'],))
-        elif c.config["os"] == "centos":
-            c.runSSHRaw(public_ip, "systemctl stop %s.service || true"
-                % (settings['DOCKER_SERVICE_NAME'],))
-        elif c.config["os"] == "coreos":
-            c.runSSHRaw(public_ip, "systemctl stop docker.service || true")
-
-        # download the latest docker binary
-        if c.config["os"] == "coreos":
-            log("Downloading the latest docker binary on %s - %s" \
-                % (public_ip, settings['DOCKER_BINARY_URL'],))
-            c.runSSHRaw(public_ip, "mkdir -p /root/bin")
-            c.runSSHRaw(public_ip, "wget -qO /root/bin/docker %s"
-                % (settings['DOCKER_BINARY_URL'],))
-            c.runSSHRaw(public_ip, "chmod +x /root/bin/docker")
-            c.runSSHRaw(public_ip,
-                    "cp /usr/lib/coreos/dockerd /root/bin/dockerd")
-            c.runSSHRaw(public_ip,
-                    "cp /usr/lib/systemd/system/docker.service /etc/systemd/system/")
-            c.runSSHRaw(public_ip,
-                    "sed -i s@/usr/lib/coreos@/root/bin@g /etc/systemd/system/docker.service")
-            c.runSSHRaw(public_ip,
-                    "sed -i \\'s@exec docker@exec /root/bin/docker@g\\' /root/bin/dockerd")
-            c.runSSHRaw(public_ip, "systemctl daemon-reload")
-        else:
-            log("Downloading the latest docker binary on %s - %s" \
-                % (public_ip, settings['DOCKER_BINARY_URL'],))
-            c.runSSHRaw(public_ip, "wget -O /usr/bin/docker %s"
-                % (settings['DOCKER_BINARY_URL'],))
-
-        # start the docker service
-        log("Starting the docker service on %s" % (public_ip,))
-        if c.config["os"] == "ubuntu":
-            c.runSSHRaw(public_ip, "start %s"
-                % (settings['DOCKER_SERVICE_NAME'],))
-        elif c.config["os"] == "centos":
-            c.runSSHRaw(public_ip, "systemctl start %s.service"
-              % (settings['DOCKER_SERVICE_NAME'],))
-        elif c.config["os"] == "coreos":
-            c.runSSHRaw(public_ip, "systemctl start docker.service")
 
     log("Generating plugin certs")
     # generate and upload plugin.crt and plugin.key for each node
@@ -184,7 +109,7 @@ def main(reactor, configFile):
         if c.config["os"] == "coreos":
             log("Starting flocker-docker-plugin as docker container on CoreOS on %s" % (public_ip,))
             c.runSSH(public_ip, """echo
-/root/bin/docker run --restart=always -d --net=host --privileged \\
+docker run --restart=always -d --net=host --privileged \\
 -e FLOCKER_CONTROL_SERVICE_BASE_URL=%s \\
 -e MY_NETWORK_IDENTITY=%s \\
 -v /etc/flocker:/etc/flocker \\

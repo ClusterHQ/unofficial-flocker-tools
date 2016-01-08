@@ -21,16 +21,25 @@ import yaml
 import treq
 import texttable
 import json
+import os
 
 def get_client(options):
-    cluster = FilePath(options["cluster-yml"])
+    cluster_yml = options["cluster-yml"]
+    if "CONTAINERIZED" in os.environ:
+        if cluster_yml.startswith("/"):
+            cluster_yml = "/host" + cluster_yml
+    cluster = FilePath(cluster_yml)
     if cluster.exists():
         config = yaml.load(cluster.open())
         certificates_path = cluster.parent()
         user = config["users"][0]
         control_service = None # figure it out based on cluster.yml
     else:
-        certificates_path = FilePath(options["certs-path"])
+        certs_path = options["certs-path"]
+        if "CONTAINERIZED" in os.environ:
+            if certs_path.startswith("/"):
+                certs_path = "/host" + certs_path
+        certificates_path = FilePath(certs_path)
         if options["user"] is None:
             raise UsageError("must specify --user")
         user = options["user"]

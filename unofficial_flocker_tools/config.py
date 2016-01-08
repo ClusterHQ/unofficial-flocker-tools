@@ -8,6 +8,13 @@ import yaml
 from twisted.internet.task import react
 from twisted.internet.defer import inlineCallbacks, gatherResults
 
+from os import environ
+
+# when installing on k8s which has been set up with kube-aws, this is necc
+EARLY_DOCKER_PREFIX = ""
+if environ.get("EARLY_DOCKER") == "1":
+    EARLY_DOCKER_PREFIX = "-H unix:///run/early-docker.sock "
+
 # Usage: deploy.py cluster.yml
 from utils import Configurator, log
 
@@ -100,19 +107,19 @@ systemctl start docker.service
         elif c.config["os"] == "coreos":
             d = c.runSSHAsync(node, """echo
 echo > /tmp/flocker-command-log
-docker run --restart=always -d --net=host --privileged \\
+docker %(early_docker_prefix)s run --restart=always -d --net=host --privileged \\
     -v /etc/flocker:/etc/flocker \\
     -v /var/run/docker.sock:/var/run/docker.sock \\
     --name=flocker-container-agent \\
     clusterhq/flocker-container-agent
-docker run --restart=always -d --net=host --privileged \\
+docker %(early_docker_prefix)s run --restart=always -d --net=host --privileged \\
     -e DEBUG=1 \\
     -v /tmp/flocker-command-log:/tmp/flocker-command-log \\
     -v /flocker:/flocker -v /:/host -v /etc/flocker:/etc/flocker \\
     -v /dev:/dev \\
     --name=flocker-dataset-agent \\
     clusterhq/flocker-dataset-agent
-""")
+""" % dict(early_docker_prefix=EARLY_DOCKER_PREFIX))
         deferreds.append(d)
 
     if c.config["os"] == "ubuntu":
@@ -136,8 +143,8 @@ firewall-cmd --add-service flocker-control-agent
 """)
     elif c.config["os"] == "coreos":
         d = c.runSSHAsync(c.config["control_node"], """echo
-docker run --name=flocker-control-volume -v /var/lib/flocker clusterhq/flocker-control-service true
-docker run --restart=always -d --net=host -v /etc/flocker:/etc/flocker --volumes-from=flocker-control-volume --name=flocker-control-service clusterhq/flocker-control-service""")
+docker %(early_docker_prefix)s run --name=flocker-control-volume -v /var/lib/flocker clusterhq/flocker-control-service true
+docker %(early_docker_prefix)s run --restart=always -d --net=host -v /etc/flocker:/etc/flocker --volumes-from=flocker-control-volume --name=flocker-control-service clusterhq/flocker-control-service""" % dict(early_docker_prefix=EARLY_DOCKER_PREFIX))
 
     deferreds.append(d)
     yield gatherResults(deferreds)
