@@ -26,8 +26,8 @@ import os
 def get_client(options):
     cluster_yml = options["cluster-yml"]
     if "CONTAINERIZED" in os.environ:
-        # XXX assumes cluster_yml is absolute
-        cluster_yml = "/host" + cluster_yml
+        if cluster_yml.startswith("/"):
+            cluster_yml = "/host" + cluster_yml
     cluster = FilePath(cluster_yml)
     if cluster.exists():
         config = yaml.load(cluster.open())
@@ -37,8 +37,8 @@ def get_client(options):
     else:
         certs_path = options["certs-path"]
         if "CONTAINERIZED" in os.environ:
-            # XXX assumes certs_path is absolute
-            certs_path = "/host" + certs_path
+            if certs_path.startswith("/"):
+                certs_path = "/host" + certs_path
         certificates_path = FilePath(certs_path)
         if options["user"] is None:
             raise UsageError("must specify --user")
