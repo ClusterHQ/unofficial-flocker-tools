@@ -349,6 +349,7 @@ def main(reactor, *argv):
     try:
         base = FlockerVolumesCommands()
         # Fake some commandline args based on env vars
+        argv = list(argv)
         if "FLOCKER_CERTS_PATH" in os.environ:
             argv.extend(["--certs-path", os.environ["FLOCKER_CERTS_PATH"]])
         if "FLOCKER_USER" in os.environ:
