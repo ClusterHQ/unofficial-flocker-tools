@@ -50,7 +50,8 @@ if [ ! "\$IGNORE_NETWORK_CHECK" = "1" ]; then
     fi
 fi
 
-\$SUDO_PREFIX docker run -ti --rm -e EARLY_DOCKER="\${EARLY_DOCKER}" -e TOKEN="\${TOKEN}" -e CUSTOM_REPO=\${CUSTOM_REPO} -e FORCE_DESTROY=\${FORCE_DESTROY} -e CONTAINERIZED=1 -v /:/host -v \$PWD:/pwd:z $IMAGE $CMD "\$@"
+
+\$SUDO_PREFIX docker run -ti --rm -e FLOCKER_CERTS_PATH="\${FLOCKER_CERTS_PATH}" -e FLOCKER_USER="\${FLOCKER_USER}" -e FLOCKER_CONTROL_SERVICE="\${FLOCKER_CONTROL_SERVICE}" -e EARLY_DOCKER="\${EARLY_DOCKER}" -e TOKEN="\${TOKEN}" -e CUSTOM_REPO=\${CUSTOM_REPO} -e FORCE_DESTROY=\${FORCE_DESTROY} -e CONTAINERIZED=1 -v /:/host -v \$PWD:/pwd:z $IMAGE $CMD "\$@"
 EOF
     sudo chmod +x /usr/local/bin/${PREFIX}${CMD}
     echo "Installed /usr/local/bin/${PREFIX}${CMD}"

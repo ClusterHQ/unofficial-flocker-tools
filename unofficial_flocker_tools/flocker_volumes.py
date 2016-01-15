@@ -348,6 +348,13 @@ class FlockerVolumesCommands(Options):
 def main(reactor, *argv):
     try:
         base = FlockerVolumesCommands()
+        # Fake some commandline args based on env vars
+        if "FLOCKER_CERTS_PATH" in os.environ:
+            argv.extend(["--certs-path", os.environ["FLOCKER_CERTS_PATH"]])
+        if "FLOCKER_USER" in os.environ:
+            argv.extend(["--user", os.environ["FLOCKER_USER"]])
+        if "FLOCKER_CONTROL_SERVICE" in os.environ:
+            argv.extend(["--control-service", os.environ["FLOCKER_CONTROL_SERVICE"]])
         base.parseOptions(argv)
         if base.subCommand is not None:
             d = defer.maybeDeferred(base.subOptions.run)
