@@ -351,11 +351,11 @@ def main(reactor, *argv):
         # Fake some commandline args based on env vars
         argv = list(argv)
         if "FLOCKER_CERTS_PATH" in os.environ:
-            argv.extend(["--certs-path", os.environ["FLOCKER_CERTS_PATH"]])
+            argv = ["--certs-path", os.environ["FLOCKER_CERTS_PATH"]] + argv
         if "FLOCKER_USER" in os.environ:
-            argv.extend(["--user", os.environ["FLOCKER_USER"]])
+            argv = ["--user", os.environ["FLOCKER_USER"]] + argv
         if "FLOCKER_CONTROL_SERVICE" in os.environ:
-            argv.extend(["--control-service", os.environ["FLOCKER_CONTROL_SERVICE"]])
+            argv = ["--control-service", os.environ["FLOCKER_CONTROL_SERVICE"]] + argv
         base.parseOptions(argv)
         if base.subCommand is not None:
             d = defer.maybeDeferred(base.subOptions.run)
