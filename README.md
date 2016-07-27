@@ -1,15 +1,12 @@
 # Unofficial Flocker Tools
 
-This repository contains several ClusterHQ Labs projects.
+This repository contains the following ClusterHQ Labs projects.
 
-* [Installer](https://docs.clusterhq.com/en/latest/labs/installer.html)
-* [Volumes CLI](https://docs.clusterhq.com/en/latest/labs/volumes-cli.html)
-* [Volumes GUI](https://docs.clusterhq.com/en/latest/labs/volumes-gui.html)
+* [Flocker Volumes CLI (`flockerctl`)](https://docs.clusterhq.com/en/latest/flocker-features/flockerctl.html)
 
 ## Documentation
 
 Please refer to the individual projects above for instructions on how to use this repo.
-You may want to start with the installer docs.
 
 ## Running tests
 
@@ -20,3 +17,9 @@ $ trial test_integration.py
 ```
 
 Note the comment at the top of the `test_integration.py` file before running the test.
+
+
+## Changelog
+
+* 2016-07-27 Deprecated the "Labs Installer".
+  (also known as "hatch" / "uft-flocker-install")
