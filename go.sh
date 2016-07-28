@@ -1,14 +1,32 @@
 #!/bin/sh
 do_install() {
 IMAGE="clusterhq/uft:latest"
+read -d '' DEPRECATION_WARNING <<EOF
+deprecated since Flocker 1.14.0 and will be removed in the next version of Flocker.
+Use the official installation methods and tools instead.
+See https://docs.clusterhq.com.
+EOF
+
 for CMD in flockerctl flocker-ca flocker-deploy flocker-config flocker-install flocker-plugin-install flocker-sample-files flocker-tutorial flocker-volumes flocker-get-nodes flocker-destroy-nodes volume-hub-agents-install; do
     if [ "$CMD" = "flockerctl" ] || [ "$CMD" = "volume-hub-agents-install" ]; then
         PREFIX=""
+        DEPRECATED="FALSE"
     else
         PREFIX="uft-"
+        # Deprecate all the uft-* tools.
+        DEPRECATED="TRUE"
     fi
     cat <<EOF |sudo tee /usr/local/bin/${PREFIX}${CMD} >/dev/null
 #!/bin/sh
+DEPRECATED="${DEPRECATED}"
+read -d '' DEPRECATION_WARNING <<END_WARNING
+${DEPRECATION_WARNING}
+END_WARNING
+
+if [ "\${DEPRECATED}" = "TRUE" ]; then
+    echo "WARNING: ${PREFIX}${CMD} is \${DEPRECATION_WARNING}" >&2
+    echo "" >&2
+fi
 if docker version >/dev/null 2>&1; then
     SUDO_PREFIX=""
 elif sudo docker version >/dev/null 2>&1; then
@@ -54,7 +72,12 @@ fi
 \$SUDO_PREFIX docker run -ti --rm -e FLOCKER_CERTS_PATH="\${FLOCKER_CERTS_PATH}" -e FLOCKER_USER="\${FLOCKER_USER}" -e FLOCKER_CONTROL_SERVICE="\${FLOCKER_CONTROL_SERVICE}" -e EARLY_DOCKER="\${EARLY_DOCKER}" -e TOKEN="\${TOKEN}" -e CUSTOM_REPO=\${CUSTOM_REPO} -e FORCE_DESTROY=\${FORCE_DESTROY} -e CONTAINERIZED=1 -v /:/host -v \$PWD:/pwd:z $IMAGE $CMD "\$@"
 EOF
     sudo chmod +x /usr/local/bin/${PREFIX}${CMD}
-    echo "Installed /usr/local/bin/${PREFIX}${CMD}"
+    if [ "${DEPRECATED}" = "TRUE" ]; then
+        EXTRA=" (deprecated)"
+    else
+        EXTRA=""
+    fi
+    echo "Installed /usr/local/bin/${PREFIX}${CMD}${EXTRA}"
 done
 
 if docker version >/dev/null 2>&1; then
@@ -101,6 +124,11 @@ fi
 
 echo "Pulling Docker image for Flocker installer..."
 $SUDO_PREFIX docker pull $IMAGE
+if [ -n "${DEPRECATION_WARNING}" ]; then
+    echo "" >&2
+    echo "WARNING: Some the commands are ${DEPRECATION_WARNING}" >&2
+fi
+echo ""
 }
 
 # wrapped up in a function so that we have some protection against only getting
