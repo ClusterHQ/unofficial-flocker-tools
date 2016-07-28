@@ -2,7 +2,7 @@
 do_install() {
 IMAGE="clusterhq/uft:latest"
 read -d '' DEPRECATION_WARNING <<EOF
-deprecated in Flocker 1.14.0 and will be removed in the next version of Flocker.
+deprecated in Flocker 1.14.0 and will be removed in future versions of Flocker.
 Use the official installation methods and tools instead.
 See https://docs.clusterhq.com.
 EOF
