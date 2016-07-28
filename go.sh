@@ -2,7 +2,7 @@
 do_install() {
 IMAGE="clusterhq/uft:latest"
 read -d '' DEPRECATION_WARNING <<EOF
-deprecated since Flocker 1.14.0 and will be removed in the next version of Flocker.
+deprecated in Flocker 1.14.0 and will be removed in the next version of Flocker.
 Use the official installation methods and tools instead.
 See https://docs.clusterhq.com.
 EOF
@@ -24,7 +24,7 @@ ${DEPRECATION_WARNING}
 END_WARNING
 
 if [ "\${DEPRECATED}" = "TRUE" ]; then
-    echo "WARNING: ${PREFIX}${CMD} is \${DEPRECATION_WARNING}" >&2
+    echo "WARNING: ${PREFIX}${CMD} was \${DEPRECATION_WARNING}" >&2
     echo "" >&2
 fi
 if docker version >/dev/null 2>&1; then
@@ -126,7 +126,7 @@ echo "Pulling Docker image for Flocker installer..."
 $SUDO_PREFIX docker pull $IMAGE
 if [ -n "${DEPRECATION_WARNING}" ]; then
     echo "" >&2
-    echo "WARNING: Some the commands are ${DEPRECATION_WARNING}" >&2
+    echo "WARNING: Some of these commands were ${DEPRECATION_WARNING}" >&2
 fi
 echo ""
 }
