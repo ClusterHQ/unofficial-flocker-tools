@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 do_install() {
 IMAGE="clusterhq/uft:latest"
 read -d '' DEPRECATION_WARNING <<EOF
@@ -17,7 +17,7 @@ for CMD in flockerctl flocker-ca flocker-deploy flocker-config flocker-install f
         DEPRECATED="TRUE"
     fi
     cat <<EOF |sudo tee /usr/local/bin/${PREFIX}${CMD} >/dev/null
-#!/bin/sh
+#!/usr/bin/env bash
 DEPRECATED="${DEPRECATED}"
 read -d '' DEPRECATION_WARNING <<END_WARNING
 ${DEPRECATION_WARNING}
