@@ -1,11 +1,12 @@
 #!/bin/sh
 do_install() {
 IMAGE="clusterhq/uft:latest"
-read -d '' DEPRECATION_WARNING <<EOF
+DEPRECATION_WARNING=$(cat <<EOF
 deprecated in Flocker 1.14.0 and will be removed in future versions of Flocker.
 Use the official installation methods and tools instead.
 See https://docs.clusterhq.com.
 EOF
+)
 
 for CMD in flockerctl flocker-ca flocker-deploy flocker-config flocker-install flocker-plugin-install flocker-sample-files flocker-tutorial flocker-volumes flocker-get-nodes flocker-destroy-nodes volume-hub-agents-install; do
     if [ "$CMD" = "flockerctl" ] || [ "$CMD" = "volume-hub-agents-install" ]; then
@@ -19,10 +20,10 @@ for CMD in flockerctl flocker-ca flocker-deploy flocker-config flocker-install f
     cat <<EOF |sudo tee /usr/local/bin/${PREFIX}${CMD} >/dev/null
 #!/bin/sh
 DEPRECATED="${DEPRECATED}"
-read -d '' DEPRECATION_WARNING <<END_WARNING
+DEPRECATION_WARNING=\$(cat <<END_WARNING
 ${DEPRECATION_WARNING}
 END_WARNING
-
+)
 if [ "\${DEPRECATED}" = "TRUE" ]; then
     echo "WARNING: ${PREFIX}${CMD} was \${DEPRECATION_WARNING}" >&2
     echo "" >&2
